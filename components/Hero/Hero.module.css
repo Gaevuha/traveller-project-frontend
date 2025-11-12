@@ -81,21 +81,40 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
 }
 
+/* Normal state - вже визначено вище */
+
+/* Hover/Focus state - трохи темніший/насиченіший синій */
 .cta:hover,
 .cta:focus {
-  background-color: #e8eeff;
-  transform: translateY(-1px);
-  color: #000000;
-  box-shadow: 0 4px 12px rgba(84, 104, 231, 0.3);
+  background-color: #3558c4;
+  border-color: #3558c4;
+  color: #ffffff;
 }
 
+.cta:focus {
+  outline: 2px solid #4169e1;
+  outline-offset: 2px;
+}
+
+/* Active state - значно темніший синій (майже navy) */
 .cta:active {
-  transform: translateY(0);
-  color: #000000;
-  background-color: #7a96ea;
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #ffffff;
+}
+
+/* Disabled state - світлий фіолетовий/лавандовий фон, світлий сірий текст */
+.cta:disabled {
+  background-color: #e8e0f5;
+  border-color: #e8e0f5;
+  color: #c4c4c4;
+  cursor: not-allowed;
+  opacity: 1;
 }
 @media (min-width: 768px) {
   .container {
