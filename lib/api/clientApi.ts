@@ -1,201 +1,114 @@
-// import { LoginRequest, RegisterRequest } from '@/types/auth';
-// import { api } from './api';
-// import { User, AuthResponse } from '@/types/user';
-// import { AxiosError } from 'axios';
-
-// export const login = async (credentials: LoginRequest): Promise<User> => {
-//   try {
-//     const response = await api.post<AuthResponse>('/auth/login', credentials);
-//     return response.data.user;
-//   } catch (error) {
-//     const axiosError = error as AxiosError<{ error: string }>;
-//     throw new Error(axiosError.response?.data?.error || 'Failed to login');
-//   }
-// };
-
-// export const register = async (userData: RegisterRequest): Promise<User> => {
-//   try {
-//     const response = await api.post<AuthResponse>('/auth/register', userData);
-//     return response.data.user;
-//   } catch (error) {
-//     const axiosError = error as AxiosError<{ error: string }>;
-//     throw new Error(axiosError.response?.data?.error || 'Failed to register');
-//   }
-// };
-
-// export const logout = async (): Promise<void> => {
-//   try {
-//     await api.post('/auth/logout');
-//   } catch (error) {
-//     const axiosError = error as AxiosError<{ error: string }>;
-//     throw new Error(axiosError.response?.data?.error || 'Failed to logout');
-//   }
-// };
-
-// export const refreshToken = async (): Promise<void> => {
-//   try {
-//     await api.post('/auth/refresh');
-//   } catch (error) {
-//     const axiosError = error as AxiosError<{ error: string }>;
-//     throw new Error(
-//       axiosError.response?.data?.error || 'Failed to refresh token'
-//     );
-//   }
-// };
-
-// export const checkSession = async (): Promise<boolean> => {
-//   try {
-//     await api.get('/users');
-//     return true;
-//   } catch (error) {
-//     const axiosError = error as AxiosError;
-
-//     if (axiosError.response?.status === 401) {
-//       return false;
-//     }
-
-//     console.error('Session check failed:', error);
-//     return false;
-//   }
-// };
-
+import { User } from '@/types/user';
 import { api } from './api';
-import { User, AuthResponse } from '@/types/user';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
+import { extractUser } from './errorHandler';
+import { StoriesResponse, Story } from '@/types/story';
 import { AxiosError } from 'axios';
 
-// MOCK MODE - для тестування без бекенду
-const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
-
-// Mock user для тестування
-const MOCK_USER: User = {
-  id: '1',
-  email: 'test@test.com',
-  name: 'Тест Тестович',
-  avatar: '',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+/**
+ * Register user
+ */
+export const register = async (data: RegisterRequest) => {
+  const res = await api.post<User>('/auth/register', data);
+  const user = extractUser(res.data) as User | null;
+  return user;
 };
 
 /**
  * Login user
  */
-export const login = async (credentials: LoginRequest): Promise<User> => {
-  // MOCK MODE
-  if (USE_MOCK_API) {
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Імітація затримки
-
-    // Перевірка mock credentials
-    if (
-      credentials.email === 'test@test.com' &&
-      credentials.password === 'Test123456'
-    ) {
-      localStorage.setItem('current-user', JSON.stringify(MOCK_USER));
-      return MOCK_USER;
-    } else {
-      throw new Error('Невірний email або пароль');
-    }
-  }
-
-  // REAL API
-  try {
-    const response = await api.post<AuthResponse>('/auth/login', credentials);
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('current-user', JSON.stringify(response.data.user));
-    }
-
-    return response.data.user;
-  } catch (error) {
-    const axiosError = error as AxiosError<{ error: string }>;
-    throw new Error(
-      axiosError.response?.data?.error || 'Помилка входу. Перевірте дані.'
-    );
-  }
+export const login = async (data: LoginRequest) => {
+  const res = await api.post<User>('/auth/login', data);
+  const user = extractUser(res.data) as User | null;
+  return user;
 };
 
 /**
- * Register new user
+ * Get current user
  */
-export const register = async (userData: RegisterRequest): Promise<User> => {
-  // MOCK MODE
-  if (USE_MOCK_API) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const newUser = {
-      ...MOCK_USER,
-      email: userData.email,
-      name: userData.name,
-    };
-
-    localStorage.setItem('current-user', JSON.stringify(newUser));
-    return newUser;
-  }
-
-  // REAL API
+export const getMe = async (silent: boolean = false) => {
   try {
-    const response = await api.post<AuthResponse>('/auth/register', userData);
+    const response = await api.get('/users/me');
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('current-user', JSON.stringify(response.data.user));
+    if (response.data && typeof response.data === 'object') {
+      if ('data' in response.data && response.data.data) {
+        const userData = response.data.data;
+        if (
+          userData &&
+          typeof userData === 'object' &&
+          '_id' in userData &&
+          'name' in userData
+        ) {
+          return userData as User;
+        }
+      }
+
+      const user = extractUser(response.data) as User | null;
+      if (user) {
+        return user;
+      }
     }
 
-    return response.data.user;
+    return null;
   } catch (error) {
-    const axiosError = error as AxiosError<{ error: string }>;
-    throw new Error(
-      axiosError.response?.data?.error ||
-        'Помилка реєстрації. Спробуйте ще раз.'
-    );
+    if (silent) {
+      // Тиха обробка - не логуємо помилку
+      return null;
+    }
+    const axiosError = error as AxiosError;
+    if (axiosError.response?.status === 401) {
+      // 401 - це очікувано, якщо користувач не залогінений
+      // Не логуємо як помилку
+      return null;
+    }
+
+    // ✅ Логуємо інші помилки
+    console.error('❌ Error in getMe:', error);
+    throw error;
   }
 };
 
 /**
- * Check session
+ * Logout user
+ */
+export const logout = async () => {
+  try {
+    await api.post('/auth/logout');
+  } catch {
+    // Ignore errors on logout
+  }
+};
+
+/**
+ * Check if session is valid (lightweight check)
  */
 export const checkSession = async (): Promise<boolean> => {
-  // MOCK MODE
-  if (USE_MOCK_API) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const user = localStorage.getItem('current-user');
-    return !!user;
-  }
-
-  // REAL API
   try {
-    await api.get('/users');
-    return true;
+    console.log('🔍 Checking session via /api/users/me');
+    const response = await api.get('/users/me');
+    console.log('✅ Session check response:', response.status);
+    return response.status >= 200 && response.status < 300;
   } catch (error) {
-    const axiosError = error as AxiosError;
+    console.log('Session check failed:', error);
 
-    if (axiosError.response?.status === 401) {
-      return false;
-    }
-
-    console.error('Session check failed:', error);
     return false;
   }
 };
 
-// ... rest remains the same
+export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
+  const response = await api.get<StoriesResponse>(`/stories`, {
+    params: { page, perPage, sort: 'favoriteCount' },
+  });
+  // console.log(response);
+  return response.data?.data || [];
+}
 
-export const getMe = async (): Promise<User> => {
-  try {
-    const response = await api.get<AuthResponse>('/auth/me');
-    return response.data.user;
-  } catch (error) {
-    const axiosError = error as AxiosError<{ error: string }>;
+fetchStories(1, 3);
 
-    if (axiosError.response?.status === 404) {
-      const storedUser = localStorage.getItem('current-user');
-      if (storedUser) {
-        return JSON.parse(storedUser) as User;
-      }
-      throw new Error('User not found in session');
-    }
+export async function addStoryToFavorites(storyId: string): Promise<void> {
+  await api.post(`/stories/${storyId}/favorite`);
+}
 
-    throw new Error(
-      axiosError.response?.data?.error || 'Failed to fetch user data'
-    );
-  }
-};
+export async function removeStoryFromFavorites(storyId: string): Promise<void> {
+  await api.delete(`/stories/${storyId}/favorite`);
+}

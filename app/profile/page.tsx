@@ -1,3 +1,9 @@
+import ProtectedRoute from '@/components/ProtectedRoute/ProtectedRoute';
+
 export default function ProfilePage() {
-  return <h2>Profile</h2>;
+  return (
+    <ProtectedRoute>
+      <h2>Profile</h2>
+    </ProtectedRoute>
+  );
 }
