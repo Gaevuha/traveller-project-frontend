@@ -13,6 +13,10 @@
   transition:
     border 250ms ease,
     background-color 250ms ease;
+
+  /* position: absolute;
+  top: 0;
+  left: 250px; */
 }
 
 .logoLink:hover,
@@ -40,11 +44,17 @@
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: #000;
+
+  transition: color 250ms ease;
 }
 
 .logoTextHeaderMain {
   color: #fff;
 }
+
+/* .logoLinkMobileMenuOpen {
+  color: red;
+} */
 
 @media screen and (min-width: 768px) {
   .logoLinkFooter {

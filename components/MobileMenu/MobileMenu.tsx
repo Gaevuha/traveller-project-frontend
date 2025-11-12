@@ -1,14 +1,14 @@
-// import Logo from '../Logo/Logo';
 import Navigation from '../Navigation/Navigation';
 import css from './MobileMenu.module.css';
 
-export default function MobileMenu() {
+type MobileMenuProps = {
+  isOpen: boolean;
+};
+
+export default function MobileMenu({ isOpen }: MobileMenuProps) {
   return (
-    <div className="container">
-      <div className={css.mobileMenu}>
-        {/* <div className={css.logo}>
-        <Logo />
-      </div> */}
+    <div className={`${css.mobileMenu} ${isOpen ? css.open : ''}`}>
+      <div className={`container ${css.mobileMenuContainer}`}>
         <Navigation variant="mobile-menu" />
       </div>
     </div>

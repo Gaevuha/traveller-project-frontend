@@ -4,13 +4,13 @@ import css from './Logo.module.css';
 import Image from 'next/image';
 
 type LogoProps = {
-  variant?: 'header-main-page' | 'footer';
+  variant?: 'header-main-page' | 'mobile-menu-open' | 'footer' | undefined;
 };
 
 export default function Logo({ variant }: LogoProps) {
   return (
     <Link
-      className={`${css.logoLink} ${variant === 'footer' ? css.logoLinkFooter : ''} ${variant === 'header-main-page' ? css.logoLinkHeaderMain : ''}`}
+      className={`${css.logoLink} ${variant === 'footer' ? css.logoLinkFooter : ''} ${variant === 'header-main-page' ? css.logoLinkHeaderMain : ''} ${variant === 'mobile-menu-open' ? css.logoLinkMobileMenuOpen : ''}`}
       href="/"
     >
       <Image

@@ -31,6 +31,7 @@ export default function Navigation({ variant }: NavProps) {
   function getNavItemClass() {
     if (variant === 'header-main-page') return css.navItemHeaderMain;
     if (variant === 'footer') return css.navItemFooter;
+    if (variant === 'mobile-menu') return css.navItemMobileMenu;
   }
   function getNavLinkClass() {
     return variant === 'header-main-page' ? css.navLinkHeaderMain : '';

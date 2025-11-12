@@ -13,6 +13,9 @@ export default function MobileMenuBtn({
   isOpen,
   variant,
 }: MobileMenuBtnProps) {
+  if (variant === 'header-main-page' && isOpen) {
+    variant = undefined;
+  }
   return (
     <button
       onClick={handleClick}
