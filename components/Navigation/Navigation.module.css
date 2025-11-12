@@ -24,10 +24,7 @@
     border 250ms ease,
     background-color 250ms ease;
 
-  /* padding: 4px 10px; */
   text-align: center;
-  padding-top: 4px;
-  padding-bottom: 4px;
   width: 100%;
 }
 
@@ -49,6 +46,12 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 1.5;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .navLinkHeaderMain {
@@ -79,9 +82,13 @@
   }
 
   .navItemFooter {
+    width: auto;
+  }
+
+  .navLinkFooter {
+    /* background-color: red; */
     padding-left: 10px;
     padding-right: 10px;
-    width: auto;
   }
 }
 
@@ -109,7 +116,6 @@
   }
 
   .navItem {
-    padding: 4px 10px;
     /* margin-right: 12px; */
     width: auto;
   }
@@ -119,6 +125,7 @@
   }
 
   .navLink {
+    padding: 4px 10px;
     font-size: 18px;
   }
 }

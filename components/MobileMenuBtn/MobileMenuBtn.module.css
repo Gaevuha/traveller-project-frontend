@@ -7,6 +7,10 @@
   width: 32px;
   height: 32px;
 
+  /* position: fixed;
+  right: 0; */
+  /* z-index: 20; */
+
   background-color: rgba(0, 0, 0, 0.05);
   transition:
     border 250ms ease,

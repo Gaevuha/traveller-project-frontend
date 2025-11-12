@@ -7,18 +7,25 @@ import Logo from '../Logo/Logo';
 import Navigation from '../Navigation/Navigation';
 import css from './Header.module.css';
 import MobileMenuBtn from '../MobileMenuBtn/MobileMenuBtn';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MobileMenu from '../MobileMenu/MobileMenu';
 import { useLockScroll } from '@/lib/hooks/useLockScroll';
 import { useBreakpointStore } from '@/lib/store/breakpointStore';
+// import { useClickOutside } from '@/lib/hooks/useClickOutside';
 
 export default function Header() {
   const isMainPage = usePathname() === '/';
+  const menuContainerRef = useRef<HTMLDivElement>(null);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const screenSize = useBreakpointStore(state => state.screenSize);
   console.log(screenSize);
+
+  // useClickOutside({
+  //   ref: menuContainerRef,
+  //   callback: () => setIsMobileMenuOpen(false),
+  // });
 
   function handleMobileMenu() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -46,8 +53,11 @@ export default function Header() {
         className={`${css.header} ${isMainPage ? css.headerMainPage : ''}`}
       >
         <div className={`container ${css.headerContainer}`}>
-          <Logo variant={LogoProps} />
-          <Navigation variant={isMainPage ? 'header-main-page' : 'header'} />
+          <Logo variant={LogoProps} handleClick={setIsMobileMenuOpen} />
+          <Navigation
+            variant={isMainPage ? 'header-main-page' : 'header'}
+            handleClick={handleMobileMenu}
+          />
           <MobileMenuBtn
             variant={isMainPage ? 'header-main-page' : undefined}
             handleClick={handleMobileMenu}
@@ -55,7 +65,9 @@ export default function Header() {
           />
         </div>
       </header>
-      <MobileMenu isOpen={isMobileMenuOpen} />
+      <div ref={menuContainerRef}>
+        <MobileMenu isOpen={isMobileMenuOpen} handleClick={handleMobileMenu} />
+      </div>
     </>
   );
 }

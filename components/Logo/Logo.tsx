@@ -1,15 +1,22 @@
 // components/Logo/Logo.tsx
+
+'use client';
+
 import Link from 'next/link';
 import css from './Logo.module.css';
 import Image from 'next/image';
 
 type LogoProps = {
   variant?: 'header-main-page' | 'mobile-menu-open' | 'footer' | undefined;
+  handleClick?: (value: boolean) => void;
 };
 
-export default function Logo({ variant }: LogoProps) {
+export default function Logo({ variant, handleClick }: LogoProps) {
   return (
     <Link
+      onClick={() => {
+        handleClick?.(false);
+      }}
       className={`${css.logoLink} ${variant === 'footer' ? css.logoLinkFooter : ''} ${variant === 'header-main-page' ? css.logoLinkHeaderMain : ''} ${variant === 'mobile-menu-open' ? css.logoLinkMobileMenuOpen : ''}`}
       href="/"
     >

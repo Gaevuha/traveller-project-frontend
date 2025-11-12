@@ -7,9 +7,10 @@ import { useAuthStore } from '@/lib/store/authStore';
 
 type NavProps = {
   variant?: 'header-main-page' | 'mobile-menu';
+  handleClick: (value: boolean) => void;
 };
 
-export default function AuthNavigation({ variant }: NavProps) {
+export default function AuthNavigation({ variant, handleClick }: NavProps) {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const isLoading = useAuthStore(state => state.isLoading);
   if (isLoading) {
@@ -26,6 +27,9 @@ export default function AuthNavigation({ variant }: NavProps) {
               href="/auth/login"
               prefetch={false}
               className={`${css.loginLink} ${variant === 'header-main-page' ? css.loginLinkMainPage : ''}`}
+              onClick={() => {
+                handleClick(false);
+              }}
             >
               Вхід
             </Link>
@@ -35,6 +39,9 @@ export default function AuthNavigation({ variant }: NavProps) {
               href="/auth/register"
               prefetch={false}
               className={`${css.loginLink} ${css.loginLinkRegister} ${variant === 'header-main-page' ? css.loginLinkRegisterMainPage : ''} ${variant === 'mobile-menu' ? css.loginLinkRegisterMobileMenu : ''}`}
+              onClick={() => {
+                handleClick(false);
+              }}
             >
               Реєстрація
             </Link>
