@@ -4,6 +4,19 @@ import Link from 'next/link';
 import styles from './Hero.module.css';
 
 export default function Hero() {
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const targetId = '#join';
+    const targetElement = document.querySelector(targetId);
+    
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
   return (
     <section className={`${styles.hero} hero-section`}>
       <div className={styles.overlay} />
@@ -15,7 +28,7 @@ export default function Hero() {
             своїми історіями та отримувати натхнення для нових пригод. Відкрийте
             для себе нові місця та знайдіть однодумців!
           </p>
-          <Link href="/#join" className={styles.cta}>
+          <Link href="/#join" className={styles.cta} onClick={handleSmoothScroll}>
             Доєднатись
           </Link>
         </div>
