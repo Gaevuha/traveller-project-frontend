@@ -15,7 +15,6 @@ import RootPageClient from './RootPage.client';
 import { getServerMe } from '@/lib/api/serverApi';
 import { User } from '@/types/user';
 
-
 const nunitoSans = Nunito_Sans({
   subsets: ['cyrillic'],
   weight: ['400', '500', '600', '700', '800', '900'],
@@ -102,17 +101,12 @@ export default async function RootLayout({
                       secondary: 'var(--color-text-primary)',
                     },
                   },
-
-                },
-              }}
-            />
-            <RootPageClient />
-          </AuthProvider>
-        </TanStackProvider>
-
-
+                }}
+              />
+              <RootPageClient />
+            </AuthProvider>
+          </TanStackProvider>
         </ThemeProvider>
-
       </body>
     </html>
   );
