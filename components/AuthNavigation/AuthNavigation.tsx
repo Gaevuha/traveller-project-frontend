@@ -1,3 +1,5 @@
+// Components/AuthNavigation/AuthNavigation.tsx
+
 'use client';
 
 import Link from 'next/link';
@@ -47,9 +49,7 @@ export default function AuthNavigation({ variant, handleClick }: NavProps) {
 
       {isAuthenticated && (
         <>
-          <li
-            className={`${css.publichStoryItem} ${variant === 'header-main-page' ? css.publichStoryItemMainPage : ''}`}
-          >
+          <li className={`container ${css.loginItem}`}>
             <PublishStoryLink />
           </li>
           <li>

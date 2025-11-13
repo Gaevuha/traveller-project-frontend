@@ -1,4 +1,7 @@
 .loginItem {
+  /* min-width: 280px; */
+  width: 100%;
+  max-width: 335px;
 }
 
 .loginLink {
@@ -153,10 +156,10 @@
   .publichStoryItem {
   }
 
-  /* .publichStoryLink {
+  .publichStoryLink {
     font-size: 18px;
     margin-left: 10px;
     margin-right: 4px;
     padding: 4px 10px;
-  } */
+  }
 }
