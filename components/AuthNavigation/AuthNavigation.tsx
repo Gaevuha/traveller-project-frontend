@@ -12,11 +12,6 @@ type NavProps = {
 
 export default function AuthNavigation({ variant, handleClick }: NavProps) {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const isLoading = useAuthStore(state => state.isLoading);
-  if (isLoading) {
-    // Можна показати skeleton або просто не показувати нічого
-    return null; // або <li>Завантаження...</li>
-  }
 
   return (
     <>

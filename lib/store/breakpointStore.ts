@@ -3,10 +3,10 @@
 import { ScreenSize } from '@/constants/constants';
 import { create } from 'zustand';
 
-type ScreenSizeType = 'mobile' | 'tablet' | 'desktop';
+type ScreenSize = 'mobile' | 'tablet' | 'desktop';
 
 type BreakpointStore = {
-  screenSize: ScreenSizeType | undefined;
+  screenSize: ScreenSize | undefined;
   setScreenSize: (width: number) => void;
   screenSizeReady: boolean;
 };
@@ -18,7 +18,7 @@ export const useBreakpointStore = create<BreakpointStore>()(set => ({
     set(() => ({ screenSize: getScreenSize(width), screenSizeReady: true })),
 }));
 
-function getScreenSize(width: number): ScreenSizeType {
+function getScreenSize(width: number): ScreenSize {
   if (width >= ScreenSize.Desktop) return 'desktop';
   if (width >= ScreenSize.Tablet) return 'tablet';
   return 'mobile';

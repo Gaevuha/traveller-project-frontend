@@ -8,6 +8,7 @@ import AuthProvider from '@/components/AuthProvider/AuthProvider';
 import { Metadata } from 'next';
 import { Toaster } from 'react-hot-toast';
 import BreakpointInitializer from '@/components/Providers/BreakpointInitializer';
+import RootPageClient from './RootPage.client';
 
 const nunitoSans = Nunito_Sans({
   subsets: ['cyrillic'],
@@ -87,6 +88,7 @@ export default function RootLayout({
                 },
               }}
             />
+            <RootPageClient />
           </AuthProvider>
         </TanStackProvider>
       </body>
