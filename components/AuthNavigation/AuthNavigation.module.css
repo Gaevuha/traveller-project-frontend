@@ -1,7 +1,16 @@
 .loginItem {
   /* min-width: 280px; */
+  /* width: 100%;
+  max-width: 335px; */
+}
+
+.loginItemPublishStoryMobileMenu {
+  margin: 0 auto;
+  padding: 0 20px;
+
   width: 100%;
-  max-width: 335px;
+  min-width: 320px;
+  max-width: 375px;
 }
 
 .loginLink {
@@ -86,9 +95,6 @@
 
 .loginLinkRegisterMobileMenu {
   margin-top: -16px;
-}
-
-.publichStoryItem {
 }
 
 /* .publichStoryLink {

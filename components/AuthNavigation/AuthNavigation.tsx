@@ -49,7 +49,9 @@ export default function AuthNavigation({ variant, handleClick }: NavProps) {
 
       {isAuthenticated && (
         <>
-          <li className={`container ${css.loginItem}`}>
+          <li
+            className={` ${css.loginItem} ${variant === 'mobile-menu' ? css.loginItemPublishStoryMobileMenu : ''}`}
+          >
             <PublishStoryLink />
           </li>
           <li>
