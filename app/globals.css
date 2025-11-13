@@ -19,6 +19,7 @@
   --color-link-active: #d8d8d8; /* Active стану для посилань */
   --color-error: #b00101; /* Помилки */
   --color-primary: #4169e1; /* Основний колір (синій), для disabled + opacity: 0.3;*/
+  --opacity-neutral-darkest-5: rgba(0, 0, 0, 0.05);
   --color-primary-hover-first: #e8eeff; /* Hover стану  + фон футеру + картки*/
   --color-primary-hover-second: #4169e1; /* Hover стану  для кнопок*/
   --color-primary-active-first: #7a96ea; /* Active стану */
@@ -45,6 +46,7 @@
   --color-link-active: #4c4c4c; /* Active стану для посилань */
   --color-error: #b00101;
   --color-primary: #ffffff; /* Основний колір (синій), для disabled + opacity: 0.3;*/
+  --opacity-neutral-darkest-5: rgba(255, 255, 255, 0.05);
   --color-primary-hover-first: #7f7f7f; /* Hover стану  + фон футеру + картки*/
   --color-primary-hover-second: #e8eeff; /* Hover стану  для кнопок*/
   --color-primary-active-first: #4c4c4c; /* Active стану */
