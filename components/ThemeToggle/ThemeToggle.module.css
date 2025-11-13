@@ -1,0 +1,47 @@
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: color 0.3s ease, transform 0.2s ease;
+  border-radius: 8px;
+}
+
+.toggle:hover {
+  background-color: var(--color-bg-secondary);
+  transform: scale(1.1);
+}
+
+.toggle:active {
+  transform: scale(0.95);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Варіанти для різних місць */
+.toggleHeader {
+  color: var(--color-text-primary);
+}
+
+.toggleHeaderMainPage {
+  color: #ffffff;
+}
+
+.toggleHeaderMainPage:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toggleMobileMenu {
+  color: var(--color-text-primary);
+}
+

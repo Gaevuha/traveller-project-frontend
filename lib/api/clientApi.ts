@@ -24,6 +24,29 @@ export const login = async (data: LoginRequest) => {
 };
 
 /**
+ * Google OAuth — отримання URL для входу через Google
+ */
+export async function getGoogleAuthUrl(): Promise<string> {
+  const { data } = await api.get('/auth/google/get-oauth-url');
+  // сервер возвращает data.data.url, а не data.url
+  return data?.data?.url || '';
+}
+
+/**
+ * Підтвердження входу після редіректу з Google
+ */
+export const authConfirmGoogle = async (code: string) => {
+  try {
+    const res = await api.post<User>('/auth/google/confirm-oauth', { code });
+    const user = extractUser(res.data) as User | null;
+    return user;
+  } catch (error) {
+    console.error('❌ Google OAuth confirm error:', error);
+    throw error;
+  }
+};
+
+/**
  * Get current user
  */
 export const getMe = async (silent: boolean = false) => {
@@ -102,8 +125,6 @@ export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
   // console.log(response);
   return response.data?.data || [];
 }
-
-fetchStories(1, 3);
 
 export async function addStoryToFavorites(storyId: string): Promise<void> {
   await api.post(`/stories/${storyId}/favorite`);

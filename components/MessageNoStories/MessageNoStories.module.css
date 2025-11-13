@@ -1,0 +1,29 @@
+.wrapper {
+  background-color: #e8f0ff;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  margin: 40px auto;
+  max-width: 600px;
+}
+
+.text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c1c1c;
+  margin-bottom: 24px;
+}
+
+.button {
+  background-color: #2563eb;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #1e4fd0;
+}

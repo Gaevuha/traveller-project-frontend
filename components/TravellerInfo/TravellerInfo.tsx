@@ -26,8 +26,6 @@ export default function TravellerInfo({
   useDefaultStyles = true,
   priority = false,
 }: TravellerInfoProps) {
-  console.log('SSR SERVER:', user);
-
   const avatarSrc =
     user.avatarUrl && user.avatarUrl.trim() !== ''
       ? user.avatarUrl

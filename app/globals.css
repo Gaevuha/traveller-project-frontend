@@ -1,3 +1,56 @@
+/* CSS VARIABLES FOR THEME */
+:root {
+  /* Light theme (default) */
+  --color-bg-primary: #f7f9ff; /* Основний фон (body, основні сторінки) */
+  --color-bg-secondary: #ffffff; /* Додатковий фон (картки, модальні вікна) */
+  --color-bg-tertiary: #f2f2f2; /* Третинний фон ("Збережіть собі історію") */
+  --color-bg-quaternary: #e5e5e5; /* Кнопка "Вхід" в хедері на головній сторінці */
+  --color-text-primary: #000000; /* Основний текст, , для disabled + opacity: 0.3; */
+  --color-text-secondary: rgba(0, 0, 0, 0.6); /* Другорядний текст  - inputs*/
+  --color-text-inverse: #ffffff; /* Інверсний текст (текст на темному фоні) */
+  --color-text-inverse-bg: #ffffff; /* join + hero */
+  --color-border: rgba(0, 0, 0, 0.15); /* Основна границя */
+  --color-border-light: rgba(
+    0,
+    0,
+    0,
+    0.05
+  ); /* Світла границя + кнопки на картках, для disabled + opacity: 0.3; */
+  --color-link-active: #d8d8d8; /* Active стану для посилань */
+  --color-error: #b00101; /* Помилки */
+  --color-primary: #4169e1; /* Основний колір (синій), для disabled + opacity: 0.3;*/
+  --color-primary-hover-first: #e8eeff; /* Hover стану  + фон футеру + картки*/
+  --color-primary-hover-second: #4169e1; /* Hover стану  для кнопок*/
+  --color-primary-active-first: #7a96ea; /* Active стану */
+  --color-primary-active-second: #1a2a5a; /* Active стану для світлих кнопок*/
+}
+
+[data-theme='dark'] {
+  /* Dark theme */
+  --color-bg-primary: #000000; /* Основний фон (body, основні сторінки) */
+  --color-bg-secondary: #1a1a1a; /* Додатковий фон (картки, модальні вікна) */
+  --color-bg-tertiary: #2a2a2a; /* Третинний фон ("Збережіть собі історію") */
+  --color-bg-quaternary: #e5e5e5; /* Кнопка "Вхід" в хедері на головній сторінці */
+  --color-text-primary: #ffffff; /* Основний текст, для disabled + opacity: 0.3; */
+  --color-text-secondary: #e0e0e0; /* Другорядний текст - inputs */
+  --color-text-inverse: #000000; /* Інверсний текст (текст на світлому фоні) */
+
+  --color-border: rgba(255, 255, 255, 0.1); /* Основна границя */
+  --color-border-light: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* Світла границя + кнопки на картках, для disabled + opacity: 0.3; */
+  --color-link-active: #4c4c4c; /* Active стану для посилань */
+  --color-error: #b00101;
+  --color-primary: #ffffff; /* Основний колір (синій), для disabled + opacity: 0.3;*/
+  --color-primary-hover-first: #7f7f7f; /* Hover стану  + фон футеру + картки*/
+  --color-primary-hover-second: #e8eeff; /* Hover стану  для кнопок*/
+  --color-primary-active-first: #4c4c4c; /* Active стану */
+  --color-primary-active-second: #7a96ea; /* Active стану для світлих кнопок*/
+}
+
 /* RESET */
 
 a {
@@ -49,8 +102,11 @@ body {
   min-height: 100vh;
   margin: 0;
 
-  color: #000;
-  background-color: #f7f9ff;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 h1,
