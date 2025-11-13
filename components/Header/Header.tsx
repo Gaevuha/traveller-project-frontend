@@ -7,8 +7,11 @@ import Logo from '../Logo/Logo';
 import Navigation from '../Navigation/Navigation';
 import css from './Header.module.css';
 import MobileMenuBtn from '../MobileMenuBtn/MobileMenuBtn';
-import { useBreakpointStore } from '@/lib/store/breakpointStore';
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
+import { useLockScroll } from '@/lib/hooks/useLockScroll';
+// import { useBreakpointStore } from '@/lib/store/breakpointStore';
+// import { useAuthStore } from '@/lib/store/authStore';
+// import PublishStoryLink from '../Navigation/PublishStoryLink/PublishStoryLink';
 
 export default function Header() {
   const isMainPage = usePathname() === '/';
@@ -19,8 +22,11 @@ export default function Header() {
   );
   const closeMobileMenu = useMobileMenuOpen(state => state.closeMobileMenu);
 
-  const screenSize = useBreakpointStore(state => state.screenSize);
-  console.log(screenSize);
+  // const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  // const device = useBreakpointStore(state => state.screenSize);
+  // const isTablet = device === 'tablet';
+
+  useLockScroll(isMobileMenuOpen);
 
   let LogoProps: 'header-main-page' | 'mobile-menu-open' | 'footer' | undefined;
 
@@ -43,6 +49,15 @@ export default function Header() {
             variant={isMainPage ? 'header-main-page' : 'header'}
             handleClick={closeMobileMenu}
           />
+
+          {/* {isAuthenticated && isTablet && (
+            <li>
+              <PublishStoryLink
+                variant={isMainPage ? 'header-main-page' : undefined}
+              />
+            </li>
+          )} */}
+
           <MobileMenuBtn
             variant={isMainPage ? 'header-main-page' : undefined}
             handleClick={setIsMobileMenuOpen}

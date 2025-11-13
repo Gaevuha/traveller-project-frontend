@@ -3,14 +3,17 @@ import { useEffect } from 'react';
 export function useLockScroll(lock: boolean) {
   useEffect(() => {
     const body = document.body;
+    const scrollContainer = document.documentElement;
 
     if (lock) {
-      const scrollY = window.scrollY;
+      if (scrollContainer.scrollHeight > scrollContainer.clientHeight) {
+        const scrollY = window.scrollY;
 
-      body.style.position = 'fixed';
-      body.style.top = `-${scrollY}px`;
-      body.style.width = '100%';
-      body.style.overflowY = 'scroll';
+        body.style.position = 'fixed';
+        body.style.top = `-${scrollY}px`;
+        body.style.width = '100%';
+        body.style.overflowY = 'scroll';
+      }
     } else {
       const scrollY = parseInt(body.style.top || '0') * -1;
 

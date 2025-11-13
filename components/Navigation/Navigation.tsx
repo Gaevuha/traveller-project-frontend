@@ -1,6 +1,10 @@
+'use client';
+
 import Link from 'next/link';
 import css from './Navigation.module.css';
 import AuthNavigation from '../AuthNavigation/AuthNavigation';
+// import { useAuthStore } from '@/lib/store/authStore';
+// import { useBreakpointStore } from '@/lib/store/breakpointStore';
 
 type NavProps = {
   variant?: 'header' | 'header-main-page' | 'footer' | 'mobile-menu';

@@ -16,7 +16,7 @@ export default function RootPageClient() {
 
   const screenSize = useBreakpointStore(state => state.screenSize);
 
-  useLockScroll(isMobileMenuOpen);
+  // useLockScroll(isMobileMenuOpen);
 
   // const menuContainerRef = useRef<HTMLDivElement>(null);
   // useClickOutside({
@@ -24,7 +24,7 @@ export default function RootPageClient() {
   //   callback: () => setIsMobileMenuOpen(false),
   // });
 
-  // useLockScroll(isMobileMenuOpen);
+  useLockScroll(isMobileMenuOpen);
 
   useEffect(() => {
     if (screenSize && screenSize === 'desktop') {

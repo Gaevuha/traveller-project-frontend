@@ -4,6 +4,7 @@ import Link from 'next/link';
 import css from './AuthNavigation.module.css';
 import ProfileAndLogoutLinks from './ProfileAndLogoutLinks/ProfileAndLogoutLinks';
 import { useAuthStore } from '@/lib/store/authStore';
+import PublishStoryLink from '../Navigation/PublishStoryLink/PublishStoryLink';
 
 type NavProps = {
   variant?: 'header-main-page' | 'mobile-menu';
@@ -49,12 +50,7 @@ export default function AuthNavigation({ variant, handleClick }: NavProps) {
           <li
             className={`${css.publichStoryItem} ${variant === 'header-main-page' ? css.publichStoryItemMainPage : ''}`}
           >
-            <Link
-              className={`${css.publichStoryLink} ${variant === 'header-main-page' ? css.publichStoryLinkMainPage : ''}`}
-              href="/stories/create"
-            >
-              Опублікувати історію
-            </Link>
+            <PublishStoryLink />
           </li>
           <li>
             <ProfileAndLogoutLinks variant={variant} />

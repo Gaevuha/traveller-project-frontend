@@ -88,7 +88,7 @@
 .publichStoryItem {
 }
 
-.publichStoryLink {
+/* .publichStoryLink {
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
@@ -131,7 +131,7 @@
 .publichStoryLinkMainPage:active {
   border: 1px solid #1a2a5a;
   background-color: #1a2a5a;
-}
+} */
 
 @media screen and (min-width: 1440px) {
   .loginItem {
@@ -153,10 +153,10 @@
   .publichStoryItem {
   }
 
-  .publichStoryLink {
+  /* .publichStoryLink {
     font-size: 18px;
     margin-left: 10px;
     margin-right: 4px;
     padding: 4px 10px;
-  }
+  } */
 }
