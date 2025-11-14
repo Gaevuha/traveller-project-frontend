@@ -1,33 +1,41 @@
 // Components/MessageNoStories/MessageNoStories.tsx
 'use client';
-import { useRouter } from 'next/navigation';
+
+import React from 'react';
+import Link from 'next/link';
 import styles from './MessageNoStories.module.css';
 
-//  Типізація пропсів через інтерфейс
-interface MessageNoStoriesProps {
+type MessageNoStoriesProps = {
   text: string;
   buttonText: string;
-  route: string;
-}
+  redirectPath: '/stories' | '/stories/create';
+  title?: string;
+};
 
-//  Типізований React-компонент
-export default function MessageNoStories({
+const MessageNoStories = ({
   text,
   buttonText,
-  route,
-}: MessageNoStoriesProps) {
-  const router = useRouter();
-
-  const handleClick = () => {
-    router.push(route);
-  };
+  redirectPath = '/stories', // Значення за замовчуванням
+  title = 'Історії Мандрівника',
+}: MessageNoStoriesProps) => {
+  // Валідація redirectPath
+  if (!redirectPath) {
+    console.error('MessageNoStories: redirectPath is required');
+    return null;
+  }
 
   return (
-    <div className={styles.wrapper}>
-      <p className={styles.text}>{text}</p>
-      <button onClick={handleClick} className={styles.button}>
-        {buttonText}
-      </button>
-    </div>
+    <section className={styles.container}>
+      <h2 className={styles.title}>{title}</h2>
+
+      <div className={styles.messageBox}>
+        <p className={styles.text}>{text}</p>
+        <Link href={redirectPath} className={styles.button}>
+          {buttonText}
+        </Link>
+      </div>
+    </section>
   );
-}
+};
+
+export default MessageNoStories;
