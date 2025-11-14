@@ -1,37 +1,40 @@
-import TravellerInfo from '@/components/TravellerInfo/TravellerInfo';
-import StoriesClient from './StoriesClient';
 import { getUserByIdServer } from '@/lib/api/serverApi';
+import TravellerInfo from '@/components/TravellerInfo/TravellerInfo';
+import TravellerPageClient from './TravellerPageClient';
 import {
   QueryClient,
   dehydrate,
   HydrationBoundary,
 } from '@tanstack/react-query';
-import styles from './TravellerPage.module.css';
+
 import type { User, BackendArticleFromUser } from '@/types/user';
+import styles from './TravellerPage.module.css';
 
 interface TravellerPageProps {
-  params: { travellerId: string };
+  params: Promise<{ travellerId: string }>;
 }
 
 export default async function TravellerPage({ params }: TravellerPageProps) {
-  const { travellerId } = params;
-  const queryClient = new QueryClient();
-  const PER_PAGE = 4;
+  const { travellerId } = await params;
 
   try {
+    // 1. Отримуємо користувача та його статті з бекенду
     const res = await getUserByIdServer(travellerId);
-    const user = res.data.user as User;
-    const initialArticles = res.data.articles as BackendArticleFromUser[];
+    const user: User = res.data.user;
+    const initialArticles: BackendArticleFromUser[] = res.data.articles;
 
-    // Prefetch для React Query
+    // 2. Створюємо QueryClient для prefetch + hydration
+    const queryClient = new QueryClient();
+
     await queryClient.prefetchQuery({
-      queryKey: ['travellerStories', travellerId, 1, PER_PAGE],
+      queryKey: ['travellerStories', travellerId],
       queryFn: async () => initialArticles,
     });
 
     return (
       <section className={styles.travellerId}>
         <div className={`container ${styles.containerTraveller}`}>
+          {/* Інформація про мандрівника */}
           <TravellerInfo
             user={user}
             useDefaultStyles={false}
@@ -45,12 +48,14 @@ export default async function TravellerPage({ params }: TravellerPageProps) {
             imageSize={{ width: 199, height: 199 }}
           />
 
+          {/* Hydration React Query */}
           <HydrationBoundary state={dehydrate(queryClient)}>
-            <StoriesClient
+            <TravellerPageClient
               travellerId={travellerId}
               user={user}
-              perPage={PER_PAGE}
-              initialArticles={initialArticles} // передаємо "рідні" дані бекенду
+              initialArticles={initialArticles}
+              loadMorePerPage={3} // кількість карток підвантаження
+              showLoadMoreOnMobile={true} // показати кнопку на мобільних
             />
           </HydrationBoundary>
         </div>
@@ -58,6 +63,6 @@ export default async function TravellerPage({ params }: TravellerPageProps) {
     );
   } catch (err) {
     console.error('Помилка отримання мандрівника:', err);
-    return null;
+    return <p>Сталася помилка при завантаженні даних.</p>;
   }
 }
