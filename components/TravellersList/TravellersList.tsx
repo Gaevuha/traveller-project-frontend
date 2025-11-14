@@ -1,11 +1,16 @@
+// app/components/TravellersList/TravellersList.tsx
 import TravellersListClient from './TravellersListClient';
 import { getUsersServer } from '@/lib/api/serverApi';
-import type { User } from '@/types/user';
 import defaultStyles from './TravellersList.module.css';
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from '@tanstack/react-query';
 
 interface Props {
-  initialPerPage?: number; // для SSR
-  loadMorePerPage: number; // для клієнта
+  initialPerPage?: number;
+  loadMorePerPage: number;
   showLoadMoreOnMobile?: boolean;
   customStyles?: typeof defaultStyles;
 }
@@ -16,24 +21,28 @@ export default async function TravellersList({
   showLoadMoreOnMobile = false,
   customStyles,
 }: Props) {
-  let initialUsers: User[] = [];
-  let totalPages = 1;
+  const queryClient = new QueryClient();
 
-  try {
-    const res = await getUsersServer(1, initialPerPage);
-    initialUsers = res.data.users ?? [];
-    totalPages = res.data.totalPages ?? 1;
-  } catch (err) {
-    console.error(err);
-  }
+  // RSC: запит на сервері
+  const res = await getUsersServer(1, initialPerPage);
+
+  await queryClient.prefetchQuery({
+    queryKey: ['travellers', 1, initialPerPage],
+    queryFn: async () => ({
+      users: res.data.users ?? [],
+      totalPages: res.data.totalPages ?? 1,
+    }),
+  });
 
   return (
-    <TravellersListClient
-      initialUsers={initialUsers}
-      loadMorePerPage={loadMorePerPage}
-      totalPages={totalPages}
-      showLoadMoreOnMobile={showLoadMoreOnMobile}
-      customStyles={customStyles}
-    />
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <TravellersListClient
+        initialPerPage={initialPerPage}
+        loadMorePerPage={loadMorePerPage}
+        showLoadMoreOnMobile={showLoadMoreOnMobile}
+        customStyles={customStyles}
+        initialUsers={res.data.users ?? []} // передаємо дані на клієнт
+      />
+    </HydrationBoundary>
   );
 }

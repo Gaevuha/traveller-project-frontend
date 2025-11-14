@@ -1,9 +1,9 @@
-import { User, GetUsersResponse } from '@/types/user';
+import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
 import { api } from './api';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
 import { StoriesResponse, Story } from '@/types/story';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 
 /**
  * Register user
@@ -145,4 +145,23 @@ export async function getUsersClient({
     params: { page, perPage },
   });
   return res.data;
+}
+
+export async function getUserByIdClient(
+  userId: string
+): Promise<GetUserByIdResponse> {
+  try {
+    const res = await api.get<GetUserByIdResponse>(`/users/${userId}`);
+    return res.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      console.error('[getUsersServer error]', error.message);
+      throw new Error(
+        error.response?.data?.error || 'Failed to fetch users from server'
+      );
+    } else {
+      console.error('[getUsersServer unknown error]', error);
+      throw new Error('Unknown server error');
+    }
+  }
 }

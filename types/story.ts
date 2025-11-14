@@ -35,6 +35,13 @@ export interface StoriesResponse {
   data: Story[];
 }
 
+export interface BackendArticle {
+  _id: string;
+  title: string;
+  img: string;
+  date: string;
+  favoriteCount: number;
+}
 // export interface FetchStoriesParams {
 //     page?: number;
 //     perPage?: number;

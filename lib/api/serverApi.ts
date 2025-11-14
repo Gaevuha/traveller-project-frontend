@@ -1,8 +1,12 @@
 import { cookies } from 'next/headers';
 import { api } from '@/app/api/api';
-import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
+import {
+  User,
+  GetUsersResponse,
+  GetUserByIdResponse,
+  GetStoriesResponse,
+} from '@/types/user';
 import { isAxiosError } from 'axios';
-
 /**
  * Refresh session tokens (server-side)
  */
@@ -86,4 +90,14 @@ export async function getUserByIdServer(
       throw new Error('Unknown server error');
     }
   }
+}
+
+export async function getStoriesServer(
+  page: number = 1,
+  perPage: number = 10
+): Promise<{ data: GetStoriesResponse }> {
+  const res = await api.get(`/stories`, {
+    params: { page, perPage },
+  });
+  return res.data;
 }
