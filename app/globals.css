@@ -148,15 +148,3 @@ section {
     padding: 0 64px;
   }
 }
-
-:root {
-  --color-scheme-1-text: #000;
-  --color-scheme-2-background: #f5f5f5;
-  --color-scheme-2-foreground: #e8eeff;
-  --color-primary: #4a90e2;
-  --color-primary-hover: #357abd;
-  --color-text-primary: #1a1a1a;
-  --color-text-on-primary: #ffffff;
-  --font-family-heading: 'Montserrat', sans-serif;
-  --font-family-body: 'Roboto', sans-serif;
-}
