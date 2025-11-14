@@ -38,6 +38,7 @@
 }
 
 .logoLinkFooter {
+  position: static;
   margin-bottom: 48px;
 }
 

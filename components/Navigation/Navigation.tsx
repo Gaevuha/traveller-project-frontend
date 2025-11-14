@@ -3,12 +3,10 @@
 import Link from 'next/link';
 import css from './Navigation.module.css';
 import AuthNavigation from '../AuthNavigation/AuthNavigation';
-// import { useAuthStore } from '@/lib/store/authStore';
-// import { useBreakpointStore } from '@/lib/store/breakpointStore';
 
 type NavProps = {
   variant?: 'header' | 'header-main-page' | 'footer' | 'mobile-menu';
-  handleClick: () => void;
+  handleClick?: () => void;
 };
 
 const navItems = [
@@ -57,14 +55,16 @@ export default function Navigation({ variant, handleClick }: NavProps) {
           </li>
         ))}
 
-        {variant === 'header-main-page' && (
+        {variant === 'header-main-page' && handleClick && (
           <AuthNavigation
             variant="header-main-page"
             handleClick={handleClick}
           />
         )}
-        {variant === 'header' && <AuthNavigation handleClick={handleClick} />}
-        {variant === 'mobile-menu' && (
+        {variant === 'header' && handleClick && (
+          <AuthNavigation handleClick={handleClick} />
+        )}
+        {variant === 'mobile-menu' && handleClick && (
           <AuthNavigation variant="mobile-menu" handleClick={handleClick} />
         )}
       </ul>
