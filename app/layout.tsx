@@ -79,6 +79,13 @@ export default async function RootLayout({
               {children}
               <Toaster
                 position="top-right"
+                gutter={16}
+                containerStyle={{
+                  top: 16,
+                  right: 16,
+                  bottom: 16,
+                  left: 16,
+                }}
                 toastOptions={{
                   duration: 4000,
                   style: {
@@ -86,6 +93,11 @@ export default async function RootLayout({
                     color: 'var(--color-text-primary)',
                     fontFamily: 'var(--font-nunito-sans), sans-serif',
                     border: '1px solid var(--color-border)',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    maxWidth: 'calc(100vw - 32px)',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
                   },
                   success: {
                     duration: 3000,
