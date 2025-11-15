@@ -126,7 +126,7 @@ export const fetchStoriesServerDup = async ({
 export async function fetchStoriesServer(
   page: number = 1,
   perPage: number = 10,
-  excludeId: string,
+  excludeId?: string,
 ): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
     params: { page, perPage, sort: 'favoriteCount', excludeId },

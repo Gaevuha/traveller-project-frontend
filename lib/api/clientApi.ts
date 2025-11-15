@@ -1,5 +1,5 @@
 import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
-import { api } from './api';
+import { api, clientApi } from './api';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
 import { StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
@@ -126,11 +126,11 @@ export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
 }
 
 export async function addStoryToFavorites(storyId: string): Promise<void> {
-  await api.post(`/me/saved/${storyId}`);
+  await clientApi.post(`users/me/saved/${storyId}`);
 }
 
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
-  await api.delete(`/me/saved/${storyId}`);
+  await clientApi.delete(`users/me/saved/${storyId}`);
 }
 
 export async function getUsersClient({

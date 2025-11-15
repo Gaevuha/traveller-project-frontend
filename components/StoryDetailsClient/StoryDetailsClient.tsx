@@ -6,7 +6,8 @@ import Image from "next/image";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { fetchStoryByIdClient } from "@/lib/api/clientApi";
-// import { SaveStoryButton } from "../SaveStoryButton/SaveStoryButton";
+import { SaveStoryButton } from "./SaveStoryButton/SaveStoryButton";
+
 
 export const StoryDetailsClient = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -18,7 +19,6 @@ export const StoryDetailsClient = () => {
   } = useQuery({
     queryKey: ["story", storyId],
     queryFn: () => fetchStoryByIdClient(storyId),
-    enabled: !!storyId,    
     refetchOnMount: false,
   });
 
@@ -34,7 +34,7 @@ export const StoryDetailsClient = () => {
     <>
       <div>
         <p>HISTORY</p>
-        <h1>{story.article}</h1>
+        <h1>{story.title}</h1>
         <Image
           className="story-card-image"
           src={story.img}
@@ -44,7 +44,8 @@ export const StoryDetailsClient = () => {
         />
         <h2>{story.ownerId.name}</h2>
       </div>
-      {/* <SaveStoryButton storyId={story._id} /> */}
+
+      <SaveStoryButton storyId={story._id} />
     </>
   );
 };
