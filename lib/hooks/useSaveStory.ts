@@ -13,14 +13,13 @@ export const useSaveStory = (storyId: string) => {
     mutationFn: () => addStoryToFavorites(storyId),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['story', storyId] });
-      queryClient.invalidateQueries({ queryKey: ['savedStories'] });
+      queryClient.invalidateQueries({ queryKey: ["story", storyId] });
+      queryClient.invalidateQueries({ queryKey: ["savedStoriesMe"] });
     },
 
     onError: (error: ApiError) => {
-
       if (error.response?.status === 401) {
-        router.push('/auth/login');
+        router.push("/auth/login");
       }
     },
   });

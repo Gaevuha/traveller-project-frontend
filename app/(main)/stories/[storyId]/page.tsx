@@ -4,7 +4,7 @@ import {
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-import { fetchStoriesServer, fetchStoryByIdServer } from '@/lib/api/serverApi';
+import { fetchSavedStoriesMeServer, fetchStoriesServer, fetchStoryByIdServer } from '@/lib/api/serverApi';
 import { StoryDetailsClient } from '@/components/StoryDetailsClient/StoryDetailsClient';
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 
@@ -46,6 +46,11 @@ export default async function StoryDetails({ params }: Props) {
   await queryClient.prefetchQuery({
     queryKey: ['story', storyId],
     queryFn: () => fetchStoryByIdServer(storyId),
+  });
+
+    await queryClient.prefetchQuery({
+    queryKey: ['savedStoriesMe'],
+    queryFn: fetchSavedStoriesMeServer,
   });
 
   const popularStoriesResponse = await fetchStoriesServer(1, 4, storyId);

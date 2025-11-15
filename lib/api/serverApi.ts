@@ -135,3 +135,15 @@ export async function fetchStoriesServer(
   return response.data?.data || [];
 }
 
+export const fetchSavedStoriesMeServer = async () => {
+  const cookieHeader = (await cookies()).toString();
+
+  const res = await api.get("/users/me/saved", {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+
+  return res.data.data.savedStories;
+};
+

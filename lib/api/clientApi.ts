@@ -301,3 +301,8 @@ export async function getUserSavedArticles(userId: string): Promise<{
   };
 }
 
+export async function fetchSavedStoriesMe(): Promise<SavedStory[]> {
+  const res = await api.get<UserSavedArticlesResponse>('/users/me/saved-articles');
+  return res.data.data.savedStories;
+}
+

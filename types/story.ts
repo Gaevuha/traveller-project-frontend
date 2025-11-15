@@ -109,6 +109,21 @@ export interface UserSavedArticlesResponse {
   };
 }
 
+export interface SavedStory {
+  _id: string;
+  img: string;
+  title: string;
+  article: string;
+  date: string;
+  favoriteCount: number;
+  category: {
+    _id: string;
+    name: string;
+  };
+}
+
+
+
 // export interface FetchStoriesParams {
 //     page?: number;
 //     perPage?: number;
