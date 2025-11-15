@@ -4,7 +4,7 @@ import {
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-
+import { fetchStoriesServer, fetchStoryByIdServer } from '@/lib/api/serverApi';
 import { StoryDetailsClient } from '@/components/StoryDetailsClient/StoryDetailsClient';
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 
@@ -48,13 +48,7 @@ export default async function StoryDetails({ params }: Props) {
     queryFn: () => fetchStoryByIdServer(storyId),
   });
 
-  
-    page: 1,
-    perPage: 4,
-    excludeId: storyId,
-  });
-
-  const popularStories = popularStoriesResponse.data;
+  const popularStoriesResponse = await fetchStoriesServer(1, 4, storyId);
 
   const isAuthenticated = false;
 
@@ -68,7 +62,7 @@ export default async function StoryDetails({ params }: Props) {
         <div className="container">
           <h2>Популярні історії</h2>
           <TravellersStories
-            stories={popularStories}
+            stories={popularStoriesResponse}
             isAuthenticated={isAuthenticated}
           />
         </div>
