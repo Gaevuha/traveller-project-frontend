@@ -1,13 +1,15 @@
 import { cookies } from 'next/headers';
 import { api } from '@/app/api/api';
-import {
-  User,
+ import{ User,
   GetUsersResponse,
   GetUserByIdResponse,
   GetStoriesResponse,
 } from '@/types/user';
 import { isAxiosError } from 'axios';
+
 import { FetchStoriesOptions, StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
+
+
 /**
  * Refresh session tokens (server-side)
  */
@@ -103,12 +105,13 @@ export async function getStoriesServer(
   return res.data;
 }
 
+
 export const fetchStoryByIdServer = async (storyId: string): Promise<Story> => {
   const res = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
   return res.data.data;
 };
-
-export const fetchStoriesServer = async ({
+//function of Sergii Sotnikov
+export const fetchStoriesServerDup = async ({
   page,
   perPage,
   excludeId,
@@ -118,3 +121,15 @@ export const fetchStoriesServer = async ({
   });
   return res.data;
 };
+
+
+export async function fetchStoriesServer(
+  page: number = 1,
+  perPage: number = 10
+): Promise<Story[]> {
+  const response = await api.get<StoriesResponse>(`/stories`, {
+    params: { page, perPage, sort: 'favoriteCount' },
+  });
+  return response.data?.data || [];
+}
+

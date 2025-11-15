@@ -173,6 +173,9 @@
 
 /* основная кнопка — как раньше */
 .story__btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 8px;
   padding: 6px 12px;
   width: 100%;

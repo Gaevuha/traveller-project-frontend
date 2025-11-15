@@ -122,16 +122,15 @@ export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
     params: { page, perPage, sort: 'favoriteCount' },
   });
-  // console.log(response);
   return response.data?.data || [];
 }
 
 export async function addStoryToFavorites(storyId: string): Promise<void> {
-  await api.post(`/stories/${storyId}/favorite`);
+  await api.post(`/me/saved/${storyId}`);
 }
 
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
-  await api.delete(`/stories/${storyId}/favorite`);
+  await api.delete(`/me/saved/${storyId}`);
 }
 
 export async function getUsersClient({
