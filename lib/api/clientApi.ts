@@ -192,7 +192,6 @@ export async function getMeProfile(): Promise<{
   };
 
   // Завантажуємо повну інформацію про кожну історію
-  const { fetchStoryByIdClient } = await import('@/lib/api/clientApi');
   const articles = await Promise.allSettled(
     (profileData.articles || []).map(
       async (article: {
@@ -251,7 +250,7 @@ export async function getUserSavedArticles(userId: string): Promise<{
     _id: data.user._id,
     name: data.user.name,
     avatarUrl: data.user.avatarUrl,
-    articlesAmount: 0,
+    articlesAmount: data.user.articlesAmount,
     createdAt: data.user.createdAt,
     description: data.user.description ?? undefined,
   };
