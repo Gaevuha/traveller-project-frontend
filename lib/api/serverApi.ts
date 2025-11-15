@@ -6,7 +6,10 @@ import { api } from '@/app/api/api';
   GetStoriesResponse,
 } from '@/types/user';
 import { isAxiosError } from 'axios';
-import { Story, StoriesResponse } from '@/types/story';
+
+import { FetchStoriesOptions, StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
+
+
 /**
  * Refresh session tokens (server-side)
  */
@@ -103,6 +106,23 @@ export async function getStoriesServer(
 }
 
 
+export const fetchStoryByIdServer = async (storyId: string): Promise<Story> => {
+  const res = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
+  return res.data.data;
+};
+//function of Sergii Sotnikov
+export const fetchStoriesServerDup = async ({
+  page,
+  perPage,
+  excludeId,
+}: FetchStoriesOptions): Promise<StoriesResponse> => {
+  const res = await api.get<StoriesResponse>('/stories', {
+    params: { page, perPage, excludeId },
+  });
+  return res.data;
+};
+
+
 export async function fetchStoriesServer(
   page: number = 1,
   perPage: number = 10
@@ -112,3 +132,4 @@ export async function fetchStoriesServer(
   });
   return response.data?.data || [];
 }
+

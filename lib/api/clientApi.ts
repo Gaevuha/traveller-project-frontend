@@ -2,7 +2,7 @@ import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
 import { api } from './api';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
-import { StoriesResponse, Story } from '@/types/story';
+import { StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
 import { AxiosError, isAxiosError } from 'axios';
 
 /**
@@ -164,3 +164,9 @@ export async function getUserByIdClient(
     }
   }
 }
+
+export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
+  const response = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
+  return response.data.data;
+}
+

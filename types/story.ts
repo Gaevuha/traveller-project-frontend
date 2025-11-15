@@ -42,6 +42,38 @@ export interface BackendArticle {
   date: string;
   favoriteCount: number;
 }
+
+
+export type StoryByIdResponse = {
+  status: number;
+  message: string;
+  data: {
+    _id: string;
+    img: string;
+    title: string;
+    article: string;
+    category: {
+      _id: string;
+      name: string;
+    };
+    ownerId: {
+      _id: string;
+      name: string;
+      avatarUrl: string;
+      description: string;
+    };
+    date: string;
+    favoriteCount: number;
+  };
+};
+
+export type FetchStoriesOptions = {
+  page?: number;
+  perPage?: number;
+  excludeId?: string;
+};
+
+
 // export interface FetchStoriesParams {
 //     page?: number;
 //     perPage?: number;
