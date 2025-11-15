@@ -27,6 +27,8 @@ export function extractUser<T>(
   if (!responseData || typeof responseData !== 'object') {
     return null;
   }
+  
+  // Якщо це вже User-подібний об'єкт - повертаємо його
   if (isUserLike(responseData)) {
     return responseData as T;
   }
@@ -34,6 +36,40 @@ export function extractUser<T>(
   const backendResponse = responseData as BackendResponse<T> &
     Record<string, unknown>;
 
+  // Перевіряємо структуру { status, message, data }
+  if (
+    'status' in backendResponse &&
+    'data' in backendResponse &&
+    backendResponse.data
+  ) {
+    const data = backendResponse.data;
+
+    if (isUserLike(data)) {
+      return data as T;
+    }
+
+    // Перевіряємо вкладену структуру data.data
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      'data' in data &&
+      isUserLike((data as { data: unknown }).data)
+    ) {
+      return (data as { data: T }).data;
+    }
+
+    // Перевіряємо структуру data.user
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      'user' in data &&
+      isUserLike((data as { user: unknown }).user)
+    ) {
+      return (data as { user: T }).user;
+    }
+  }
+
+  // Якщо немає 'status', але є 'data' - перевіряємо напряму
   if ('data' in backendResponse && backendResponse.data) {
     const data = backendResponse.data;
 

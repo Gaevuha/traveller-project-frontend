@@ -73,12 +73,12 @@ export default async function RootLayout({
     <html lang="uk">
       <body className={`${nunitoSans.variable} ${sora.variable}`}>
         <ThemeProvider>
-          <BreakpointInitializer />
-          <TanStackProvider>
-            <AuthProvider initialUser={initialUser}>
-              {children}
-              <Toaster
-                position="top-right"
+        <BreakpointInitializer />
+        <TanStackProvider>
+          <AuthProvider initialUser={initialUser}>
+            {children}
+            <Toaster
+              position="top-right"
                 gutter={16}
                 containerStyle={{
                   top: 16,
@@ -86,38 +86,38 @@ export default async function RootLayout({
                   bottom: 16,
                   left: 16,
                 }}
-                toastOptions={{
-                  duration: 4000,
-                  style: {
+              toastOptions={{
+                duration: 4000,
+                style: {
                     background: 'var(--color-bg-secondary)',
                     color: 'var(--color-text-primary)',
-                    fontFamily: 'var(--font-nunito-sans), sans-serif',
+                  fontFamily: 'var(--font-nunito-sans), sans-serif',
                     border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     padding: '12px 16px',
                     maxWidth: 'calc(100vw - 32px)',
                     wordWrap: 'break-word',
                     overflowWrap: 'break-word',
-                  },
-                  success: {
-                    duration: 3000,
-                    iconTheme: {
+                },
+                success: {
+                  duration: 3000,
+                  iconTheme: {
                       primary: 'var(--color-primary)',
                       secondary: 'var(--color-text-primary)',
-                    },
                   },
-                  error: {
-                    duration: 5000,
-                    iconTheme: {
+                },
+                error: {
+                  duration: 5000,
+                  iconTheme: {
                       primary: 'var(--color-error)',
                       secondary: 'var(--color-text-primary)',
-                    },
                   },
-                }}
-              />
+                },
+              }}
+            />
               <RootPageClient />
-            </AuthProvider>
-          </TanStackProvider>
+          </AuthProvider>
+        </TanStackProvider>
         </ThemeProvider>
       </body>
     </html>

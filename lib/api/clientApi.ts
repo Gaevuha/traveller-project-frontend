@@ -175,6 +175,7 @@ export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
 }
 
 
+
 export async function fetchSavedStoriesByUserId(
   userId: string
 ): Promise<SavedStory[]> {
@@ -189,4 +190,96 @@ export async function fetchSavedStoriesByUserId(
   return res.data.data.savedStories;
 }
 
+
+
+/**
+ * Get current user profile with articles
+ */
+export async function getMeProfile(): Promise<{
+  user: User;
+  articles: Story[];
+}> {
+  const res = await api.get('/users/me/profile');
+  const profileData = res.data.data;
+
+  // Створюємо User об'єкт
+  const user: User = {
+    _id: profileData._id,
+    name: profileData.name,
+    avatarUrl: profileData.avatarUrl,
+    articlesAmount: profileData.articlesAmount,
+    createdAt: profileData.createdAt,
+    updatedAt: profileData.updatedAt,
+    description: profileData.description,
+  };
+
+  // Завантажуємо повну інформацію про кожну історію
+  const articles = await Promise.allSettled(
+    (profileData.articles || []).map(
+      async (article: {
+        _id: string;
+        title: string;
+        img: string;
+        date: string;
+        favoriteCount: number;
+        createdAt: string;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          const fullStory = await fetchStoryByIdClient(article._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без article
+          return {
+            _id: article._id,
+            img: article.img,
+            title: article.title,
+            article: '',
+            category: article.category,
+            ownerId: {
+              _id: profileData._id,
+              name: profileData.name,
+              avatarUrl: profileData.avatarUrl || '',
+              articlesAmount: profileData.articlesAmount,
+              description: profileData.description ?? undefined,
+            },
+            date: article.date,
+            favoriteCount: article.favoriteCount,
+          } as Story;
+        }
+      }
+    )
+  );
+
+  const stories = articles
+    .map(result => (result.status === 'fulfilled' ? result.value : null))
+    .filter((story): story is Story => story !== null);
+
+  return { user, articles: stories };
+}
+
+/**
+ * Get user saved articles
+ */
+export async function getUserSavedArticles(userId: string): Promise<{
+  user: User;
+  savedStories: Story[];
+}> {
+  const res = await api.get(`/users/${userId}/saved-articles`);
+  const data = res.data.data;
+
+  const user: User = {
+    _id: data.user._id,
+    name: data.user.name,
+    avatarUrl: data.user.avatarUrl,
+    articlesAmount: data.user.articlesAmount,
+    createdAt: data.user.createdAt,
+    description: data.user.description ?? undefined,
+  };
+
+  return {
+    user,
+    savedStories: data.savedStories || [],
+  };
+}
 

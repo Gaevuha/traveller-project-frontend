@@ -1,18 +1,21 @@
-// app/api/users/[userId]/saved-articles/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { isAxiosError } from "axios";
-import { api } from "@/lib/api/api"; 
+import { NextRequest, NextResponse } from 'next/server';
+import { api } from '../../../api';
+import { cookies } from 'next/headers';
+import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../../../_utils/utils';
 
-
+/**
+ * GET /api/users/[userId]/saved-articles
+ */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const cookieStore = cookies();
-    const { userId } = params;
+    const cookieStore = await cookies();
+    const { userId } = await params;
+
 
     const res = await api.get(`/users/${userId}/saved-articles`, {
       headers: {
@@ -23,18 +26,19 @@ export async function GET(
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {
-      console.error(
-        "[API ERROR] /api/users/[userId]/saved-articles:",
-        error.response?.data
-      );
+
+      logErrorResponse(error.response?.data);
+
       return NextResponse.json(
         { error: error.message, response: error.response?.data },
         { status: error.response?.status || 500 }
       );
     }
 
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: 'Internal Server Error' },
+
       { status: 500 }
     );
   }
