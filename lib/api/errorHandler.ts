@@ -20,6 +20,7 @@ function isUserLike(obj: unknown): obj is { _id: unknown; name: unknown } {
 
 /**
  * Extract user from backend response
+ * Нормалізує id → _id для консистентності
  */
 export function extractUser<T>(
   responseData: BackendResponse<T> | unknown
@@ -28,9 +29,22 @@ export function extractUser<T>(
     return null;
   }
   
-  // Якщо це вже User-подібний об'єкт - повертаємо його
+  // Функція для нормалізації id → _id
+  const normalizeUserId = (obj: unknown): unknown => {
+    if (obj && typeof obj === 'object') {
+      const normalized = { ...obj } as Record<string, unknown>;
+      // Якщо є id, але немає _id - копіюємо id в _id
+      if ('id' in normalized && !('_id' in normalized)) {
+        normalized._id = normalized.id;
+      }
+      return normalized;
+    }
+    return obj;
+  };
+  
+  // Якщо це вже User-подібний об'єкт - нормалізуємо і повертаємо
   if (isUserLike(responseData)) {
-    return responseData as T;
+    return normalizeUserId(responseData) as T;
   }
 
   const backendResponse = responseData as BackendResponse<T> &
@@ -45,7 +59,7 @@ export function extractUser<T>(
     const data = backendResponse.data;
 
     if (isUserLike(data)) {
-      return data as T;
+      return normalizeUserId(data) as T;
     }
 
     // Перевіряємо вкладену структуру data.data
@@ -55,7 +69,7 @@ export function extractUser<T>(
       'data' in data &&
       isUserLike((data as { data: unknown }).data)
     ) {
-      return (data as { data: T }).data;
+      return normalizeUserId((data as { data: T }).data) as T;
     }
 
     // Перевіряємо структуру data.user
@@ -65,7 +79,7 @@ export function extractUser<T>(
       'user' in data &&
       isUserLike((data as { user: unknown }).user)
     ) {
-      return (data as { user: T }).user;
+      return normalizeUserId((data as { user: T }).user) as T;
     }
   }
 
@@ -74,7 +88,7 @@ export function extractUser<T>(
     const data = backendResponse.data;
 
     if (isUserLike(data)) {
-      return data as T;
+      return normalizeUserId(data) as T;
     }
 
     if (
@@ -83,7 +97,7 @@ export function extractUser<T>(
       'data' in data &&
       isUserLike((data as { data: unknown }).data)
     ) {
-      return (data as { data: T }).data;
+      return normalizeUserId((data as { data: T }).data) as T;
     }
 
     if (
@@ -92,7 +106,7 @@ export function extractUser<T>(
       'user' in data &&
       isUserLike((data as { user: unknown }).user)
     ) {
-      return (data as { user: T }).user;
+      return normalizeUserId((data as { user: T }).user) as T;
     }
   }
 

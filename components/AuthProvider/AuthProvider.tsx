@@ -35,10 +35,26 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
 
       // Якщо initialUser є null, але є user в store (з localStorage) - перевіряємо сесію
       if (user) {
+        const userIdInfo = {
+          id: 'id' in user ? String(user.id) : undefined,
+          _id: '_id' in user ? String(user._id) : undefined,
+        };
+        console.log('🟠 AuthProvider - user з store:', user);
+        console.log('🟠 user.id:', userIdInfo.id);
+        console.log('🟠 user._id:', userIdInfo._id);
+
         try {
           // Перевіряємо, чи сесія все ще активна
           const currentUser = await getMe(true); // silent: true - не логуємо помилки
           if (currentUser) {
+            const currentUserIdInfo = {
+              id: 'id' in currentUser ? String(currentUser.id) : undefined,
+              _id: '_id' in currentUser ? String(currentUser._id) : undefined,
+            };
+            console.log('🟣 AuthProvider - currentUser з getMe:', currentUser);
+            console.log('🟣 currentUser.id:', currentUserIdInfo.id);
+            console.log('🟣 currentUser._id:', currentUserIdInfo._id);
+
             // Сесія активна - оновлюємо дані
             setUser(currentUser);
           } else {
