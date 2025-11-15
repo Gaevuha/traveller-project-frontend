@@ -1,9 +1,17 @@
 import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
-import { api, clientApi } from './api';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
-import { StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
+import {
+  SavedStory,
+  StoriesResponse,
+  Story,
+  StoryByIdResponse,
+  UserSavedArticlesResponse,
+} from '@/types/story';
 import { AxiosError, isAxiosError } from 'axios';
+import { api } from '../api/api';
+
+export type ApiError = AxiosError<{ error: string }>;
 
 /**
  * Register user
@@ -126,11 +134,11 @@ export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
 }
 
 export async function addStoryToFavorites(storyId: string): Promise<void> {
-  await clientApi.post(`users/me/saved/${storyId}`);
+  await api.post(`/users/me/saved/${storyId}`);
 }
 
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
-  await clientApi.delete(`users/me/saved/${storyId}`);
+  await api.delete(`/users/me/saved/${storyId}`);
 }
 
 export async function getUsersClient({
@@ -168,6 +176,23 @@ export async function getUserByIdClient(
 export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
   const response = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
   return response.data.data;
+}
+
+export async function fetchSavedStoriesByUserId(
+  userId: string
+): Promise<SavedStory[]> {
+  console.log('fetchSavedStoriesByUserId CALL with userId:', userId);
+
+  const res = await api.get<UserSavedArticlesResponse>(
+    `/users/${userId}/saved-articles`
+  );
+
+  console.log(
+    'fetchSavedStoriesByUserId RESPONSE:',
+    res.data.data.savedStories
+  );
+
+  return res.data.data.savedStories;
 }
 
 /**

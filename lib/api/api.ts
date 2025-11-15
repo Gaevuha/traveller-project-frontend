@@ -14,13 +14,6 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Клієнт АПІ іестанс для запрпиту на бекенд
-
-export const clientApi = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
-});
 
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;

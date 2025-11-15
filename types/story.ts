@@ -67,12 +67,47 @@ export type StoryByIdResponse = {
   };
 };
 
+
+
 export type FetchStoriesOptions = {
   page?: number;
   perPage?: number;
   excludeId?: string;
 };
 
+export type SavedArticlesUser = {
+  _id: string;
+  name: string;
+  avatarUrl: string;
+  description?: string;
+  createdAt: string;
+};
+
+export interface SavedStory {
+  _id: string;
+  img: string;
+  title: string;
+  article: string;
+  category: Category;
+  date: string;
+  favoriteCount: number;
+}
+
+
+export interface UserSavedArticlesResponse {
+  status: number;
+  message: string;
+  data: {
+    user: {
+      _id: string;
+      name: string;
+      avatarUrl: string;
+      description?: string;
+      createdAt?: string;
+    };
+    savedStories: SavedStory[];
+  };
+}
 
 // export interface FetchStoriesParams {
 //     page?: number;
