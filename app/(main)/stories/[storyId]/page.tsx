@@ -9,7 +9,7 @@ import { StoryDetailsClient } from '@/components/StoryDetailsClient/StoryDetails
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 
 type Props = {
-  params: { storyId: string };
+  params: Promise<{ storyId: string }>;
 };
 
 export const generateMetadata = async ({
@@ -40,7 +40,7 @@ export const generateMetadata = async ({
 };
 
 export default async function StoryDetails({ params }: Props) {
-  const { storyId } = params;
+  const { storyId } = await params;
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
@@ -48,13 +48,7 @@ export default async function StoryDetails({ params }: Props) {
     queryFn: () => fetchStoryByIdServer(storyId),
   });
 
-  const popularStoriesResponse = await fetchStoriesServer({
-    page: 1,
-    perPage: 4,
-    excludeId: storyId,
-  });
-
-  const popularStories = popularStoriesResponse.data;
+  const popularStoriesResponse = await fetchStoriesServer(1, 4, storyId);
 
   const isAuthenticated = false;
 
@@ -68,7 +62,7 @@ export default async function StoryDetails({ params }: Props) {
         <div className="container">
           <h2>Популярні історії</h2>
           <TravellersStories
-            stories={popularStories}
+            stories={popularStoriesResponse}
             isAuthenticated={isAuthenticated}
           />
         </div>

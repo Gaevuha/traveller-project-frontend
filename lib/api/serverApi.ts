@@ -125,11 +125,13 @@ export const fetchStoriesServerDup = async ({
 
 export async function fetchStoriesServer(
   page: number = 1,
-  perPage: number = 10
+  perPage: number = 10,
+  excludeId: string,
 ): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
-    params: { page, perPage, sort: 'favoriteCount' },
+    params: { page, perPage, sort: 'favoriteCount', excludeId },
   });
+  
   return response.data?.data || [];
 }
 
