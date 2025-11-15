@@ -43,17 +43,61 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
       }),
       onRehydrateStorage: () => state => {
-        // Після відновлення з localStorage - встановлюємо isLoading в true
-        // щоб AuthProvider міг перевірити актуальний стан
         if (state) {
-          // ✅ Встановлюємо isLoading: true після відновлення
+          // Встановлюємо isLoading: true після відновлення
           state.setLoading(true);
-          // ✅ Якщо є user в localStorage, встановлюємо isAuthenticated: true
-          // Але все одно дозволяємо AuthProvider перевірити актуальний стан
+
           if (state.user) {
-            // ✅ Тимчасово встановлюємо isAuthenticated: true на основі user
-            // Але AuthProvider все одно перевірить сесію
-            state.isAuthenticated = true;
+            // Перевіряємо, чи user - це об'єкт User, а не API response
+            const userData = state.user as unknown;
+
+            // Функція для перевірки, чи це валідний User об'єкт
+            const isValidUser = (obj: unknown): obj is User => {
+              return (
+                obj !== null &&
+                typeof obj === 'object' &&
+                '_id' in obj &&
+                'name' in obj &&
+                typeof (obj as { _id: unknown })._id === 'string' &&
+                typeof (obj as { name: unknown }).name === 'string'
+              );
+            };
+
+            // Якщо це API response з структурою { status, message, data }
+            if (
+              userData &&
+              typeof userData === 'object' &&
+              'status' in userData &&
+              'data' in userData
+            ) {
+              const responseData = userData as { data: unknown };
+              // Витягуємо user з data
+              if (isValidUser(responseData.data)) {
+                state.user = responseData.data;
+                console.log(
+                  '✅ Виправлено user з API response:',
+                  state.user.name
+                );
+              } else {
+                // Якщо не вдалося витягнути - очищаємо
+                console.warn(
+                  '⚠️ Не вдалося витягнути user з API response, очищаємо'
+                );
+                state.user = null;
+              }
+            } else if (!isValidUser(userData)) {
+              // Якщо не валідний User - очищаємо
+              console.warn('⚠️ User не валідний, очищаємо:', userData);
+              state.user = null;
+            }
+
+            // Якщо є валідний user в localStorage, встановлюємо isAuthenticated: true
+            if (state.user && isValidUser(state.user)) {
+              state.isAuthenticated = true;
+            } else {
+              state.isAuthenticated = false;
+              state.user = null;
+            }
           } else {
             state.isAuthenticated = false;
           }

@@ -1,0 +1,72 @@
+.profile {
+  padding-top: 32px;
+  padding-bottom: 64px;
+}
+
+.loaderWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px 0;
+}
+
+.errorWrapper {
+  padding: 24px;
+  text-align: center;
+}
+
+.errorText {
+  font-size: 16px;
+  color: var(--color-error);
+  font-family: var(--font-nunito-sans), sans-serif;
+}
+
+.travellerInfoWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 12px;
+
+  margin-bottom: 32px;
+}
+
+.travellerInfoWrapper img {
+  margin-bottom: 24px;
+  width: 199px;
+  height: 199px;
+  object-fit: cover;
+}
+
+.tabsWrapper {
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.storiesWrapper {
+  width: 100%;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .travellerInfoWrapper {
+    padding: 0;
+  }
+
+  .tabsWrapper {
+    max-width: 422px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1440px) {
+  .profile {
+    padding-top: 48px;
+    padding-bottom: 72px;
+  }
+
+  .travellerInfoWrapper {
+    margin-bottom: 48px;
+  }
+}

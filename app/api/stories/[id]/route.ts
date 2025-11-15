@@ -1,18 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { api } from '../../api';
 import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../../_utils/utils';
 
 /**
- * GET /api/users/me/profile
- * Отримати профіль поточного користувача з його статтями
+ * GET /api/stories/[id]
  */
-export async function GET() {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const cookieStore = await cookies();
+    const { id } = await params;
+    const storyId = id;
 
-    const res = await api.get('/users/me/profile', {
+    const res = await api.get(`/stories/${storyId}`, {
       headers: {
         Cookie: cookieStore.toString(),
       },
