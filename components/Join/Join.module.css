@@ -19,7 +19,7 @@
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  color: #ffffff;
+  color: var(--color-text-inverse-bg);
 
   margin-bottom: 16px;
 }
@@ -29,7 +29,7 @@
   max-width: 295px;
   font-weight: 400;
   line-height: 1.5;
-  color: #ffffff;
+  color: var(--color-text-inverse-bg);
 
   margin-bottom: 24px;
 }
@@ -39,17 +39,17 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  color: #ffffff;
+  color: var(--color-text-inverse);
   text-align: center;
 
-  border: 1px solid #4169e1;
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
   padding: 6px 12px;
   width: 100%;
   max-width: 295px;
   height: 48px;
   transition: all 0.3s ease;
-  background-color: #4169e1;
+  background-color: var(--color-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -67,24 +67,24 @@
 
 .button:hover:not([aria-disabled='true']),
 .button:focus:not([aria-disabled='true']) {
-  background-color: #e8eeff;
-  color: #000000;
+  background-color: var(--color-primary-hover-first);
+  color: var(--color-text-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(84, 104, 231, 0.3);
+  box-shadow: 0 4px 12px var(--color-primary-active-first);
 }
 
 .button:active:not([aria-disabled='true']) {
-  background-color: #7a96ea;
-  color: #000000;
+  background-color: var(--color-primary-active-first);
+  color: var(--color-text-primary);
   transform: translateY(0);
 }
 
 .button[aria-disabled='true'],
 .button[aria-disabled='true']:hover {
-  background-color: #4169e1;
+  background-color: var(--color-primary);
   opacity: 0.3;
   border-color: transparent;
-  color: #ffffff;
+  color: var(--color-text-inverse);
   cursor: not-allowed;
   transform: none;
 }

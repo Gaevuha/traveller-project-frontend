@@ -1,12 +1,11 @@
 .section {
-  padding: 72px 0 64px;
-  background-color: #f7f9ff;
+  padding: 64px 0;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 64px;
 }
 
 .intro {
@@ -16,69 +15,62 @@
 }
 
 .title {
-  font-family: var(--font-sora), sans-serif;
   font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
+  letter-spacing: -0.01em;
   color: #000;
 }
 
 .description {
   font-size: 16px;
-  line-height: 1.55;
+  line-height: 1.5;
+  font-weight: 400;
   color: #000;
-  margin: 0;
   align-self: flex-start;
   width: 100%;
 }
 
 .features {
   display: grid;
-  gap: 24px;
+  gap: 32px;
   list-style: none;
-  padding: 0;
-  margin: 0;
 }
 
 .feature {
-  /* padding: 24px; */
   display: grid;
-  gap: 16px;
+  gap: 8px;
 }
 
 .iconWrapper {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
 }
 
 .icon {
-  width: 36.8px;
-  height: 36.8px;
+  width: 48px;
+  height: 48px;
   fill: #000;
 }
 
 .featureTitle {
   font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: #000000;
 }
 
 .featureDescription {
   font-weight: 400;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
-  color: #000;
+  color: #000000;
 }
 
 @media (min-width: 768px) {
-  .section {
-    padding: 88px 0 80px;
-  }
-
   .container {
-    gap: 56px;
+    gap: 64px;
   }
 
   .intro {
@@ -93,7 +85,7 @@
   }
 
   .title {
-    font-size: 36px;
+    font-size: 44px;
   }
 
   .intro .description {
@@ -103,23 +95,23 @@
   .features {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 28px;
+    align-items: baseline;
+  }
+
+  .featureDescription {
+    min-width: 213px;
   }
 }
 
 @media (min-width: 1440px) {
   .section {
-    padding: 72px 0 72px;
-  }
-
-  .container {
-    gap: 72px;
+    padding: 72px 0;
   }
 
   .description {
     font-size: 20px;
     font-weight: 400;
-    margin-top: 8px;
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
   .title {
@@ -129,7 +121,16 @@
   .featureTitle {
     font-size: 32px;
   }
-}
-.features {
-  gap: 48px;
+
+  .features {
+    gap: 48px;
+  }
+
+  .feature {
+    gap: 24px;
+  }
+
+  .featureDescription {
+    min-width: 405px;
+  }
 }

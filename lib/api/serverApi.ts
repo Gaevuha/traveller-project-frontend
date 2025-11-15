@@ -1,11 +1,14 @@
 import { cookies } from 'next/headers';
 import { api } from '@/app/api/api';
-import { User, GetUsersResponse } from '@/types/user';
+ import{ User,
+  GetUsersResponse,
+  GetUserByIdResponse,
+  GetStoriesResponse,
+} from '@/types/user';
 import { isAxiosError } from 'axios';
-
+import { Story, StoriesResponse } from '@/types/story';
 /**
  * Refresh session tokens (server-side)
- * Backend expects POST /api/auth/refresh
  */
 export const checkServerSession = async () => {
   const cookieStore = await cookies();
@@ -25,15 +28,27 @@ export const checkServerSession = async () => {
 /**
  * Get current user (server-side)
  */
-export const getServerMe = async () => {
-  const cookieStore = await cookies();
-  // Backend endpoint is /users/me/profile, not /users/me
-  const { data } = await api.get<User>('/users/me/profile', {
-    headers: {
-      Cookie: cookieStore.toString(),
-    },
-  });
-  return data;
+export const getServerMe = async (): Promise<User | null> => {
+  try {
+    const cookieStore = await cookies();
+
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+
+    // Якщо немає жодного токена, не робити запит
+    if (!accessToken && !refreshToken) {
+      return null;
+    }
+
+    const { data } = await api.get<User>('/users/me/profile', {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+    });
+    return data;
+  } catch {
+    return null;
+  }
 };
 
 export async function getUsersServer(
@@ -56,4 +71,44 @@ export async function getUsersServer(
       throw new Error('Unknown server error');
     }
   }
+}
+
+export async function getUserByIdServer(
+  userId: string
+): Promise<GetUserByIdResponse> {
+  try {
+    const res = await api.get<GetUserByIdResponse>(`/users/${userId}`);
+    return res.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      console.error('[getUsersServer error]', error.message);
+      throw new Error(
+        error.response?.data?.error || 'Failed to fetch users from server'
+      );
+    } else {
+      console.error('[getUsersServer unknown error]', error);
+      throw new Error('Unknown server error');
+    }
+  }
+}
+
+export async function getStoriesServer(
+  page: number = 1,
+  perPage: number = 10
+): Promise<{ data: GetStoriesResponse }> {
+  const res = await api.get(`/stories`, {
+    params: { page, perPage },
+  });
+  return res.data;
+}
+
+
+export async function fetchStoriesServer(
+  page: number = 1,
+  perPage: number = 10
+): Promise<Story[]> {
+  const response = await api.get<StoriesResponse>(`/stories`, {
+    params: { page, perPage, sort: 'favoriteCount' },
+  });
+  return response.data?.data || [];
 }

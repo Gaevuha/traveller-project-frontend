@@ -1,0 +1,135 @@
+/* Components/MessageNoStories/MessageNoStories.module.css */
+
+/* Mobile styles (base) - 320px+ */
+.container {
+  padding: 32px 16px 48px;
+  width: 100%;
+  max-width: 1440px;
+  min-height: 320px;
+  margin: 0 auto;
+  background: var(--color-scheme-2-background);
+}
+
+.title {
+  width: 100%;
+  max-width: 1312px;
+  margin: 0 auto 24px;
+  font-family: var(--font-family-heading, 'Montserrat', sans-serif);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 42px;
+  color: var(--color-text-primary);
+}
+
+.messageBox {
+  max-width: 768px;
+  width: 100%;
+  padding: 24px 16px;
+  border-radius: 16px;
+  background: var(--color-scheme-2-foreground);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.text {
+  max-width: 533px;
+  margin: 0 0 24px 0;
+  font-family: var(--font-family-body, 'Roboto', sans-serif);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 26px;
+  color: var(--color-text-primary);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 100%;
+  min-width: 165px;
+  height: 48px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: none;
+  background: var(--color-primary);
+  font-family: var(--font-family-body, 'Roboto', sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--color-text-on-primary);
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.button:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Tablet and up - 768px+ */
+@media only screen and (min-width: 768px) {
+  .container {
+    padding: 40px 48px 64px;
+    min-height: 356px;
+  }
+
+  .title {
+    font-size: 40px;
+    line-height: 52px;
+    height: 52px;
+    margin-bottom: 32px;
+  }
+
+  .messageBox {
+    padding: 32px 24px;
+    border-radius: 24px;
+  }
+
+  .text {
+    font-size: 20px;
+    line-height: 28px;
+    margin-bottom: 24px;
+  }
+
+  .button {
+    width: 165px;
+  }
+}
+
+/* Desktop and up - 1440px+ */
+@media only screen and (min-width: 1440px) {
+  .container {
+    padding: 48px 64px 72px;
+    min-height: 454px;
+  }
+
+  .title {
+    font-size: 48px;
+    line-height: 62px;
+    height: 62px;
+    margin-bottom: 40px;
+  }
+
+  .messageBox {
+    padding: 40px 32px;
+  }
+
+  .text {
+    font-size: 24px;
+    line-height: 32px;
+    margin-bottom: 32px;
+  }
+}

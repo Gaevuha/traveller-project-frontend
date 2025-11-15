@@ -1,9 +1,9 @@
-import { User, GetUsersResponse } from '@/types/user';
+import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
 import { api } from './api';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
 import { StoriesResponse, Story } from '@/types/story';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 
 /**
  * Register user
@@ -21,6 +21,29 @@ export const login = async (data: LoginRequest) => {
   const res = await api.post<User>('/auth/login', data);
   const user = extractUser(res.data) as User | null;
   return user;
+};
+
+/**
+ * Google OAuth — отримання URL для входу через Google
+ */
+export async function getGoogleAuthUrl(): Promise<string> {
+  const { data } = await api.get('/auth/google/get-oauth-url');
+  // сервер возвращает data.data.url, а не data.url
+  return data?.data?.url || '';
+}
+
+/**
+ * Підтвердження входу після редіректу з Google
+ */
+export const authConfirmGoogle = async (code: string) => {
+  try {
+    const res = await api.post<User>('/auth/google/confirm-oauth', { code });
+    const user = extractUser(res.data) as User | null;
+    return user;
+  } catch (error) {
+    console.error('❌ Google OAuth confirm error:', error);
+    throw error;
+  }
 };
 
 /**
@@ -99,18 +122,15 @@ export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
     params: { page, perPage, sort: 'favoriteCount' },
   });
-  // console.log(response);
   return response.data?.data || [];
 }
 
-fetchStories(1, 3);
-
 export async function addStoryToFavorites(storyId: string): Promise<void> {
-  await api.post(`/stories/${storyId}/favorite`);
+  await api.post(`/me/saved/${storyId}`);
 }
 
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
-  await api.delete(`/stories/${storyId}/favorite`);
+  await api.delete(`/me/saved/${storyId}`);
 }
 
 export async function getUsersClient({
@@ -124,4 +144,23 @@ export async function getUsersClient({
     params: { page, perPage },
   });
   return res.data;
+}
+
+export async function getUserByIdClient(
+  userId: string
+): Promise<GetUserByIdResponse> {
+  try {
+    const res = await api.get<GetUserByIdResponse>(`/users/${userId}`);
+    return res.data;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      console.error('[getUsersServer error]', error.message);
+      throw new Error(
+        error.response?.data?.error || 'Failed to fetch users from server'
+      );
+    } else {
+      console.error('[getUsersServer unknown error]', error);
+      throw new Error('Unknown server error');
+    }
+  }
 }

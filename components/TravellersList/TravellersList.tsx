@@ -1,32 +1,48 @@
-// components/TravellersList/TravellersList.tsx
-import { getUsersServer } from '@/lib/api/serverApi';
-import type { User } from '@/types/user';
+// app/components/TravellersList/TravellersList.tsx
 import TravellersListClient from './TravellersListClient';
-import styles from './TravellersList.module.css';
+import { getUsersServer } from '@/lib/api/serverApi';
+import defaultStyles from './TravellersList.module.css';
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from '@tanstack/react-query';
 
-export default async function TravellersList() {
-  let initialUsers: User[] = [];
-  let totalPages = 1;
+interface Props {
+  initialPerPage?: number;
+  loadMorePerPage: number;
+  showLoadMoreOnMobile?: boolean;
+  customStyles?: typeof defaultStyles;
+}
 
-  try {
-    const res = await getUsersServer(1, 4);
-    initialUsers = res.data.users ?? [];
-    totalPages = res.data.totalPages ?? 1;
-  } catch (err) {
-    console.error('Error fetching users:', err);
-  }
+export default async function TravellersList({
+  initialPerPage = 12,
+  loadMorePerPage,
+  showLoadMoreOnMobile = false,
+  customStyles,
+}: Props) {
+  const queryClient = new QueryClient();
+
+  // RSC: запит на сервері
+  const res = await getUsersServer(1, initialPerPage);
+
+  await queryClient.prefetchQuery({
+    queryKey: ['travellers', 1, initialPerPage],
+    queryFn: async () => ({
+      users: res.data.users ?? [],
+      totalPages: res.data.totalPages ?? 1,
+    }),
+  });
 
   return (
-    <>
-      <h2 className={styles.travellers__title}>Наші Мандрівники</h2>
-
-      {/* Клієнтський компонент для рендеру списку */}
+    <HydrationBoundary state={dehydrate(queryClient)}>
       <TravellersListClient
-        initialUsers={initialUsers}
-        perPage={4}
-        totalPages={totalPages}
-        initialPage={1}
+        initialPerPage={initialPerPage}
+        loadMorePerPage={loadMorePerPage}
+        showLoadMoreOnMobile={showLoadMoreOnMobile}
+        customStyles={customStyles}
+        initialUsers={res.data.users ?? []} // передаємо дані на клієнт
       />
-    </>
+    </HydrationBoundary>
   );
 }
