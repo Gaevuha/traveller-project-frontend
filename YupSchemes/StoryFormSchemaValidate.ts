@@ -28,8 +28,8 @@ const categories: CategoryType[] = [
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
 const StoryFormSchemaValidate = Yup.object().shape({
-  imageUrl: Yup.mixed<File>()
-    .required('The image is required')
+  imageUrl: Yup.mixed()
+    .required('Додайте зображення до вашої історії')
     .test('fileType', 'Дозволені тільки зображення', value => {
       if (!value) return false;
       return value instanceof File && value.type.startsWith('image/');
@@ -40,18 +40,18 @@ const StoryFormSchemaValidate = Yup.object().shape({
     }),
 
   title: Yup.string()
-    .min(5, 'The title is too short. Tap at least 5 symbols')
-    .max(80, '80 symbols is a maximum in this field')
-    .required('This field is required'),
+    .min(5, 'Заголовок має містити щонайменше 5 символів')
+    .max(80, 'Будь ласка, введіть не більше 80 символів у цьому полі')
+    .required('Це поле є необхідним для заповнення'),
 
   article: Yup.string()
-    .min(300, 'The minimum text capacity is 300 symbols')
+    .min(300, 'Текст історії має містити щонайменше 300 символів')
     .max(2500, 'You incresed the maximum characters for this field')
-    .required('This field is required'),
+    .required('Це поле є необхідним для заповнення'),
 
   category: Yup.string()
     .oneOf(categories, 'Будь ласка, виберіть категорію')
-    .required('This option is required'),
+    .required('Це поле є необхідним для заповнення'),
 });
 
 export default StoryFormSchemaValidate;

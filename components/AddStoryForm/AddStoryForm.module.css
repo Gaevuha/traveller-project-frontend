@@ -4,12 +4,13 @@
 .fieldsList {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 40px;
 
-  margin-bottom: 24px;
+  margin-bottom: 42px;
 }
 
 .fieldItem {
+  position: relative;
 }
 
 .coverLabel {
@@ -45,6 +46,17 @@
 .inputField:focus {
   border: 1px solid transparent;
   outline: 1px solid black;
+}
+
+.errorMessage {
+  position: absolute;
+  bottom: -23px;
+  left: 0;
+  color: red;
+}
+
+.errorMessageImage {
+  bottom: -28px;
 }
 
 /* .inputField:hover,
@@ -202,6 +214,11 @@
   .imageWrapper {
     max-width: 704px;
     aspect-ratio: 704 / 469;
+  }
+
+  .errorMessageImage {
+    bottom: 3px;
+    left: 220px;
   }
 }
 

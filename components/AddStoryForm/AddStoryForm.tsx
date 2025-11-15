@@ -7,9 +7,38 @@ import css from './AddStoryForm.module.css';
 import { useId, useState } from 'react';
 import Image from 'next/image';
 import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createStory } from './api';
 
 interface AddStoryFormTypes {
   variant: 'create-story' | 'edit-story';
+}
+
+type Category =
+  | 'Європа'
+  | 'Азія'
+  | 'Пустелі'
+  | 'Африка'
+  | 'Гори'
+  | 'Америка'
+  | 'Балкани'
+  | 'Кавказ'
+  | 'Океанія';
+
+type InitialCategory = Category | 'Категорія';
+
+interface CreateStoryInitial {
+  title: string;
+  article: string;
+  category: InitialCategory;
+  imageUrl: null;
+}
+
+interface CreateStory {
+  title: string;
+  article: string;
+  category: Category;
+  imageUrl: File;
 }
 
 export default function AddStoryForm({ variant }: AddStoryFormTypes) {
@@ -17,66 +46,41 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
   const fieldId = useId();
   const [preview, setPreview] = useState<string>(placeholderImage);
 
-  const isImageDefault = preview === '/img/AddStoryForm/placeholder-image.png';
+  const queryClient = useQueryClient();
+  const addStory = useMutation({
+    mutationFn: createStory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['allStories'],
+      });
+      console.log('Successfully created the story!!!');
+    },
+  });
 
-  //! ===========================================
+  // const isImageDefault = preview === '/img/AddStoryForm/placeholder-image.png';
 
-  type CategoryType =
-    | 'Європа'
-    | 'Азія'
-    | 'Пустелі'
-    | 'Африка'
-    | 'Гори'
-    | 'Америка'
-    | 'Балкани'
-    | 'Кавказ'
-    | 'Океанія';
-
-  //!====================================================
-
-  type InitialCategoryType = CategoryType | 'Категорія';
-
-  interface CreateStoryType {
-    title: string;
-    article: string;
-    category: InitialCategoryType;
-    imageUrl: string;
-  }
-
-  const createStoryInitialValues: CreateStoryType = {
+  const createStoryInitialValues: CreateStoryInitial = {
     title: '',
     article: '',
     category: 'Категорія',
-    imageUrl: '/img/AddStoryForm/placeholder-image.png',
+    imageUrl: null,
   };
 
   function handleSubmitCreateStory(
-    values: CreateStoryType,
-    actions: FormikHelpers<CreateStoryType>
+    values: CreateStory,
+    actions: FormikHelpers<CreateStory>
   ) {
-    console.log('Form data: ', values);
+    // console.log('Form data: ', values);
+    addStory.mutate(values);
     actions.resetForm();
+    setPreview(placeholderImage);
   }
-  //   function sortCategories(categoryName) {
-  //     if (categoryName === 'Азія') return '68fb50c80ae91338641121f0';
-  //     if (categoryName === 'Гори') return '68fb50c80ae91338641121f1';
-  //     if (categoryName === 'Європа') return '68fb50c80ae91338641121f2';
-  //     if (categoryName === 'Америка') return '68fb50c80ae91338641121f3';
-  //     if (categoryName === 'Африка') return '68fb50c80ae91338641121f4';
-  //     if (categoryName === 'Пустелі') return '68fb50c80ae91338641121f6';
-  //     if (categoryName === 'Балкани') return '68fb50c80ae91338641121f7';
-  //     if (categoryName === 'Кавказ') return '68fb50c80ae91338641121f8';
-  //     if (categoryName === 'Океанія') return '68fb50c80ae91338641121f9';
-  //   }
-
-  // textarea growing
 
   return (
     <Formik
       initialValues={createStoryInitialValues}
       validationSchema={StoryFormSchemaValidate}
       onSubmit={handleSubmitCreateStory}
-      //   onSubmit={`${variant === 'create-story' ? handleSubmitCreateStory : () => {}}`}
     >
       {formik => (
         <Form className={css.form}>
@@ -108,7 +112,8 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 className={css.coverInput}
                 onChange={e => {
                   if (!e.target.files || e.target.files.length === 0) return;
-                  const file = e.target.files[0];
+                  const file = e.target.files?.[0];
+                  if (!file) return;
                   formik.setFieldValue('imageUrl', file);
                   setPreview(URL.createObjectURL(file));
                 }}
@@ -121,7 +126,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
               <ErrorMessage
                 component="span"
                 name="imageUrl"
-                className={css.error}
+                className={`${css.errorMessage} ${css.errorMessageImage}`}
               />
             </li>
 
@@ -139,7 +144,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
               <ErrorMessage
                 component="span"
                 name="title"
-                className={css.error}
+                className={css.errorMessage}
               />
             </li>
 
@@ -175,6 +180,11 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 <option value="Кавказ">Кавказ</option>
                 <option value="Океанія">Океанія</option>
               </Field>
+              <ErrorMessage
+                component="span"
+                name="category"
+                className={css.errorMessage}
+              />
             </li>
 
             {/* <li className={css.fieldItem}>
@@ -207,12 +217,21 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 className={`${css.storyText} ${css.inputField}`}
                 placeholder="Ваша історія тут"
               ></Field>
+              <ErrorMessage
+                component="span"
+                name="article"
+                className={css.errorMessage}
+              />
             </li>
           </ul>
           <div className={css.buttonsContainer}>
             <button
               type="submit"
-              className={`${css.saveBtn} ${css.btnDisabled}`}
+              className={
+                formik.isValid && formik.dirty
+                  ? css.saveBtn
+                  : `${css.saveBtn} ${css.btnDisabled}`
+              }
             >
               Зберегти
             </button>
