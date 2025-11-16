@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/clientApi';
 import css from './TravellersStoriesItem.module.css';
 import { Icon } from '../Icon/Icon';
+import Link from 'next/link';
 
 interface TravellersStoriesItemProps {
   story: Story;
@@ -25,6 +26,8 @@ export default function TravellersStoriesItem({
   const [isSaved, setIsSaved] = useState(story.isFavorite ?? false);
   const [isSaving, setIsSaving] = useState(false);
   const [favoriteCount, setFavoriteCount] = useState(story.favoriteCount);
+
+
 
   const handleSave = async () => {
     if (!isAuthenticated) {
@@ -52,10 +55,16 @@ export default function TravellersStoriesItem({
     }
   };
 
-  const isoDateString = story.date;
-  const dateObject = new Date(isoDateString);
+  function formatDate(dateString: string) {
+  const d = new Date(dateString);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`; 
+  };
 
-  const normalFormatLocale = dateObject.toLocaleDateString();
+
+ 
 
   return (
     <li className={css.story}>
@@ -83,19 +92,19 @@ export default function TravellersStoriesItem({
           <div className={css.story__info}>
             <p className={css.story__name}>{story.ownerId.name}</p>
             <div className={css.meta}>
-              <span className={css.story__meta}>{normalFormatLocale}</span>
+              <span className={css.story__meta}>{formatDate(story.date)}</span>
               <span className={css.favoriteCount}>{favoriteCount}</span>
               <Icon name="icon-bookmark" className={css.icon} />
             </div>
           </div>
         </div>
         <div className={css.story__actions}>
-          <button
-            onClick={() => router.push(`/stories/${story._id}`)}
+          <Link
+            href={`/stories/${story._id}`}
             className={css.story__btn}
           >
             Переглянути статтю
-          </button>
+          </Link>
 
           <button
             onClick={handleSave}

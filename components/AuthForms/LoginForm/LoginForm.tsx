@@ -1,11 +1,11 @@
 'use client';
 
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
-
 import { useAuth } from '@/lib/hooks/useAuth';
 import { LoginRequest } from '@/types/auth';
 import styles from '../RegistrationForm/RegistrationForm.module.css';
 import { loginSchema } from '@/lib/validation/authSchemas';
+import GoogleAuthButton from '@/components/AuthSocial/GoogleAuthButton';
 
 const LoginForm = () => {
   const { login, isSubmitting } = useAuth();
@@ -52,7 +52,7 @@ const LoginForm = () => {
         validateOnChange={true}
         validateOnBlur={true}
       >
-        {({ errors, touched, values }) => (
+        {({ errors, touched, values, isSubmitting, isValid, dirty }) => (
           <Form className={styles.form}>
             <div className={styles.fieldGroup}>
               <label htmlFor="email" className={styles.label}>
@@ -65,7 +65,11 @@ const LoginForm = () => {
                 placeholder="hello@podorozhnyky.ua"
                 className={`${styles.input} ${
                   errors.email && touched.email ? styles.inputError : ''
-                } ${!errors.email && touched.email && values.email ? styles.inputValid : ''}`}
+                } ${
+                  !errors.email && touched.email && values.email
+                    ? styles.inputValid
+                    : ''
+                }`}
                 disabled={isSubmitting}
               />
               <ErrorMessage
@@ -85,8 +89,14 @@ const LoginForm = () => {
                 name="password"
                 placeholder="********"
                 className={`${styles.input} ${
-                  errors.password && touched.password ? styles.inputError : ''
-                } ${!errors.password && touched.password && values.password ? styles.inputValid : ''}`}
+                  errors.password && touched.password
+                    ? styles.inputError
+                    : ''
+                } ${
+                  !errors.password && touched.password && values.password
+                    ? styles.inputValid
+                    : ''
+                }`}
                 disabled={isSubmitting}
               />
               <ErrorMessage
@@ -99,10 +109,13 @@ const LoginForm = () => {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isValid || !dirty}
             >
               {isSubmitting ? 'Входимо...' : 'Увійти'}
             </button>
+
+            {/* кнопка Google під формою */}
+            <GoogleAuthButton />
           </Form>
         )}
       </Formik>

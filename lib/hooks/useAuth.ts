@@ -30,7 +30,7 @@ export const useAuth = () => {
     } catch (error) {
       const message = extractErrorMessage(error);
       toast.error(message);
-      throw error;
+      throw new Error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -44,12 +44,13 @@ export const useAuth = () => {
         throw new Error('Користувач не знайдений');
       }
       setUser(user);
+
       toast.success(`Вітаємо, ${user.name || 'користувач'}!`);
       router.push('/');
     } catch (error) {
       const message = extractErrorMessage(error);
       toast.error(message);
-      throw error;
+      throw new Error(message);
     } finally {
       setIsSubmitting(false);
     }

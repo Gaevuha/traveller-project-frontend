@@ -1,45 +1,132 @@
 'use client';
 
-import { getMe } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
+import { User } from '@/types/user';
 import { useEffect, useState } from 'react';
+import { getMe, refreshSession } from '@/lib/api/clientApi';
 
 type Props = {
   children: React.ReactNode;
+  initialUser?: User | null;
 };
 
-const AuthProvider = ({ children }: Props) => {
+const AuthProvider = ({ children, initialUser = null }: Props) => {
   const setUser = useAuthStore(state => state.setUser);
   const clearIsAuthenticated = useAuthStore(
     state => state.clearIsAuthenticated
   );
   const setLoading = useAuthStore(state => state.setLoading);
+  const user = useAuthStore(state => state.user);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
       if (isInitialized) return;
 
-      try {
-        setLoading(true);
+      setLoading(true);
 
-        const user = await getMe(true);
+      // Якщо є initialUser з SSR - використовуємо його
+      if (initialUser) {
+        // Нормалізуємо можливу відповідь API { status, message, data }
+        const asRecord = initialUser as unknown as Record<string, unknown>;
+        let normalizedUser: User | null = null;
 
-        if (user) {
-          setUser(user);
+        if (
+          asRecord &&
+          typeof asRecord === 'object' &&
+          'status' in asRecord &&
+          'data' in asRecord
+        ) {
+          const rawUnknown = (asRecord as { data: unknown }).data;
+          if (rawUnknown && typeof rawUnknown === 'object') {
+            const raw = rawUnknown as Record<string, unknown>;
+            const idFromUnderscore =
+              '_id' in raw && typeof raw._id === 'string'
+                ? (raw._id as string)
+                : undefined;
+            const idFromId =
+              'id' in raw && typeof (raw.id as unknown) === 'string'
+                ? (raw.id as string)
+                : undefined;
+            const resolvedId = idFromUnderscore ?? idFromId;
+            normalizedUser = {
+              ...(raw as unknown as Omit<User, '_id'>),
+              _id: resolvedId ?? '',
+            };
+          }
+        } else {
+          // В іншому випадку це вже User — але гарантуємо наявність _id
+          const raw = initialUser as unknown as Record<string, unknown>;
+          const idFromUnderscore =
+            '_id' in raw && typeof raw._id === 'string'
+              ? (raw._id as string)
+              : undefined;
+          const idFromId =
+            'id' in raw && typeof (raw.id as unknown) === 'string'
+              ? (raw.id as string)
+              : undefined;
+          const resolvedId = idFromUnderscore ?? idFromId;
+          normalizedUser = {
+            ...(initialUser as unknown as Omit<User, '_id'>),
+            _id: resolvedId ?? '',
+          };
+        }
+
+        if (normalizedUser && normalizedUser._id) {
+          setUser(normalizedUser);
         } else {
           clearIsAuthenticated();
         }
-      } catch {
-        clearIsAuthenticated();
-      } finally {
         setLoading(false);
         setIsInitialized(true);
+        return;
       }
+
+      // Якщо initialUser є null, але є user в store (з localStorage) - перевіряємо сесію
+      if (user) {
+        try {
+          // Перевіряємо, чи сесія все ще активна
+          const currentUser = await getMe(true); // silent: true - не логуємо помилки
+          if (currentUser) {
+            // Сесія активна - оновлюємо дані
+            setUser(currentUser);
+          } else {
+            // Спробуємо оновити сесію і повторити запит
+            const refreshed = await refreshSession();
+            if (refreshed) {
+              const retried = await getMe(true);
+              if (retried) {
+                setUser(retried);
+              } else {
+                clearIsAuthenticated();
+              }
+            } else {
+              // Сесія неактивна - очищаємо
+              clearIsAuthenticated();
+            }
+          }
+        } catch {
+          // Помилка при перевірці - очищаємо
+          clearIsAuthenticated();
+        }
+      } else {
+        // Немає ні initialUser, ні user в store - очищаємо
+        clearIsAuthenticated();
+      }
+
+      setLoading(false);
+      setIsInitialized(true);
     };
 
     fetchSession();
-  }, [clearIsAuthenticated, setUser, setLoading, isInitialized]);
+  }, [
+    initialUser,
+    clearIsAuthenticated,
+    setUser,
+    setLoading,
+    isInitialized,
+    user,
+  ]);
 
   return <>{children}</>;
 };

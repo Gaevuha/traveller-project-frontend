@@ -4,6 +4,9 @@ import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../_utils/utils';
 
+/**
+ * GET /api/stories
+ */
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -43,6 +46,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/stories
+ */
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = cookies();

@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useState } from 'react';
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
+import Image from 'next/image';
 
 type ProfileAndLogoutLinksProps = {
   variant?: 'header-main-page' | 'mobile-menu';
@@ -37,8 +38,30 @@ export default function ProfileAndLogoutLinks({
   };
 
   // Отримуємо ім'я користувача або дефолтне значення
-  const userName = user?.name || 'Користувач';
-  const userAvatar = user?.avatarUrl;
+  let userName = 'Користувач';
+  if (user) {
+    if (
+      'data' in user &&
+      typeof user.data === 'object' &&
+      user.data !== null &&
+      'name' in user.data
+    ) {
+      userName = (user.data as { name: string }).name;
+    } else if ('name' in user && typeof user.name === 'string') {
+      // Якщо це валідний User об'єкт
+      userName = user.name;
+    }
+  }
+  const userAvatar =
+    user && 'avatarUrl' in user
+      ? user.avatarUrl
+      : user &&
+          'data' in user &&
+          typeof user.data === 'object' &&
+          user.data !== null &&
+          'avatarUrl' in user.data
+        ? (user.data as { avatarUrl?: string }).avatarUrl
+        : undefined;
 
   return (
     <div className={css.container}>
@@ -48,7 +71,13 @@ export default function ProfileAndLogoutLinks({
         className={css.profileLink}
       >
         {userAvatar ? (
-          <img src={userAvatar} alt={userName} className={css.avatar} />
+          <Image
+            src={userAvatar}
+            alt={userName}
+            className={css.avatar}
+            width={32}
+            height={32}
+          />
         ) : (
           <Icon name="avatar" className={css.avatar} />
         )}

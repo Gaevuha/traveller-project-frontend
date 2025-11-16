@@ -10,10 +10,10 @@ if (!BASE_URL) throw new Error('NEXT_PUBLIC_API_URL is not defined');
  */
 export const api = axios.create({
   baseURL: '/api', // Next.js API routes
-  // baseURL: BASE_URL, // Next.js API routes
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
+
 
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;
@@ -103,6 +103,7 @@ api.interceptors.response.use(
       if (isMissingToken) {
         return Promise.reject(error);
       }
+      // Allow refresh even for /users/me to recover expired access tokens
 
       if (isRefreshing) {
         // If already refreshing, queue this request

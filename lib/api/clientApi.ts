@@ -1,10 +1,26 @@
-import { User, GetUsersResponse } from '@/types/user';
-import { api } from './api';
+import {
+  User,
+  GetUsersResponse,
+  GetUserByIdResponse,
+  GetArticlesResponse,
+  ArticlesWithPagination,
+} from '@/types/user';
+
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
-import { StoriesResponse, Story } from '@/types/story';
-import { AxiosError } from 'axios';
+
+import {
+  SavedStory,
+  StoriesResponse,
+  Story,
+  StoryByIdResponse,
+  UserSavedArticlesResponse,
+} from '@/types/story';
+import { AxiosError, isAxiosError } from 'axios';
+import { api } from '../api/api';
 import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
+
+export type ApiError = AxiosError<{ error: string }>;
 
 /**
  * Register user
@@ -21,7 +37,31 @@ export const register = async (data: RegisterRequest) => {
 export const login = async (data: LoginRequest) => {
   const res = await api.post<User>('/auth/login', data);
   const user = extractUser(res.data) as User | null;
+
   return user;
+};
+
+/**
+ * Google OAuth — отримання URL для входу через Google
+ */
+export async function getGoogleAuthUrl(): Promise<string> {
+  const { data } = await api.get('/auth/google/get-oauth-url');
+  // сервер возвращает data.data.url, а не data.url
+  return data?.data?.url || '';
+}
+
+/**
+ * Підтвердження входу після редіректу з Google
+ */
+export const authConfirmGoogle = async (code: string) => {
+  try {
+    const res = await api.post<User>('/auth/google/confirm-oauth', { code });
+    const user = extractUser(res.data) as User | null;
+    return user;
+  } catch (error) {
+    console.error('❌ Google OAuth confirm error:', error);
+    throw error;
+  }
 };
 
 /**
@@ -81,6 +121,17 @@ export const logout = async () => {
 };
 
 /**
+ * Try to refresh session on the client (will set cookies via Next API route)
+ */
+export async function refreshSession(): Promise<boolean> {
+  try {
+    await api.post('/auth/refresh', {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+/**
  * Check if session is valid (lightweight check)
  */
 export const checkSession = async (): Promise<boolean> => {
@@ -96,24 +147,25 @@ export const checkSession = async (): Promise<boolean> => {
   }
 };
 
-export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
+export async function fetchStories(
+  page = 1,
+  perPage = 3,
+  categoryId?: string
+): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
-    params: { page, perPage, sort: 'favoriteCount' },
+    params: { page, perPage, sort: 'favoriteCount', category: categoryId },
   });
-  // console.log(response);
   return response.data?.data || [];
 }
 
-fetchStories(1, 3);
-
 export async function addStoryToFavorites(storyId: string): Promise<void> {
-  await api.post(`/stories/${storyId}/favorite`);
+  await api.post(`/users/me/saved/${storyId}`);
 }
 
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
-  await api.delete(`/stories/${storyId}/favorite`);
+  await api.delete(`/users/me/saved/${storyId}`);
 }
-
+/*Haievoi Serhii*/
 export async function getUsersClient({
   page = 1,
   perPage = 4,
@@ -125,6 +177,207 @@ export async function getUsersClient({
     params: { page, perPage },
   });
   return res.data;
+}
+export async function getArticlesByUserClient(
+  travellerId: string,
+  page: number,
+  perPage: number
+): Promise<GetArticlesResponse> {
+  try {
+    const url = `/users/${travellerId}`;
+    const res = await api.get<GetUserByIdResponse>(url, {
+      params: { page, perPage },
+    });
+
+    const articles: ArticlesWithPagination = res.data.data.articles;
+    const totalArticles = articles.pagination.totalItems;
+    return {
+      user: res.data.data.user,
+      articles: articles,
+      totalArticles: totalArticles,
+    };
+  } catch (error: unknown) {
+    console.error('[getArticlesByUserClient] Full error details:', error);
+
+    if (isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error ||
+          `Request failed with status code ${error.response?.status}`
+      );
+    } else {
+      console.error('[getArticlesByUserClient] Unknown error type:', {
+        error,
+        errorType: typeof error,
+        isErrorInstance: error instanceof Error,
+      });
+      throw new Error('Unknown client error');
+    }
+  }
+}
+
+/*end Haievoi Serhii*/
+export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
+  const response = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
+  return response.data.data;
+}
+
+export async function fetchSavedStoriesByUserId(
+  userId: string
+): Promise<SavedStory[]> {
+  console.log('fetchSavedStoriesByUserId CALL with userId:', userId);
+
+  const res = await api.get<UserSavedArticlesResponse>(
+    `/users/${userId}/saved-articles`
+  );
+
+  console.log(
+    'fetchSavedStoriesByUserId RESPONSE:',
+    res.data.data.savedStories
+  );
+
+  return res.data.data.savedStories;
+}
+
+/**
+ * Get current user profile with articles
+ */
+export async function getMeProfile(): Promise<{
+  user: User;
+  articles: Story[];
+}> {
+  const res = await api.get('/users/me/profile');
+  const profileData = res.data.data;
+
+  // Створюємо User об'єкт
+  const user: User = {
+    _id: profileData._id,
+    name: profileData.name,
+    avatarUrl: profileData.avatarUrl,
+    articlesAmount: profileData.articlesAmount,
+    createdAt: profileData.createdAt,
+    updatedAt: profileData.updatedAt,
+    description: profileData.description,
+  };
+
+  // Завантажуємо повну інформацію про кожну історію
+  const articles = await Promise.allSettled(
+    (profileData.articles || []).map(
+      async (article: {
+        _id: string;
+        title: string;
+        img: string;
+        date: string;
+        favoriteCount: number;
+        createdAt: string;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          const fullStory = await fetchStoryByIdClient(article._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без article
+          return {
+            _id: article._id,
+            img: article.img,
+            title: article.title,
+            article: '',
+            category: article.category,
+            ownerId: {
+              _id: profileData._id,
+              name: profileData.name,
+              avatarUrl: profileData.avatarUrl || '',
+              articlesAmount: profileData.articlesAmount,
+              description: profileData.description ?? undefined,
+            },
+            date: article.date,
+            favoriteCount: article.favoriteCount,
+          } as Story;
+        }
+      }
+    )
+  );
+
+  const stories = articles
+    .map(result => (result.status === 'fulfilled' ? result.value : null))
+    .filter((story): story is Story => story !== null);
+
+  return { user, articles: stories };
+}
+
+/**
+ * Get user saved articles
+ * Завантажує повну інформацію про кожну збережену історію, включаючи ownerId
+ */
+export async function getUserSavedArticles(userId: string): Promise<{
+  user: User;
+  savedStories: Story[];
+}> {
+  const res = await api.get(`/users/${userId}/saved-articles`);
+  const data = res.data.data;
+
+  const user: User = {
+    _id: data.user._id,
+    name: data.user.name,
+    avatarUrl: data.user.avatarUrl,
+    articlesAmount: data.user.articlesAmount,
+    createdAt: data.user.createdAt,
+    description: data.user.description ?? undefined,
+  };
+
+  // Завантажуємо повну інформацію про кожну збережену історію (включаючи ownerId)
+  const savedStories = await Promise.allSettled(
+    (data.savedStories || []).map(
+      async (savedStory: {
+        _id: string;
+        img: string;
+        title: string;
+        article: string;
+        date: string;
+        favoriteCount: number;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          // Завантажуємо повну інформацію про історію, включаючи ownerId
+          const fullStory = await fetchStoryByIdClient(savedStory._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без ownerId (має не статися, але на всяк випадок)
+          return {
+            _id: savedStory._id,
+            img: savedStory.img,
+            title: savedStory.title,
+            article: savedStory.article || '',
+            category: savedStory.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: savedStory.date,
+            favoriteCount: savedStory.favoriteCount,
+          } as Story;
+        }
+      }
+    )
+  );
+
+  const stories = savedStories
+    .map(result => (result.status === 'fulfilled' ? result.value : null))
+    .filter((story): story is Story => story !== null);
+
+  return {
+    user,
+    savedStories: stories,
+  };
+}
+
+export async function fetchSavedStoriesMe(): Promise<SavedStory[]> {
+  const res = await api.get<UserSavedArticlesResponse>(
+    '/users/me/saved-articles'
+  );
+  return res.data.data.savedStories;
 }
 
 // Story create form

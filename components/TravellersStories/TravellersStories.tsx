@@ -6,14 +6,16 @@ import css from './TravellersStories.module.css';
 interface TravellersStoriesProps {
   stories: Story[];
   isAuthenticated: boolean;
+  className?: string; // додатковий проп для кастомного стилю
 }
 
 export default function TravellersStories({
   stories,
   isAuthenticated,
+  className,
 }: TravellersStoriesProps) {
   return (
-    <ul className={css.stories__list}>
+    <ul className={`${css.stories__list} ${className ?? ''}`}>
       {stories.map(story => (
         <TravellersStoriesItem
           key={story._id}
