@@ -305,6 +305,7 @@ export async function getMeProfile(): Promise<{
 
 /**
  * Get user saved articles
+ * Завантажує повну інформацію про кожну збережену історію, включаючи ownerId
  */
 export async function getUserSavedArticles(userId: string): Promise<{
   user: User;
@@ -322,9 +323,52 @@ export async function getUserSavedArticles(userId: string): Promise<{
     description: data.user.description ?? undefined,
   };
 
+  // Завантажуємо повну інформацію про кожну збережену історію (включаючи ownerId)
+  const savedStories = await Promise.allSettled(
+    (data.savedStories || []).map(
+      async (savedStory: {
+        _id: string;
+        img: string;
+        title: string;
+        article: string;
+        date: string;
+        favoriteCount: number;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          // Завантажуємо повну інформацію про історію, включаючи ownerId
+          const fullStory = await fetchStoryByIdClient(savedStory._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без ownerId (має не статися, але на всяк випадок)
+          return {
+            _id: savedStory._id,
+            img: savedStory.img,
+            title: savedStory.title,
+            article: savedStory.article || '',
+            category: savedStory.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: savedStory.date,
+            favoriteCount: savedStory.favoriteCount,
+          } as Story;
+        }
+      }
+    )
+  );
+
+  const stories = savedStories
+    .map(result => (result.status === 'fulfilled' ? result.value : null))
+    .filter((story): story is Story => story !== null);
+
   return {
     user,
-    savedStories: data.savedStories || [],
+    savedStories: stories,
   };
 }
 

@@ -121,11 +121,20 @@ export default function ProfilePage() {
             <>
               {' '}
               {user && (
-                <div className={css.travellerInfoWrapper}>
+                <div className={css.containerTraveller}>
                   <TravellerInfo
                     user={user}
-                    imageSize={{ width: 120, height: 120 }}
-                    priority={true}
+                    useDefaultStyles={false}
+                    priority
+                    className={{
+                      travellerInfoWraper: css.travellerInfoWraper,
+                      image: css.image,
+                      wrapper: css.wrapperContent,
+                      container: css.travellerContainer,
+                      name: css.travellerName,
+                      text: css.travellerText,
+                    }}
+                    imageSize={{ width: 199, height: 199 }}
                   />
                 </div>
               )}
