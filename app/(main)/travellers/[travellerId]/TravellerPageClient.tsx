@@ -137,8 +137,8 @@ export default function TravellerPageClient({
     return (
       <MessageNoStories
         text="У цього користувача ще немає історій."
-        buttonText="Створити історію"
-        route="/stories/create"
+        buttonText="Назад до історій"
+        route="/stories"
       />
     );
   }
