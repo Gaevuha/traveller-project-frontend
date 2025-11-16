@@ -1,4 +1,11 @@
-import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
+import {
+  User,
+  GetUsersResponse,
+  GetUserByIdResponse,
+  GetArticlesResponse,
+  ArticlesWithPagination,
+  PaginationData,
+} from '@/types/user';
 import { api } from './api';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
@@ -132,7 +139,7 @@ export async function addStoryToFavorites(storyId: string): Promise<void> {
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
   await api.delete(`/me/saved/${storyId}`);
 }
-
+/*Haievoi Serhii*/
 export async function getUsersClient({
   page = 1,
   perPage = 4,
@@ -145,28 +152,119 @@ export async function getUsersClient({
   });
   return res.data;
 }
-
-export async function getUserByIdClient(
-  userId: string
-): Promise<GetUserByIdResponse> {
+export async function getArticlesByUserClient(
+  travellerId: string,
+  page: number,
+  perPage: number
+): Promise<GetArticlesResponse> {
   try {
-    const res = await api.get<GetUserByIdResponse>(`/users/${userId}`);
-    return res.data;
+    console.log(`[getArticlesByUserClient] Starting request:`, {
+      travellerId,
+      page,
+      perPage,
+      timestamp: new Date().toISOString(),
+    });
+
+    const url = `/users/${travellerId}`;
+    console.log(`[getArticlesByUserClient] Request URL: ${url}`);
+
+    const res = await api.get<GetUserByIdResponse>(url, {
+      params: { page, perPage },
+    });
+
+    console.log(`[getArticlesByUserClient] Response received:`, {
+      status: res.status,
+      statusText: res.statusText,
+      dataStructure: {
+        hasData: !!res.data,
+        hasUser: !!res.data?.data?.user,
+        hasArticles: !!res.data?.data?.articles,
+        articlesType: typeof res.data?.data?.articles,
+        articlesIsArray: Array.isArray(res.data?.data?.articles),
+      },
+      articlesCount: res.data?.data?.articles?.items?.length || 0,
+    });
+
+    const articles: ArticlesWithPagination = res.data.data.articles;
+    const totalArticles = articles.pagination.totalItems;
+
+    console.log(`[getArticlesByUserClient] Request successful:`, {
+      user: res.data.data.user.name,
+      articlesCount: articles.items.length,
+      totalArticles,
+      pagination: articles.pagination,
+    });
+
+    return {
+      user: res.data.data.user,
+      articles: articles,
+      totalArticles: totalArticles,
+    };
   } catch (error: unknown) {
+    console.error('[getArticlesByUserClient] Full error details:', error);
+
     if (isAxiosError(error)) {
-      console.error('[getUsersServer error]', error.message);
+      console.error('[getArticlesByUserClient] Axios error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method,
+        params: error.config?.params,
+        headers: error.config?.headers,
+      });
+
+      // Додамо перевірку на 500 помилку
+      if (error.response?.status === 500) {
+        console.error(
+          '[getArticlesByUserClient] Server 500 error - possible backend issue'
+        );
+
+        // Можна додати додаткову інформацію для дебагу
+        const errorData = error.response?.data;
+        if (errorData) {
+          console.error('[getArticlesByUserClient] Server error response:', {
+            error: errorData.error,
+            message: errorData.message,
+            details: errorData.details,
+          });
+        }
+      }
+
       throw new Error(
-        error.response?.data?.error || 'Failed to fetch users from server'
+        error.response?.data?.error ||
+          `Request failed with status code ${error.response?.status}`
       );
     } else {
-      console.error('[getUsersServer unknown error]', error);
-      throw new Error('Unknown server error');
+      console.error('[getArticlesByUserClient] Unknown error type:', {
+        error,
+        errorType: typeof error,
+        isErrorInstance: error instanceof Error,
+      });
+      throw new Error('Unknown client error');
     }
   }
 }
 
+// export async function getUserByIdClient(
+//   userId: string
+// ): Promise<GetUserByIdResponse['data']> {
+//   try {
+//     const res = await api.get<GetUserByIdResponse>(`/users/${userId}`);
+//     return res.data.data;
+//   } catch (error: unknown) {
+//     if (isAxiosError(error)) {
+//       console.error('[getUserByIdClient error]', error.message);
+//       throw new Error(error.response?.data?.error || 'Failed to fetch user');
+//     } else {
+//       console.error('[getUserByIdClient unknown error]', error);
+//       throw new Error('Unknown server error');
+//     }
+//   }
+// }
+
+/*end Haievoi Serhii*/
 export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
   const response = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
   return response.data.data;
 }
-

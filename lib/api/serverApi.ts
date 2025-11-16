@@ -1,14 +1,21 @@
 import { cookies } from 'next/headers';
 import { api } from '@/app/api/api';
- import{ User,
+import {
+  User,
   GetUsersResponse,
   GetUserByIdResponse,
-  GetStoriesResponse,
+  GetArticlesResponse,
+  ArticlesWithPagination,
+  PaginationData,
 } from '@/types/user';
 import { isAxiosError } from 'axios';
 
-import { FetchStoriesOptions, StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
-
+import {
+  FetchStoriesOptions,
+  StoriesResponse,
+  Story,
+  StoryByIdResponse,
+} from '@/types/story';
 
 /**
  * Refresh session tokens (server-side)
@@ -76,6 +83,30 @@ export async function getUsersServer(
   }
 }
 
+export async function getArticlesByUserServer(
+  travellerId: string,
+  page: number = 1,
+  perPage: number = 6
+): Promise<GetArticlesResponse> {
+  try {
+    const res = await api.get<GetUserByIdResponse>(`/users/${travellerId}`, {
+      params: { page, perPage },
+    });
+
+    const articles: ArticlesWithPagination = res.data.data.articles;
+    const totalArticles = articles.pagination.totalItems;
+
+    return {
+      user: res.data.data.user,
+      articles: articles,
+      totalArticles: totalArticles,
+    };
+  } catch (error: unknown) {
+    console.error('[getArticlesByUserServer] Error:', error);
+    throw new Error('Failed to fetch user articles from server');
+  }
+}
+
 export async function getUserByIdServer(
   userId: string
 ): Promise<GetUserByIdResponse> {
@@ -98,13 +129,12 @@ export async function getUserByIdServer(
 export async function getStoriesServer(
   page: number = 1,
   perPage: number = 10
-): Promise<{ data: GetStoriesResponse }> {
+): Promise<{ data: GetArticlesResponse }> {
   const res = await api.get(`/stories`, {
     params: { page, perPage },
   });
   return res.data;
 }
-
 
 export const fetchStoryByIdServer = async (storyId: string): Promise<Story> => {
   const res = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
@@ -122,7 +152,6 @@ export const fetchStoriesServerDup = async ({
   return res.data;
 };
 
-
 export async function fetchStoriesServer(
   page: number = 1,
   perPage: number = 10
@@ -132,4 +161,3 @@ export async function fetchStoriesServer(
   });
   return response.data?.data || [];
 }
-

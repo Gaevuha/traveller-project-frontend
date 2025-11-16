@@ -3,17 +3,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 import Loader from '@/components/Loader/Loader';
-import type { BackendArticleFromUser, User } from '@/types/user';
+import MessageNoStories from '@/components/MessageNoStories/MessageNoStories';
+import type { User, BackendArticleFromUser } from '@/types/user';
 import type { Story } from '@/types/story';
+import { getArticlesByUserClient } from '@/lib/api/clientApi';
+import { useQuery } from '@tanstack/react-query';
 import styles from './TravellerPage.module.css';
 
 interface Props {
   travellerId: string;
   user: User;
   initialArticles: BackendArticleFromUser[];
-  initialPerPage?: number; // скільки карток показати спочатку
-  loadMorePerPage: number; // скільки підвантажувати при кліку
-  showLoadMoreOnMobile?: boolean;
+  totalArticles: number;
+  loadMorePerPage: number;
+  showLoadMoreOnMobile: boolean;
 }
 
 function backendToStory(article: BackendArticleFromUser, user: User): Story {
@@ -21,7 +24,7 @@ function backendToStory(article: BackendArticleFromUser, user: User): Story {
     _id: article._id,
     img: article.img,
     title: article.title,
-    article: article.title,
+    article: article.article,
     date: article.date,
     favoriteCount: article.favoriteCount,
     category: { _id: '', name: '' },
@@ -40,72 +43,114 @@ export default function TravellerPageClient({
   travellerId,
   user,
   initialArticles,
-  initialPerPage = 6,
-  loadMorePerPage,
-  showLoadMoreOnMobile = false,
+  totalArticles,
 }: Props) {
-  const isFetchingRef = useRef(false);
-  const [visibleStories, setVisibleStories] = useState<Story[]>(() =>
-    initialArticles.slice(0, initialPerPage).map(a => backendToStory(a, user))
-  );
-  const [visibleCount, setVisibleCount] = useState(
-    Math.min(initialArticles.length, initialPerPage)
-  );
+  const [stories, setStories] = useState<Story[]>([]);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [noStories, setNoStories] = useState(initialArticles.length === 0);
+  const pageRef = useRef(1);
 
-  // Визначаємо мобільний розмір та слухаємо resize
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Підлаштовуємо перший рендер під ширину екрана на клієнті
-  useEffect(() => {
-    const width = window.innerWidth;
-    let initialCount = initialPerPage;
-
-    if (width < 768) initialCount = Math.min(initialArticles.length, 4);
-    else if (width < 1024) initialCount = Math.min(initialArticles.length, 4);
-    else initialCount = Math.min(initialArticles.length, initialPerPage);
-
-    setVisibleStories(
-      initialArticles.slice(0, initialCount).map(a => backendToStory(a, user))
-    );
-    setVisibleCount(Math.min(initialArticles.length, initialCount));
-  }, [initialArticles, initialPerPage, user]);
-
-  const handleLoadMore = () => {
-    if (isFetchingRef.current) return;
-
-    isFetchingRef.current = true;
-    setLoading(true);
-
-    const nextArticles = initialArticles.slice(
-      visibleCount,
-      visibleCount + loadMorePerPage
-    );
-
-    const nextStories = nextArticles.map(a => backendToStory(a, user));
-
-    setVisibleStories(prev => [...prev, ...nextStories]);
-    setVisibleCount(prev => prev + nextStories.length);
-
-    setLoading(false);
-    isFetchingRef.current = false;
+  // Динамічний перPage під мобілку/планшет/десктоп
+  const getPerPage = () => {
+    if (window.innerWidth < 1440) return 4; // мобільні + планшет
+    return 6; // десктоп
   };
 
-  const showLoadMoreButton =
-    visibleCount < initialArticles.length &&
-    (!isMobile || showLoadMoreOnMobile);
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 1440);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  // Перший рендер
+  useEffect(() => {
+    if (isMobile === null) return;
+
+    const perPage = getPerPage();
+
+    if (!initialArticles || initialArticles.length === 0) {
+      setNoStories(true);
+      setHasMore(false);
+      return;
+    }
+
+    const firstStories = initialArticles
+      .slice(0, perPage)
+      .map(a => backendToStory(a, user));
+    setStories(firstStories);
+    setNoStories(false);
+
+    setHasMore(totalArticles > firstStories.length);
+    pageRef.current = 1;
+  }, [isMobile, initialArticles, totalArticles, user]);
+
+  // LOAD MORE
+  const handleLoadMore = async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+
+    try {
+      const perPage = getPerPage(); // ✅ динамічний perPage
+      const nextPage = pageRef.current + 1;
+
+      const res = await getArticlesByUserClient(travellerId, nextPage, perPage);
+      const newArticles = res.articles.items ?? [];
+
+      if (newArticles.length === 0) {
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
+
+      const mapped = newArticles.map(a => backendToStory(a, user));
+
+      setStories(prev => {
+        const merged = [...prev, ...mapped];
+
+        const unique = merged.filter(
+          (item, index, arr) => arr.findIndex(i => i._id === item._id) === index
+        );
+
+        // ✅ ховаємо кнопку на останній сторінці
+        if (unique.length >= totalArticles || newArticles.length < perPage) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+
+        return unique;
+      });
+
+      pageRef.current = nextPage;
+    } catch (e) {
+      console.error(e);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (noStories) {
+    return (
+      <MessageNoStories
+        text="У цього користувача ще немає історій."
+        buttonText="Створити історію"
+        redirectPath="/stories/create"
+      />
+    );
+  }
+
+  if (isMobile === null) return null;
 
   return (
     <>
-      <TravellersStories stories={visibleStories} isAuthenticated={false} />
+      <TravellersStories stories={stories} isAuthenticated={false} />
 
-      {showLoadMoreButton && (
+      {hasMore && stories.length > 0 && (
         <div className={styles.loadMoreWrapper}>
           {loading ? (
             <Loader className={styles.loader} />
@@ -113,8 +158,9 @@ export default function TravellerPageClient({
             <button
               className={styles.traveller__btn__more}
               onClick={handleLoadMore}
+              disabled={loading}
             >
-              Переглянути ще
+              Показати ще
             </button>
           )}
         </div>
