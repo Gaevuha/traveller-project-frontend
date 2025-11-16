@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSaveStory } from "@/lib/hooks/useSaveStory";
 import css from "./SaveStoryButton.module.css";
-import Modal from "@/components/Modal";
+import Modal from "../../Modal/Modal";
+
 
 type SaveStoryButtonProps = {
   storyId: string;
