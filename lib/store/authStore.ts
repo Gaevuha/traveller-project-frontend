@@ -48,25 +48,6 @@ export const useAuthStore = create<AuthStore>()(
           state.setLoading(true);
 
           if (state.user) {
-            const getUserId = (obj: unknown): { id?: string; _id?: string } => {
-              if (obj && typeof obj === 'object') {
-                return {
-                  id: 'id' in obj ? String(obj.id) : undefined,
-                  _id: '_id' in obj ? String(obj._id) : undefined,
-                };
-              }
-              return {};
-            };
-
-            const userIdInfo = getUserId(state.user);
-            console.log(
-              '🟡 ПІСЛЯ ПЕРЕЗАВАНТАЖЕННЯ - user з localStorage:',
-              state.user
-            );
-            console.log('🟡 user.id:', userIdInfo.id);
-            console.log('🟡 user._id:', userIdInfo._id);
-            console.log('🟡 Всі ключі user:', Object.keys(state.user));
-
             // Перевіряємо, чи user - це об'єкт User, а не API response
             const userData = state.user as unknown;
 
@@ -126,10 +107,7 @@ export const useAuthStore = create<AuthStore>()(
             } else if (normalizedUser && isValidUser(normalizedUser)) {
               // Нормалізуємо user (id → _id) та зберігаємо
               state.user = normalizedUser;
-              console.log('✅ Нормалізовано user (id → _id):', state.user.name);
             } else {
-              // Якщо не валідний User - очищаємо
-              console.warn('⚠️ User не валідний, очищаємо:', userData);
               state.user = null;
             }
 

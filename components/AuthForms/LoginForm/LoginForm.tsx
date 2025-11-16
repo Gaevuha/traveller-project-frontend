@@ -52,7 +52,7 @@ const LoginForm = () => {
         validateOnChange={true}
         validateOnBlur={true}
       >
-        {({ errors, touched, values }) => (
+        {({ errors, touched, values, isSubmitting, isValid, dirty }) => (
           <Form className={styles.form}>
             <div className={styles.fieldGroup}>
               <label htmlFor="email" className={styles.label}>
@@ -109,7 +109,7 @@ const LoginForm = () => {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isValid || !dirty}
             >
               {isSubmitting ? 'Входимо...' : 'Увійти'}
             </button>
