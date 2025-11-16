@@ -1,29 +1,25 @@
-'use client'
-import { useState } from "react";
-import css from './CategoriesMenu.module.css'
 
-const categories = ["Азія", "Гори", "Європа", "Америка", "Африка", "Пустелі", "Кавказ", "Балкани", "Океанія"];
+import { Category } from "@/types/story";
+import css from "./CategoriesMenu.module.css";
 
 
-export default function CategoriesMenu() {
-    const [isOpen, setIsOpen] = useState(false);
-  const toggle = () => setIsOpen(!isOpen);
-    return (
-        <div className={css.menuContainer}>
-            <button onClick={toggle} className={css.menuButton}>
-                Всі Історії
-            </button>
-            {isOpen && (
-                <ul className={css.menuList}>
-                   {categories.map(tag => (
-                    <li key={tag} className={css.menuItem}>
-                        <button  onClick={toggle} className={css.menuLink}>
-                            {tag}
-                        </button>
-                    </li>
-                ))}
-                </ul>
-                )}
-        </div>
-    );
+interface Props {
+    categories: Category[];
+  value: string;
+  onChange: (categoryId: string) => void;
+}
+
+export default function CategoriesMenu({ categories, value, onChange }: Props) {
+    
+  return (
+      <select className={css.select} value={value} onChange={(e) => onChange(e.target.value)} 
+         >
+         <option value='all'>Всі історії</option>   
+         {categories.map(cat => (
+        <option key={cat._id} value={cat._id}>
+          {cat.name}
+        </option>
+      ))}
+    </select>
+  );
 }
