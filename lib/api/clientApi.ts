@@ -137,9 +137,9 @@ export const checkSession = async (): Promise<boolean> => {
   }
 };
 
-export async function fetchStories(page = 1, perPage = 3): Promise<Story[]> {
+export async function fetchStories(page = 1, perPage = 3, categoryId?: string): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
-    params: { page, perPage, sort: 'favoriteCount' },
+    params: { page, perPage, sort: 'favoriteCount', category: categoryId },
   });
   return response.data?.data || [];
 }

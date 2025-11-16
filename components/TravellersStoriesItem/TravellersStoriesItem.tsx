@@ -63,6 +63,7 @@ export default function TravellersStoriesItem({
   return `${day}.${month}.${year}`; 
   };
 
+
  
 
   return (

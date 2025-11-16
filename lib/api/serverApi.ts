@@ -7,7 +7,7 @@ import { api } from '@/app/api/api';
 } from '@/types/user';
 import { isAxiosError } from 'axios';
 
-import { FetchStoriesOptions, StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
+import { CategoriesResponse, Category, FetchStoriesOptions, StoriesResponse, Story, StoryByIdResponse } from '@/types/story';
 
 
 /**
@@ -126,12 +126,21 @@ export const fetchStoriesServerDup = async ({
 export async function fetchStoriesServer(
   page: number = 1,
   perPage: number = 10,
-  excludeId?: string,
+
+  excludeId ?: string,
+
 ): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
-    params: { page, perPage, sort: 'favoriteCount', excludeId },
+    params: { page, perPage, sort: 'favoriteCount', excludeId, },
   });
   
   return response.data?.data || [];
+};
+
+export async function fetchCategories(): Promise<Category[]> {
+  const res = await api.get<CategoriesResponse>("/categories");
+  return res.data.data; 
 }
+
+
 

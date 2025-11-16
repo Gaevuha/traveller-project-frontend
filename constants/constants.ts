@@ -3,3 +3,5 @@ export const ScreenSize = {
   Tablet: 768,
   Desktop: 1440,
 };
+
+
