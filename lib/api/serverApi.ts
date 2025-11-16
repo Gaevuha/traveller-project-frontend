@@ -209,3 +209,161 @@ export const fetchSavedStoriesMeServer = async () => {
 
   return res.data.data.savedStories;
 };
+
+/**
+ * Get current user profile with articles (server-side)
+ */
+export async function getMeProfileServer(): Promise<{
+  user: User;
+  articles: Story[];
+} | null> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+
+    if (!accessToken && !refreshToken) {
+      return null;
+    }
+
+    const res = await api.get('/users/me/profile', {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+    });
+
+    const profileData = res.data.data;
+
+    // Створюємо User об'єкт
+    const user: User = {
+      _id: profileData._id,
+      name: profileData.name,
+      avatarUrl: profileData.avatarUrl,
+      articlesAmount: profileData.articlesAmount,
+      createdAt: profileData.createdAt,
+      updatedAt: profileData.updatedAt,
+      description: profileData.description ?? undefined,
+    };
+
+    // Завантажуємо повну інформацію про кожну історію (включаючи article)
+    const articles = await Promise.allSettled(
+      (profileData.articles || []).map(async (article: {
+        _id: string;
+        title: string;
+        img: string;
+        date: string;
+        favoriteCount: number;
+        createdAt: string;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          const fullStory = await fetchStoryByIdServer(article._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без article
+          return {
+            _id: article._id,
+            img: article.img,
+            title: article.title,
+            article: '',
+            category: article.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: article.date,
+            favoriteCount: article.favoriteCount,
+          } as Story;
+        }
+      })
+    );
+
+    const stories = articles
+      .map(result => (result.status === 'fulfilled' ? result.value : null))
+      .filter((story): story is Story => story !== null);
+
+    return { user, articles: stories };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get user saved articles (server-side)
+ */
+export async function getUserSavedArticlesServer(
+  userId: string
+): Promise<{
+  user: User;
+  savedStories: Story[];
+} | null> {
+  try {
+    const cookieStore = await cookies();
+    const res = await api.get(`/users/${userId}/saved-articles`, {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+    });
+
+    const data = res.data.data;
+
+    const user: User = {
+      _id: data.user._id,
+      name: data.user.name,
+      avatarUrl: data.user.avatarUrl,
+      articlesAmount: data.user.articlesAmount || 0,
+      createdAt: data.user.createdAt,
+      description: data.user.description ?? undefined,
+    };
+
+    // Завантажуємо повну інформацію про кожну збережену історію (включаючи ownerId)
+    const savedStories = await Promise.allSettled(
+      (data.savedStories || []).map(async (savedStory: {
+        _id: string;
+        img: string;
+        title: string;
+        article: string;
+        date: string;
+        favoriteCount: number;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          const fullStory = await fetchStoryByIdServer(savedStory._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації
+          return {
+            _id: savedStory._id,
+            img: savedStory.img,
+            title: savedStory.title,
+            article: savedStory.article || '',
+            category: savedStory.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: savedStory.date,
+            favoriteCount: savedStory.favoriteCount,
+          } as Story;
+        }
+      })
+    );
+
+    const stories = savedStories
+      .map(result => (result.status === 'fulfilled' ? result.value : null))
+      .filter((story): story is Story => story !== null);
+
+    return {
+      user,
+      savedStories: stories,
+    };
+  } catch {
+    return null;
+  }
+}
