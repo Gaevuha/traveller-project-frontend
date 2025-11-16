@@ -247,7 +247,10 @@ import { useId, useState } from 'react';
 import Image from 'next/image';
 import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createStory } from './api';
+import { createStory } from '@/lib/api/clientApi';
+import { useRouter } from 'next/navigation';
+
+// import { createStory } from './api';
 
 // interface AddStoryFormTypes {
 //   variant: 'create-story' | 'edit-story';
@@ -270,30 +273,35 @@ interface CreateStoryInitial {
   title: string;
   article: string;
   category: CategoryWithPlaceholder;
-  imageUrl: File | null;
+  img: File | null;
 }
 
 interface CreateStory {
   title: string;
   article: string;
   category: Category;
-  imageUrl: File;
+  img: File;
 }
 
 export default function AddStoryForm() {
-// { variant }: AddStoryFormTypes
+  // { variant }: AddStoryFormTypes
   const placeholderImage = '/img/AddStoryForm/placeholder-image.png';
   const fieldId = useId();
+  const router = useRouter();
   const [preview, setPreview] = useState<string>(placeholderImage);
 
   const queryClient = useQueryClient();
   const addStory = useMutation({
     mutationFn: createStory,
-    onSuccess: () => {
+    onSuccess: response => {
       queryClient.invalidateQueries({
         queryKey: ['allStories'],
       });
+      router.push(`/stories/${response.data._id}`);
       console.log('Successfully created the story!!!');
+    },
+    onError: err => {
+      alert(`Помилка збереження: ${err.message || err}`);
     },
   });
 
@@ -301,14 +309,14 @@ export default function AddStoryForm() {
     title: '',
     article: '',
     category: 'Категорія',
-    imageUrl: null,
+    img: null,
   };
 
   function handleSubmitCreateStory(
     values: CreateStoryInitial,
     actions: FormikHelpers<CreateStoryInitial>
   ) {
-    if (values.category === 'Категорія' || !values.imageUrl) {
+    if (values.category === 'Категорія' || !values.img) {
       alert('Виберіть категорію та додайте фото');
       return;
     }
@@ -317,7 +325,7 @@ export default function AddStoryForm() {
     const storyToSend: CreateStory = {
       ...values,
       category: values.category as Category,
-      imageUrl: values.imageUrl,
+      img: values.img,
     };
 
     addStory.mutate(storyToSend);
@@ -358,12 +366,13 @@ export default function AddStoryForm() {
                 id={`${fieldId}-cover`}
                 type="file"
                 accept="image/*"
-                name="imageUrl"
+                name="img"
                 className={css.coverInput}
                 onChange={e => {
                   if (!e.target.files || e.target.files.length === 0) return;
                   const file = e.target.files[0];
-                  formik.setFieldValue('imageUrl', file);
+                  formik.setFieldValue('img', file);
+                  formik.validateField('img');
                   setPreview(URL.createObjectURL(file));
                 }}
               />
@@ -372,7 +381,7 @@ export default function AddStoryForm() {
               </label>
               <ErrorMessage
                 component="span"
-                name="imageUrl"
+                name="img"
                 className={`${css.errorMessage} ${css.errorMessageImage}`}
               />
             </li>

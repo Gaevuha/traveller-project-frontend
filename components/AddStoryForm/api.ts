@@ -1,6 +1,8 @@
+// import { api } from '@/lib/api/api';
 import axios from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL + 'api';
+// const baseURL = process.env.NEXT_PUBLIC_API_URL + 'api';
+const baseURL = 'http://localhost:3001/api';
 
 const nextServer = axios.create({
   baseURL,
@@ -22,7 +24,7 @@ interface CreateStory {
   title: string;
   article: string;
   category: Category;
-  imageUrl: File;
+  img: File;
 }
 
 interface StoryResponse {
@@ -38,7 +40,7 @@ export async function createStory(
   formData.append('title', newStory.title);
   formData.append('article', newStory.article);
   formData.append('category', newStory.category);
-  formData.append('imageUrl', newStory.imageUrl);
+  formData.append('img', newStory.img);
 
   const { data } = await nextServer.post<StoryResponse>('/stories', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

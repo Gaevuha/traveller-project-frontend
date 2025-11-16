@@ -28,7 +28,7 @@ const categories: CategoryType[] = [
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
 const StoryFormSchemaValidate = Yup.object().shape({
-  imageUrl: Yup.mixed()
+  img: Yup.mixed()
     .required('Додайте зображення до вашої історії')
     .test('fileType', 'Дозволені тільки зображення', value => {
       if (!value) return false;

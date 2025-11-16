@@ -18,6 +18,7 @@ import {
 } from '@/types/story';
 import { AxiosError, isAxiosError } from 'axios';
 import { api } from '../api/api';
+import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
 
 export type ApiError = AxiosError<{ error: string }>;
 
@@ -377,4 +378,21 @@ export async function fetchSavedStoriesMe(): Promise<SavedStory[]> {
     '/users/me/saved-articles'
   );
   return res.data.data.savedStories;
+}
+
+// Story create form
+
+export async function createStory(
+  newStory: CreateStory
+): Promise<StoryResponse> {
+  const formData = new FormData();
+  formData.append('title', newStory.title);
+  formData.append('article', newStory.article);
+  formData.append('category', newStory.category);
+  formData.append('img', newStory.img);
+
+  const { data } = await api.post<StoryResponse>('/stories', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
 }
