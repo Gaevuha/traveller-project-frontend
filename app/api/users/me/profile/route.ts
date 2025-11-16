@@ -6,7 +6,6 @@ import { logErrorResponse } from '../../../_utils/utils';
 
 /**
  * GET /api/users/me/profile
- * Отримати профіль поточного користувача з його статтями
  */
 export async function GET() {
   try {

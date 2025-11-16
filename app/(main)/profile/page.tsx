@@ -20,11 +20,8 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('my');
   const [user, setUser] = useState<User | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
-  // const [savedStories, setSavedStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [isLoadingStories, setIsLoadingStories] = useState(false);
-  // const [savedStoriesLoaded, setSavedStoriesLoaded] = useState(false);
 
   const currentUser = useAuthStore(state => state.user);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
