@@ -2,6 +2,7 @@
 import { SavedStory } from "./story";
 
 
+
 export type User = {
   _id: string;
   email?: string;
@@ -17,6 +18,7 @@ export type User = {
 export interface BackendArticleFromUser {
   _id: string;
   title: string;
+  article: string;
   img: string;
   date: string;
   favoriteCount: number;
@@ -56,8 +58,17 @@ export interface GetUserByIdResponse {
   message: string;
   data: {
     user: User;
-    articles: BackendArticleFromUser[];
-    totalArticles: number;
+    articles: {
+      items: BackendArticleFromUser[];
+      pagination: {
+        currentPage: number;
+        perPage: number;
+        totalItems: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPrevPage: boolean;
+      };
+    };
   };
 }
 export interface BackendArticle {
@@ -68,13 +79,30 @@ export interface BackendArticle {
   favoritesCount: number;
   authorId: string;
 }
+export type GetArticlesResponse = {
+  user: User;
+  articles: ArticlesWithPagination;
+  totalArticles: number;
+};
 
-export interface GetStoriesResponse {
-  stories: BackendArticle[];
+export interface GetArticlesParams {
+  travellerId: string;
   page: number;
   perPage: number;
-  totalPages: number;
+}
+
+export interface PaginationData {
+  currentPage: number;
+  perPage: number;
   totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface ArticlesWithPagination {
+  items: BackendArticleFromUser[];
+  pagination: PaginationData;
 }
 
 export interface UserSavedArticlesResponse {

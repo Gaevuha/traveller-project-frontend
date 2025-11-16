@@ -1,4 +1,4 @@
-// import { User } from "./user";
+import type { BackendArticleFromUser, User } from './user';
 
 export type Story = {
   _id: string;
@@ -52,7 +52,6 @@ export interface BackendArticle {
   favoriteCount: number;
 }
 
-
 export type StoryByIdResponse = {
   status: number;
   message: string;
@@ -83,6 +82,7 @@ export type FetchStoriesOptions = {
   perPage?: number;
   excludeId?: string;
 };
+
 
 export type SavedArticlesUser = {
   _id: string;
@@ -130,6 +130,7 @@ export interface SavedStory {
     name: string;
   };
 }
+
 
 
 

@@ -4,7 +4,9 @@ import {
   User,
   GetUsersResponse,
   GetUserByIdResponse,
-  GetStoriesResponse,
+  GetArticlesResponse,
+  ArticlesWithPagination,
+  PaginationData,
 } from '@/types/user';
 import { isAxiosError } from 'axios';
 
@@ -16,6 +18,7 @@ import {
   Story,
   StoryByIdResponse,
 } from '@/types/story';
+
 
 // Normalize backend user payload to always contain `_id`
 function normalizeUserId(
@@ -33,6 +36,7 @@ function normalizeUserId(
   }
   return rec;
 }
+
 
 /**
  * Refresh session tokens (server-side)
@@ -110,6 +114,30 @@ export async function getUsersServer(
   }
 }
 
+export async function getArticlesByUserServer(
+  travellerId: string,
+  page: number = 1,
+  perPage: number = 6
+): Promise<GetArticlesResponse> {
+  try {
+    const res = await api.get<GetUserByIdResponse>(`/users/${travellerId}`, {
+      params: { page, perPage },
+    });
+
+    const articles: ArticlesWithPagination = res.data.data.articles;
+    const totalArticles = articles.pagination.totalItems;
+
+    return {
+      user: res.data.data.user,
+      articles: articles,
+      totalArticles: totalArticles,
+    };
+  } catch (error: unknown) {
+    console.error('[getArticlesByUserServer] Error:', error);
+    throw new Error('Failed to fetch user articles from server');
+  }
+}
+
 export async function getUserByIdServer(
   userId: string
 ): Promise<GetUserByIdResponse> {
@@ -132,7 +160,7 @@ export async function getUserByIdServer(
 export async function getStoriesServer(
   page: number = 1,
   perPage: number = 10
-): Promise<{ data: GetStoriesResponse }> {
+): Promise<{ data: GetArticlesResponse }> {
   const res = await api.get(`/stories`, {
     params: { page, perPage },
   });
@@ -168,6 +196,7 @@ export async function fetchStoriesServer(
   return response.data?.data || [];
 }
 
+
 export async function fetchCategories(): Promise<Category[]> {
   const res = await api.get<CategoriesResponse>('/categories');
   return res.data.data;
@@ -184,3 +213,4 @@ export const fetchSavedStoriesMeServer = async () => {
 
   return res.data.data.savedStories;
 };
+
