@@ -1,4 +1,243 @@
-// AddStoryForm.tsx
+// // AddStoryForm.tsx
+
+// 'use-client';
+
+// import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
+// import css from './AddStoryForm.module.css';
+// import { useId, useState } from 'react';
+// import Image from 'next/image';
+// import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import { createStory } from './api';
+
+// interface AddStoryFormTypes {
+//   variant: 'create-story' | 'edit-story';
+// }
+
+// type Category =
+//   | 'Європа'
+//   | 'Азія'
+//   | 'Пустелі'
+//   | 'Африка'
+//   | 'Гори'
+//   | 'Америка'
+//   | 'Балкани'
+//   | 'Кавказ'
+//   | 'Океанія';
+// // | 'Категорія';
+
+// interface CreateStoryInitial {
+//   title: string;
+//   article: string;
+//   category: Category | 'Категорія';
+//   imageUrl: File | null;
+// }
+
+// interface CreateStory {
+//   title: string;
+//   article: string;
+//   category: Category;
+//   imageUrl: File;
+// }
+
+// export default function AddStoryForm({ variant }: AddStoryFormTypes) {
+//   const placeholderImage = '/img/AddStoryForm/placeholder-image.png';
+//   const fieldId = useId();
+//   const [preview, setPreview] = useState<string>(placeholderImage);
+
+//   const queryClient = useQueryClient();
+//   const addStory = useMutation({
+//     mutationFn: createStory,
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({
+//         queryKey: ['allStories'],
+//       });
+//       console.log('Successfully created the story!!!');
+//     },
+//   });
+
+//   const createStoryInitialValues: CreateStoryInitial = {
+//     title: '',
+//     article: '',
+//     category: 'Категорія',
+//     imageUrl: null,
+//   };
+
+//   function handleSubmitCreateStory(
+//     values: CreateStory,
+//     actions: FormikHelpers<CreateStory>
+//   ) {
+//     addStory.mutate(values);
+//     actions.resetForm();
+//     setPreview(placeholderImage);
+//   }
+
+//   return (
+//     <Formik<CreateStory>
+//       initialValues={createStoryInitialValues}
+//       validationSchema={StoryFormSchemaValidate}
+//       onSubmit={handleSubmitCreateStory}
+//     >
+//       {formik => (
+//         <Form className={css.form}>
+//           <ul className={css.fieldsList}>
+//             <li className={css.fieldItem}>
+//               <label
+//                 htmlFor={`${fieldId}-cover`}
+//                 className={`${css.inputLabel} ${css.coverLabel}`}
+//               >
+//                 Обкладинка статті
+//               </label>
+
+//               <div className={css.imageWrapper}>
+//                 <Image
+//                   src={preview}
+//                   alt="Зображення історії"
+//                   fill
+//                   style={{ objectFit: 'cover' }}
+//                   className={css.imagePreview}
+//                 />
+//               </div>
+
+//               {/* hidden button */}
+//               <input
+//                 id={`${fieldId}-cover`}
+//                 type="file"
+//                 accept="image/*"
+//                 name="imageUrl"
+//                 className={css.coverInput}
+//                 onChange={e => {
+//                   if (!e.target.files || e.target.files.length === 0) return;
+//                   const file = e.target.files?.[0];
+//                   if (!file) return;
+//                   formik.setFieldValue('imageUrl', file);
+//                   setPreview(URL.createObjectURL(file));
+//                 }}
+//               />
+
+//               <label htmlFor={`${fieldId}-cover`} className={css.coverButton}>
+//                 Завантажити фото
+//               </label>
+
+//               <ErrorMessage
+//                 component="span"
+//                 name="imageUrl"
+//                 className={`${css.errorMessage} ${css.errorMessageImage}`}
+//               />
+//             </li>
+
+//             <li className={css.fieldItem}>
+//               <label htmlFor={`${fieldId}-title`} className={css.inputLabel}>
+//                 Заголовок
+//               </label>
+//               <Field
+//                 id={`${fieldId}-title`}
+//                 type="text"
+//                 name="title"
+//                 className={`${css.title} ${css.inputField}`}
+//                 placeholder="Введіть заголовок історії"
+//               />
+//               <ErrorMessage
+//                 component="span"
+//                 name="title"
+//                 className={css.errorMessage}
+//               />
+//             </li>
+
+//             <li className={css.fieldItem}>
+//               <label
+//                 htmlFor={`${fieldId}-category`}
+//                 className={`${css.inputLabel}`}
+//               >
+//                 Категорія
+//               </label>
+//               <Field
+//                 id={`${fieldId}-category`}
+//                 as="select"
+//                 name="category"
+//                 className={`${css.category} ${css.inputField} ${css.categoryInput}`}
+//                 // placeholder="Категорія"
+//               >
+//                 <option
+//                   value="Категорія"
+//                   disabled
+//                   //   selected
+//                   className={css.optionDisabled}
+//                 >
+//                   Категорія
+//                 </option>
+//                 <option value="Європа">Європа</option>
+//                 <option value="Азія">Азія</option>
+//                 <option value="Пустелі">Пустелі</option>
+//                 <option value="Африка">Африка</option>
+//                 <option value="Гори">Гори</option>
+//                 <option value="Америка">Америка</option>
+//                 <option value="Балкани">Балкани</option>
+//                 <option value="Кавказ">Кавказ</option>
+//                 <option value="Океанія">Океанія</option>
+//               </Field>
+//               <ErrorMessage
+//                 component="span"
+//                 name="category"
+//                 className={css.errorMessage}
+//               />
+//             </li>
+
+//             {/* <li className={css.fieldItem}>
+//               <label
+//                 htmlFor={`${fieldId}-description`}
+//                 className={css.inputLabel}
+//               >
+//                 Короткий опис
+//               </label>
+//               <Field
+//                 id={`${fieldId}-description`}
+//                 as="textarea"
+//                 name="description"
+//                 className={`${css.description} ${css.inputField}`}
+//                 placeholder="Введіть короткий опис історії"
+//               ></Field>
+//             </li> */}
+
+//             <li className={css.fieldItem}>
+//               <label
+//                 htmlFor={`${fieldId}-story-text`}
+//                 className={css.inputLabel}
+//               >
+//                 Текст історії
+//               </label>
+//               <Field
+//                 name="article"
+//                 as="textarea"
+//                 id={`${fieldId}-story-text`}
+//                 className={`${css.storyText} ${css.inputField}`}
+//                 placeholder="Ваша історія тут"
+//               ></Field>
+//               <ErrorMessage
+//                 component="span"
+//                 name="article"
+//                 className={css.errorMessage}
+//               />
+//             </li>
+//           </ul>
+//           <div className={css.buttonsContainer}>
+//             <button
+//               type="submit"
+//               className={
+//                 formik.isValid && formik.dirty
+//                   ? css.saveBtn
+//                   : `${css.saveBtn} ${css.btnDisabled}`
+//               }
+//             >
+//               Зберегти
+//             </button>
+//             <button className={css.rejectBtn}>Відмінити</button>
+//           </div>
+//         </Form>
+//       )}
+//     </Formik>
+//   );
+// }
 
 'use-client';
 
@@ -10,9 +249,9 @@ import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createStory } from './api';
 
-interface AddStoryFormTypes {
-  variant: 'create-story' | 'edit-story';
-}
+// interface AddStoryFormTypes {
+//   variant: 'create-story' | 'edit-story';
+// }
 
 type Category =
   | 'Європа'
@@ -25,13 +264,13 @@ type Category =
   | 'Кавказ'
   | 'Океанія';
 
-type InitialCategory = Category | 'Категорія';
+type CategoryWithPlaceholder = Category | 'Категорія';
 
 interface CreateStoryInitial {
   title: string;
   article: string;
-  category: InitialCategory;
-  imageUrl: null;
+  category: CategoryWithPlaceholder;
+  imageUrl: File | null;
 }
 
 interface CreateStory {
@@ -41,7 +280,8 @@ interface CreateStory {
   imageUrl: File;
 }
 
-export default function AddStoryForm({ variant }: AddStoryFormTypes) {
+export default function AddStoryForm() {
+// { variant }: AddStoryFormTypes
   const placeholderImage = '/img/AddStoryForm/placeholder-image.png';
   const fieldId = useId();
   const [preview, setPreview] = useState<string>(placeholderImage);
@@ -57,8 +297,6 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
     },
   });
 
-  // const isImageDefault = preview === '/img/AddStoryForm/placeholder-image.png';
-
   const createStoryInitialValues: CreateStoryInitial = {
     title: '',
     article: '',
@@ -67,17 +305,29 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
   };
 
   function handleSubmitCreateStory(
-    values: CreateStory,
-    actions: FormikHelpers<CreateStory>
+    values: CreateStoryInitial,
+    actions: FormikHelpers<CreateStoryInitial>
   ) {
-    // console.log('Form data: ', values);
-    addStory.mutate(values);
+    if (values.category === 'Категорія' || !values.imageUrl) {
+      alert('Виберіть категорію та додайте фото');
+      return;
+    }
+
+    // Приводимо до типу API
+    const storyToSend: CreateStory = {
+      ...values,
+      category: values.category as Category,
+      imageUrl: values.imageUrl,
+    };
+
+    addStory.mutate(storyToSend);
     actions.resetForm();
     setPreview(placeholderImage);
+    console.log('Successfully sent the story: ', storyToSend);
   }
 
   return (
-    <Formik
+    <Formik<CreateStoryInitial>
       initialValues={createStoryInitialValues}
       validationSchema={StoryFormSchemaValidate}
       onSubmit={handleSubmitCreateStory}
@@ -85,6 +335,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
       {formik => (
         <Form className={css.form}>
           <ul className={css.fieldsList}>
+            {/* Зображення */}
             <li className={css.fieldItem}>
               <label
                 htmlFor={`${fieldId}-cover`}
@@ -103,7 +354,6 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 />
               </div>
 
-              {/* hidden button */}
               <input
                 id={`${fieldId}-cover`}
                 type="file"
@@ -112,17 +362,14 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 className={css.coverInput}
                 onChange={e => {
                   if (!e.target.files || e.target.files.length === 0) return;
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+                  const file = e.target.files[0];
                   formik.setFieldValue('imageUrl', file);
                   setPreview(URL.createObjectURL(file));
                 }}
               />
-
               <label htmlFor={`${fieldId}-cover`} className={css.coverButton}>
                 Завантажити фото
               </label>
-
               <ErrorMessage
                 component="span"
                 name="imageUrl"
@@ -130,6 +377,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
               />
             </li>
 
+            {/* Заголовок */}
             <li className={css.fieldItem}>
               <label htmlFor={`${fieldId}-title`} className={css.inputLabel}>
                 Заголовок
@@ -148,6 +396,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
               />
             </li>
 
+            {/* Категорія */}
             <li className={css.fieldItem}>
               <label
                 htmlFor={`${fieldId}-category`}
@@ -160,12 +409,10 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 as="select"
                 name="category"
                 className={`${css.category} ${css.inputField} ${css.categoryInput}`}
-                // placeholder="Категорія"
               >
                 <option
                   value="Категорія"
                   disabled
-                  //   selected
                   className={css.optionDisabled}
                 >
                   Категорія
@@ -187,22 +434,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
               />
             </li>
 
-            {/* <li className={css.fieldItem}>
-              <label
-                htmlFor={`${fieldId}-description`}
-                className={css.inputLabel}
-              >
-                Короткий опис
-              </label>
-              <Field
-                id={`${fieldId}-description`}
-                as="textarea"
-                name="description"
-                className={`${css.description} ${css.inputField}`}
-                placeholder="Введіть короткий опис історії"
-              ></Field>
-            </li> */}
-
+            {/* Текст посту */}
             <li className={css.fieldItem}>
               <label
                 htmlFor={`${fieldId}-story-text`}
@@ -216,7 +448,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
                 id={`${fieldId}-story-text`}
                 className={`${css.storyText} ${css.inputField}`}
                 placeholder="Ваша історія тут"
-              ></Field>
+              />
               <ErrorMessage
                 component="span"
                 name="article"
@@ -224,6 +456,7 @@ export default function AddStoryForm({ variant }: AddStoryFormTypes) {
               />
             </li>
           </ul>
+
           <div className={css.buttonsContainer}>
             <button
               type="submit"
