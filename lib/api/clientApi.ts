@@ -1,4 +1,3 @@
-
 import {
   User,
   GetUsersResponse,
@@ -410,4 +409,3 @@ export async function fetchSavedStoriesMe(): Promise<SavedStory[]> {
   );
   return res.data.data.savedStories;
 }
-
