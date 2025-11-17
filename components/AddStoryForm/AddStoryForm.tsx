@@ -239,7 +239,7 @@
 //   );
 // }
 
-'use-client';
+'use client';
 
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import css from './AddStoryForm.module.css';
@@ -249,6 +249,7 @@ import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createStory } from '@/lib/api/clientApi';
 import { useRouter } from 'next/navigation';
+import { FormikLocalStoragePersistor } from '../Forms/FormikLocalStoragePersistor';
 
 // import { createStory } from './api';
 
@@ -283,7 +284,13 @@ interface CreateStory {
   img: File;
 }
 
-export default function AddStoryForm() {
+interface AddStoryFormProps {
+  storyId?: string;
+}
+
+const CREATE_STORY_DRAFT_KEY = 'create-story-draft';
+
+export default function AddStoryForm({ storyId: _storyId }: AddStoryFormProps) {
   // { variant }: AddStoryFormTypes
   const placeholderImage = '/img/AddStoryForm/placeholder-image.png';
   const fieldId = useId();
@@ -297,6 +304,10 @@ export default function AddStoryForm() {
       queryClient.invalidateQueries({
         queryKey: ['allStories'],
       });
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+      }
+
       router.push(`/stories/${response.data._id}`);
       console.log('Successfully created the story!!!');
     },
@@ -331,6 +342,9 @@ export default function AddStoryForm() {
     addStory.mutate(storyToSend);
     actions.resetForm();
     setPreview(placeholderImage);
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+    }
     console.log('Successfully sent the story: ', storyToSend);
   }
 
@@ -342,6 +356,11 @@ export default function AddStoryForm() {
     >
       {formik => (
         <Form className={css.form}>
+          <FormikLocalStoragePersistor<CreateStoryInitial>
+            formik={formik}
+            storageKey={CREATE_STORY_DRAFT_KEY}
+            excludeFields={['img']}
+          />
           <ul className={css.fieldsList}>
             {/* Зображення */}
             <li className={css.fieldItem}>
@@ -477,7 +496,19 @@ export default function AddStoryForm() {
             >
               Зберегти
             </button>
-            <button className={css.rejectBtn}>Відмінити</button>
+            <button
+              type="button"
+              className={css.rejectBtn}
+              onClick={() => {
+                formik.resetForm();
+                setPreview(placeholderImage);
+                if (typeof window !== 'undefined') {
+                  window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+                }
+              }}
+            >
+              Відмінити
+            </button>
           </div>
         </Form>
       )}
