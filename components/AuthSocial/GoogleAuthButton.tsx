@@ -25,12 +25,12 @@ export default function GoogleAuthButton() {
   return (
     <div className={css.container}>
       <p className={css.orText}>або</p>
-      <button type="button" className={css.button} onClick={handleGoogleLogin}>
-        <span className={css.buttonContent}>
-          Увійти через Google
-          <FaGoogle size={18} />
-        </span>
-      </button>
+     <button type="button" className={css.button} onClick={handleGoogleLogin}>
+  <span className={css.buttonContent}>
+    <FaGoogle className={css.icon} />
+    Увійти через Google
+  </span>
+</button>
     </div>
   );
 }
