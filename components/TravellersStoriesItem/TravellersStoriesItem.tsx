@@ -91,7 +91,7 @@ export default function TravellersStoriesItem({
     } catch (error) {
       console.error(error);
 
-      //  відкат UI якщо зламаэться
+      // відкат UI якщо зламаэться
       setIsSaved(prevSaved);
       setFavoriteCount(prevCount);
 
@@ -105,29 +105,29 @@ export default function TravellersStoriesItem({
   };
 
   // const handleSave = async () => {
-  //   if (!isAuthenticated) {
-  //     router.push('/auth/register');
-  //     return;
-  //   }
+  // if (!isAuthenticated) {
+  // router.push('/auth/register');
+  // return;
+  // }
 
-  //   try {
-  //     setIsSaving(true);
-  //     if (!isSaved) {
-  //       await addStoryToFavorites(story._id);
-  //       setFavoriteCount(prev => prev + 1);
-  //       setIsSaved(true);
-  //       toast.success('Додано до збережених!');
-  //     } else {
-  //       await removeStoryFromFavorites(story._id);
-  //       setFavoriteCount(prev => prev - 1);
-  //       setIsSaved(false);
-  //       toast('Видалено із збережених');
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
+  // try {
+  // setIsSaving(true);
+  // if (!isSaved) {
+  // await addStoryToFavorites(story._id);
+  // setFavoriteCount(prev => prev + 1);
+  // setIsSaved(true);
+  // toast.success('Додано до збережених!');
+  // } else {
+  // await removeStoryFromFavorites(story._id);
+  // setFavoriteCount(prev => prev - 1);
+  // setIsSaved(false);
+  // toast('Видалено із збережених');
+  // }
+  // } catch (error) {
+  // console.error(error);
+  // } finally {
+  // setIsSaving(false);
+  // }
   // };
 
   function formatDate(dateString: string) {
@@ -203,9 +203,6 @@ export default function TravellersStoriesItem({
         onCancel={() => {
           setIsAuthModalOpen(false);
           router.push('/auth/login');
-        }}
-        onClose={() => {
-          setIsAuthModalOpen(false);
         }}
         isOpen={isAuthModalOpen}
       />
