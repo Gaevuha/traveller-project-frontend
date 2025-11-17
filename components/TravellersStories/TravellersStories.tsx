@@ -5,6 +5,7 @@ import css from './TravellersStories.module.css';
 interface TravellersStoriesProps {
   stories: Story[];
   isAuthenticated: boolean;
+  onRemoveSavedStory?: (id: string) => void; // ⬅ додаємо!
 
   // className?: string; // додатковий проп для кастомного стилю
 }
