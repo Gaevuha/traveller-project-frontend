@@ -1,0 +1,14 @@
+.wrapper {
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.moreBtn {
+  display: block;
+  margin: 0 auto;
+}

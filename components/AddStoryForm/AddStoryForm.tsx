@@ -239,7 +239,7 @@
 //   );
 // }
 
-'use-client';
+'use client';
 
 import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import css from './AddStoryForm.module.css';
@@ -247,7 +247,11 @@ import { useId, useState } from 'react';
 import Image from 'next/image';
 import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createStory } from './api';
+import { createStory } from '@/lib/api/clientApi';
+import { useRouter } from 'next/navigation';
+import { FormikLocalStoragePersistor } from '../Forms/FormikLocalStoragePersistor';
+
+// import { createStory } from './api';
 
 // interface AddStoryFormTypes {
 //   variant: 'create-story' | 'edit-story';
@@ -270,30 +274,45 @@ interface CreateStoryInitial {
   title: string;
   article: string;
   category: CategoryWithPlaceholder;
-  imageUrl: File | null;
+  img: File | null;
 }
 
 interface CreateStory {
   title: string;
   article: string;
   category: Category;
-  imageUrl: File;
+  img: File;
 }
 
-export default function AddStoryForm() {
-// { variant }: AddStoryFormTypes
+interface AddStoryFormProps {
+  storyId?: string;
+}
+
+const CREATE_STORY_DRAFT_KEY = 'create-story-draft';
+
+export default function AddStoryForm({ storyId: _storyId }: AddStoryFormProps) {
+  // { variant }: AddStoryFormTypes
   const placeholderImage = '/img/AddStoryForm/placeholder-image.png';
   const fieldId = useId();
+  const router = useRouter();
   const [preview, setPreview] = useState<string>(placeholderImage);
 
   const queryClient = useQueryClient();
   const addStory = useMutation({
     mutationFn: createStory,
-    onSuccess: () => {
+    onSuccess: response => {
       queryClient.invalidateQueries({
         queryKey: ['allStories'],
       });
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+      }
+
+      router.push(`/stories/${response.data._id}`);
       console.log('Successfully created the story!!!');
+    },
+    onError: err => {
+      alert(`Помилка збереження: ${err.message || err}`);
     },
   });
 
@@ -301,14 +320,14 @@ export default function AddStoryForm() {
     title: '',
     article: '',
     category: 'Категорія',
-    imageUrl: null,
+    img: null,
   };
 
   function handleSubmitCreateStory(
     values: CreateStoryInitial,
     actions: FormikHelpers<CreateStoryInitial>
   ) {
-    if (values.category === 'Категорія' || !values.imageUrl) {
+    if (values.category === 'Категорія' || !values.img) {
       alert('Виберіть категорію та додайте фото');
       return;
     }
@@ -317,12 +336,15 @@ export default function AddStoryForm() {
     const storyToSend: CreateStory = {
       ...values,
       category: values.category as Category,
-      imageUrl: values.imageUrl,
+      img: values.img,
     };
 
     addStory.mutate(storyToSend);
     actions.resetForm();
     setPreview(placeholderImage);
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+    }
     console.log('Successfully sent the story: ', storyToSend);
   }
 
@@ -334,6 +356,11 @@ export default function AddStoryForm() {
     >
       {formik => (
         <Form className={css.form}>
+          <FormikLocalStoragePersistor<CreateStoryInitial>
+            formik={formik}
+            storageKey={CREATE_STORY_DRAFT_KEY}
+            excludeFields={['img']}
+          />
           <ul className={css.fieldsList}>
             {/* Зображення */}
             <li className={css.fieldItem}>
@@ -358,12 +385,13 @@ export default function AddStoryForm() {
                 id={`${fieldId}-cover`}
                 type="file"
                 accept="image/*"
-                name="imageUrl"
+                name="img"
                 className={css.coverInput}
                 onChange={e => {
                   if (!e.target.files || e.target.files.length === 0) return;
                   const file = e.target.files[0];
-                  formik.setFieldValue('imageUrl', file);
+                  formik.setFieldValue('img', file);
+                  formik.validateField('img');
                   setPreview(URL.createObjectURL(file));
                 }}
               />
@@ -372,7 +400,7 @@ export default function AddStoryForm() {
               </label>
               <ErrorMessage
                 component="span"
-                name="imageUrl"
+                name="img"
                 className={`${css.errorMessage} ${css.errorMessageImage}`}
               />
             </li>
@@ -468,7 +496,19 @@ export default function AddStoryForm() {
             >
               Зберегти
             </button>
-            <button className={css.rejectBtn}>Відмінити</button>
+            <button
+              type="button"
+              className={css.rejectBtn}
+              onClick={() => {
+                formik.resetForm();
+                setPreview(placeholderImage);
+                if (typeof window !== 'undefined') {
+                  window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+                }
+              }}
+            >
+              Відмінити
+            </button>
           </div>
         </Form>
       )}

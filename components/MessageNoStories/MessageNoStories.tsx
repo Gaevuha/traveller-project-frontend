@@ -19,7 +19,7 @@ export type MessageNoStoriesProps = {
   /**
    * Маршрут для навігації (використовується, якщо не передано onClick).
    */
-  route?: '/stories' | '/stories-create/create' | string;
+  route?: '/stories' | '/stories/create' | string;
   /**
    * Опціональний обробник кліку. Якщо передано, використовуємо його замість навігації.
    */

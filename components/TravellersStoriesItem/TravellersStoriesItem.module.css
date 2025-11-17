@@ -245,8 +245,8 @@
 
 /* состояние "сохранено" — выделяется цветом */
 .story__save.saved {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: #7a96ea;
+  border-color: #4169e1;
 }
 
 .story__save.saved .icon__bookmark {

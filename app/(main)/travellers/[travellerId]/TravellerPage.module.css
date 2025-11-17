@@ -14,8 +14,8 @@
 }
 .image {
   border-radius: 100%;
-  width: 119px;
-  height: 119px;
+  width: 199px;
+  height: 199px;
   margin-bottom: 24px;
 }
 
@@ -131,6 +131,11 @@
   .travellerStoriesTitle {
     font-size: 44px;
   }
+  .wrapperMessage {
+    height: 185px;
+    width: 533px;
+    align-self: flex-start;
+  }
 }
 
 @media only screen and (min-width: 1440px) {
@@ -147,5 +152,8 @@
 
   .travellerStoriesTitle {
     font-size: 52px;
+  }
+  .wrapperMessage {
+    height: 232px;
   }
 }

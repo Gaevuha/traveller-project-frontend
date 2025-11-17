@@ -22,21 +22,49 @@
   font-family: var(--font-nunito-sans), sans-serif;
 }
 
-.travellerInfoWrapper {
+.containerTraveller {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: 0 12px;
+}
+.travellerInfoWraper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.image {
+  border-radius: 100%;
+  width: 199px;
+  height: 199px;
+  margin-bottom: 24px;
+}
 
+.travellerContainer {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.wrapperContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 32px;
 }
 
-.travellerInfoWrapper img {
-  margin-bottom: 24px;
-  width: 199px;
-  height: 199px;
-  object-fit: cover;
+.travellerName {
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.travellerText {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .tabsWrapper {
@@ -50,12 +78,28 @@
 
 /* Tablet */
 @media (min-width: 768px) {
-  .travellerInfoWrapper {
-    padding: 0;
-  }
-
   .tabsWrapper {
     max-width: 422px;
+  }
+
+  .travellerInfoWraper {
+    flex-direction: row;
+    gap: 24px;
+    align-self: flex-start;
+    margin-bottom: 32px;
+  }
+  .image {
+    margin-bottom: 0;
+  }
+
+  .wrapperContent {
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 0;
+  }
+  .travellerText {
+    width: 480px;
+    text-align: left;
   }
 }
 
@@ -66,7 +110,14 @@
     padding-bottom: 72px;
   }
 
-  .travellerInfoWrapper {
+  .travellerName {
+    font-size: 32px;
+  }
+  .travellerText {
+    font-size: 18px;
+    width: 367px;
+  }
+  .travellerInfoWraper {
     margin-bottom: 48px;
   }
 }
