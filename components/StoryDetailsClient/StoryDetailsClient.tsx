@@ -53,13 +53,14 @@ export const StoryDetailsClient = () => {
         <p className={css.text}>Опубліковано <span className={css.addText}>{story.date}</span></p>
         <p className={css.textCategory}>{story.category.name}</p>
         </div>
+        <div className={css.storyImageWrapper}>
         <Image
           className={css.storyCardImage}
           src={story.img}
           alt={story.title}
-          width={1312}
-          height={874}        
+          fill       
           />
+</div>
         <div className={css.wrapperButton}>
         <p className={css.mainText}>{story.article}</p>
           <div className={css.saveStory}>

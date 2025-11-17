@@ -41,7 +41,6 @@
 }
 
 .textCategory {
-  width: 76px;
   height: 26px;
   display: flex;
   flex-direction: row;
@@ -55,11 +54,17 @@
   margin-bottom: 16px;
 }
 
-.storyCardImage {
-  height: 223px;
-  width: 335px;
+.storyImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 223px;        /* мобилка */
   border-radius: 24px;
+  overflow: hidden;     /* чтобы обрезать картинку */
   margin-bottom: 32px;
+}
+
+.storyCardImage {
+  object-fit: cover;    /* картинка заполняет блок */
 }
 
 .mainText {
@@ -140,11 +145,10 @@
     margin-right: 0px;
   }
 
-  .storyCardImage {
-    object-fit: cover;
-    height: auto;
-    width: 704px;
-    border-radius: 24px;
+  .storyImageWrapper {
+    height: 469px;
+    max-width: 704px;
+    margin: 0 auto 40px;
   }
 
   .mainText {
@@ -173,11 +177,10 @@
     margin-bottom: 21px;
   }
 
-  .storyCardImage {
-    object-fit: cover;
-    width: 1312px;
-    height: auto;
-    margin-bottom: 96px;
+    .storyImageWrapper {
+    height: 874px;
+    max-width: 1312px;
+    margin: 0 auto 96px;
   }
 
   .wrapperButton {
@@ -190,3 +193,5 @@
     max-width: 865px;
   }
 }
+
+
