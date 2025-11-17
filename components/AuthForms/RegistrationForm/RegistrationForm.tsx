@@ -35,7 +35,7 @@ const RegistrationForm = () => {
           setFieldError('password', error.message);
         } else if (
           error.message.includes('name') ||
-          error.message.includes('ім')
+          error.message.includes('імʼя')
         ) {
           setFieldError('name', error.message);
         } else {
