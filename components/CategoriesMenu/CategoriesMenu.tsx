@@ -1,6 +1,7 @@
 
 import { Category } from "@/types/story";
 import css from "./CategoriesMenu.module.css";
+import { Icon } from "../Icon/Icon";
 
 
 interface Props {
@@ -27,6 +28,7 @@ export default function CategoriesMenu({ categories, value, onChange }: Props) {
         </option>
       ))}
           </select>
+          <Icon name="icon-keyboard_arrow_down" className={css.selectIcon}></Icon>
           </div>
     </div>
      <div className={css.buttonsWrapper}>

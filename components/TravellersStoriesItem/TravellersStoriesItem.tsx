@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { Story } from '@/types/story';
 import {
   addStoryToFavorites,
@@ -12,6 +13,7 @@ import {
 import css from './TravellersStoriesItem.module.css';
 import { Icon } from '../Icon/Icon';
 import Link from 'next/link';
+import Modal from '../Modal/Modal'
 
 interface TravellersStoriesItemProps {
   story: Story;
@@ -23,37 +25,106 @@ export default function TravellersStoriesItem({
   isAuthenticated,
 }: TravellersStoriesItemProps) {
   const router = useRouter();
-  const [isSaved, setIsSaved] = useState(story.isFavorite ?? false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [favoriteCount, setFavoriteCount] = useState(story.favoriteCount);
+  const queryClient = useQueryClient();
+  const [isSaved, setIsSaved] = useState<boolean>(story.isFavorite ?? false);
+  // const [isSaving, setIsSaving] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState<number>(story.favoriteCount);
+  const [loading, setLoading] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+    useEffect(() => {
+    setIsSaved(story.isFavorite ?? false);
+  }, [story.isFavorite]);
 
-
-  const handleSave = async () => {
+  const handleToggleFavorite = async () => {
     if (!isAuthenticated) {
-      router.push('/auth/register');
+      setIsAuthModalOpen(true);
       return;
     }
 
+    if (loading) return;
+
+    
+    const prevSaved = isSaved;
+    const prevCount = favoriteCount;
+    const nextSaved = !prevSaved;
+
+    // оптимістичне оновлення UI в самій картці
+    setIsSaved(nextSaved);
+    setFavoriteCount(prevCount + (nextSaved ? 1 : -1));
+    setLoading(true);
+
+        const prevSavedMe = queryClient.getQueryData<Story[]>(['savedStoriesMe']);
+
     try {
-      setIsSaving(true);
-      if (!isSaved) {
+      if (nextSaved) {
+        // пушимо цю історію в кеш savedStoriesMe
+        queryClient.setQueryData<Story[] | undefined>(
+          ['savedStoriesMe'],
+          (prev) => {
+            if (!prev) return [story];
+            if (prev.some((prevOne) => prevOne._id === story._id)) return prev;
+            return [...prev, story];
+          }
+        );
+
         await addStoryToFavorites(story._id);
-        setFavoriteCount(prev => prev + 1);
-        setIsSaved(true);
-        toast.success('Додано до збережених!');
       } else {
+        // прибираємо історію з кешу savedStoriesMe
+        queryClient.setQueryData<Story[] | undefined>(
+          ['savedStoriesMe'],
+          (prev) => (prev ? prev.filter((prevOne) => prevOne._id !== story._id) : prev)
+        );
+
         await removeStoryFromFavorites(story._id);
-        setFavoriteCount(prev => prev - 1);
-        setIsSaved(false);
-        toast('Видалено із збережених');
       }
+      queryClient.invalidateQueries({ queryKey: ['savedStoriesByUser'] });
+      queryClient.invalidateQueries({ queryKey: ['savedStoriesMe'] });
     } catch (error) {
       console.error(error);
+
+      //  відкат UI якщо зламаэться
+      setIsSaved(prevSaved);
+      setFavoriteCount(prevCount);
+
+      // відкат кешу savedStoriesMe якщо зламаэться
+      queryClient.setQueryData(['savedStoriesMe'], prevSavedMe);
+
+      toast.error('Не вдалося оновити збережені історії');
     } finally {
-      setIsSaving(false);
+      setLoading(false);
     }
   };
+
+
+
+
+
+  // const handleSave = async () => {
+  //   if (!isAuthenticated) {
+  //     router.push('/auth/register');
+  //     return;
+  //   }
+
+  //   try {
+  //     setIsSaving(true);
+  //     if (!isSaved) {
+  //       await addStoryToFavorites(story._id);
+  //       setFavoriteCount(prev => prev + 1);
+  //       setIsSaved(true);
+  //       toast.success('Додано до збережених!');
+  //     } else {
+  //       await removeStoryFromFavorites(story._id);
+  //       setFavoriteCount(prev => prev - 1);
+  //       setIsSaved(false);
+  //       toast('Видалено із збережених');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
 
   function formatDate(dateString: string) {
   const d = new Date(dateString);
@@ -67,6 +138,7 @@ export default function TravellersStoriesItem({
  
 
   return (
+    <>
     <li className={css.story}>
       <Image
         src={story.img}
@@ -107,8 +179,8 @@ export default function TravellersStoriesItem({
           </Link>
 
           <button
-            onClick={handleSave}
-            disabled={isSaving}
+            onClick={handleToggleFavorite}
+            disabled={loading}
             className={`${css.story__save} ${isSaved ? css.saved : ''}`}
           >
             <Icon
@@ -119,5 +191,21 @@ export default function TravellersStoriesItem({
         </div>
       </div>
     </li>
+          <Modal
+        title="Помилка під час збереження"
+        message="Щоб зберегти статтю вам треба увійти, якщо ще немає облікового запису — зареєструйтесь."
+        confirmButtonText="Зареєструватись"
+        cancelButtonText="Увійти"
+        onConfirm={() => {
+          setIsAuthModalOpen(false);
+          router.push('/auth/register');
+        }}
+        onCancel={() => {
+          setIsAuthModalOpen(false);
+          router.push('/auth/login');
+        }}
+        isOpen={isAuthModalOpen}
+      />
+</>
   );
 }

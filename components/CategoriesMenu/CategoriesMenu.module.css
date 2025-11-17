@@ -13,7 +13,19 @@ position: relative;
     background: #fff;
     cursor: pointer;
     margin-bottom: 40px;
+     appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
    
+}
+
+.select:hover,
+.select:focus{
+border-color: #7a96ea;
 }
 
 
@@ -44,6 +56,23 @@ position: relative;
     .select {
         display: none;
     }
+}
+
+.selectIcon {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-270%);
+  pointer-events: none;
+  width: 24px;
+  height: 24px;
+  fill: #000;
+}
+
+@media screen and (min-width: 768px){
+.selectIcon{
+    display: none;
+}
 }
 
 

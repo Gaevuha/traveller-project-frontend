@@ -1,29 +1,51 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import TravellersStories from '../TravellersStories/TravellersStories';
 import css from './PopularClient.module.css';
-import { fetchStories } from '@/lib/api/clientApi';
-import { Story } from '@/types/story';
+import { fetchStories, fetchSavedStoriesByUserId } from '@/lib/api/clientApi';
+import { Story, SavedStory} from '@/types/story';
 import { useBreakpointStore } from '@/lib/store/breakpointStore';
 import { useAuthStore } from '@/lib/store/authStore';
 import Loader from '@/components/Loader/Loader';
 
 interface PopularClientProps{
   initialStories: Story[];
+  withPagination?: boolean; 
 }
 
-export default function PopularClient({initialStories}: PopularClientProps) {
+export default function PopularClient({initialStories, withPagination = true}: PopularClientProps) {
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [page, setPage] = useState(1);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const { screenSize} = useBreakpointStore();
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const user = useAuthStore(state => state.user);
+  const userId = user?._id || null;
+  const isAuthenticated = !!userId;
+
+  const { data: savedStories = [] } = useQuery<SavedStory[]>({
+    queryKey: ['savedStoriesByUser', userId],
+    queryFn: () => fetchSavedStoriesByUserId(userId as string),
+    enabled: isAuthenticated, // якщо юзер не авторізованний
+  });
+
+  let savedIds: string[] = [];
+
+  if (isAuthenticated) {
+    savedIds = savedStories.map((story) => story._id);
+  }
+  
+  const mergedStories: Story[] = stories.map((story) => ({
+    ...story,
+    isFavorite: isAuthenticated ? savedIds.includes(story._id) : false,
+  }));
+
 
   
-// Визначаємо мобільний розмір
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -31,12 +53,11 @@ export default function PopularClient({initialStories}: PopularClientProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Адаптивне обрізання початкових користувачів
+
   useEffect(() => {
     if (isMobile === null) return;
 
     let count = initialStories.length;
-    // if (window.innerWidth >= 1440) count = Math.min(initialStories.length, );
     if (window.innerWidth >= 768 && window.innerWidth < 1440 ) count = Math.min(initialStories.length, 4);
     else count = Math.min(initialStories.length, 3);
 
@@ -51,6 +72,7 @@ export default function PopularClient({initialStories}: PopularClientProps) {
   
 
   const handleLoadMore = async () => {
+        if (!withPagination) return; 
     if (loading || !hasMore) return;
     setLoading(true);
     try {
@@ -74,10 +96,10 @@ export default function PopularClient({initialStories}: PopularClientProps) {
       <div className="container">
         <h2 className={css.stories__title}>Популярні історії</h2>
         <TravellersStories
-          stories = { stories }
+          stories = { mergedStories }
           isAuthenticated={isAuthenticated}
         />
-        {hasMore && (
+        {withPagination && hasMore && (
           <div className={css.stories__footer}>
             <button
               onClick={handleLoadMore}
