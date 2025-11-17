@@ -206,6 +206,9 @@ export default function TravellersStoriesItem({
           setIsAuthModalOpen(false);
           router.push('/auth/login');
         }}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+        }}
         isOpen={isAuthModalOpen}
       />
 </>
