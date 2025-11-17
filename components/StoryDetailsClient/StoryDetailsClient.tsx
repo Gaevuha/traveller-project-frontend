@@ -27,18 +27,14 @@ export const StoryDetailsClient = () => {
   });
 
   const {
-    data: savedStories = [],
-    isLoading: isSavedLoading,
-    error: savedError,
-  } = useQuery({
-    queryKey: ['savedStoriesMe'],
-    queryFn: fetchSavedStoriesMe,
-    retry: false,
-    staleTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+  data: savedStories = [],
+  isLoading: isSavedLoading,
+  error: savedError,
+} = useQuery({
+  queryKey: ['savedStoriesMe'],
+  queryFn: fetchSavedStoriesMe,
+  retry: false,
+});
 
   if (isStoryLoading || isSavedLoading) return <Loader />;
   if (storyError || !story) return <ErrorMessage />;
