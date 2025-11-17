@@ -37,11 +37,19 @@ export default function ProfilePageClient({
   const savedStoriesLoadedRef = useRef(initialSavedStories !== null);
   const myStoriesLoadedRef = useRef(initialMyStories.length > 0);
 
+  // рефи для стабільних значень initial
+  const initialMyStoriesRef = useRef(initialMyStories);
+  const initialSavedStoriesRef = useRef(initialSavedStories);
+
   const currentUser = useAuthStore(state => state.user);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const authIsLoading = useAuthStore(state => state.isLoading);
 
-  // Завантаження даних при зміні табу
+  // Видалення картки зі сторінки після "unfavorite"
+  const handleRemoveSavedStory = (storyId: string) => {
+    setStories(prev => prev.filter(story => story._id !== storyId));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (authIsLoading) return;
@@ -51,14 +59,17 @@ export default function ProfilePageClient({
         return;
       }
 
-      // Якщо дані вже завантажені з SSR для поточного табу, використовуємо їх
+      // --- Мої історії ---
       if (activeTab === 'my') {
-        if (myStoriesLoadedRef.current && initialMyStories.length > 0) {
-          setStories(initialMyStories);
+        if (
+          myStoriesLoadedRef.current &&
+          initialMyStoriesRef.current.length > 0
+        ) {
+          setStories(initialMyStoriesRef.current);
           setIsLoading(false);
           return;
         }
-        // Завантажуємо "Мої історії" тільки якщо не завантажені з SSR
+
         try {
           setIsLoading(true);
           setError(null);
@@ -80,10 +91,19 @@ export default function ProfilePageClient({
         return;
       }
 
-      // Для табу "Збережені історії"
+      // --- Збережені історії ---
       if (activeTab === 'saved') {
-        if (savedStoriesLoadedRef.current && initialSavedStories !== null) {
-          setStories(initialSavedStories);
+        if (
+          savedStoriesLoadedRef.current &&
+          initialSavedStoriesRef.current !== null
+        ) {
+          const savedStoriesWithFavorite = initialSavedStoriesRef.current.map(
+            story => ({
+              ...story,
+              isFavorite: true,
+            })
+          );
+          setStories(savedStoriesWithFavorite);
           setIsLoading(false);
           return;
         }
@@ -91,22 +111,24 @@ export default function ProfilePageClient({
         try {
           setIsLoading(true);
           setError(null);
-          let userId = currentUser?._id;
-          if (!userId && user?._id) {
-            userId = user._id;
-          }
+          let userId = currentUser?._id || user?._id;
           if (!userId) {
             const { getMe } = await import('@/lib/api/clientApi');
             const me = await getMe(true);
-            if (!me?._id) {
-              throw new Error('Не вдалося отримати ID користувача');
-            }
+            if (!me?._id) throw new Error('Не вдалося отримати ID користувача');
             userId = me._id;
           }
+
           const { user: profileUser, savedStories } =
             await getUserSavedArticles(userId);
           setUser(profileUser);
-          setStories(savedStories || []);
+
+          const savedStoriesWithFavorite = (savedStories || []).map(story => ({
+            ...story,
+            isFavorite: true,
+          }));
+
+          setStories(savedStoriesWithFavorite);
           savedStoriesLoadedRef.current = true;
         } catch (error) {
           console.error('Failed to fetch saved stories:', error);
@@ -121,12 +143,11 @@ export default function ProfilePageClient({
         }
       }
     };
-    fetchData();
-  }, [activeTab, isAuthenticated, authIsLoading]);
 
-  const handleTabChange = (tab: 'saved' | 'my') => {
-    setActiveTab(tab);
-  };
+    fetchData();
+  }, [activeTab, isAuthenticated, authIsLoading, currentUser?._id, user?._id]);
+
+  const handleTabChange = (tab: 'saved' | 'my') => setActiveTab(tab);
 
   const getMessageNoStoriesProps = (): {
     text: string;
@@ -198,6 +219,7 @@ export default function ProfilePageClient({
                 <TravellersStories
                   stories={stories}
                   isAuthenticated={isAuthenticated}
+                  onRemoveSavedStory={handleRemoveSavedStory}
                 />
               )}
             </div>

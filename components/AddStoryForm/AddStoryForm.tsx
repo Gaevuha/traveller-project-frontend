@@ -7,15 +7,14 @@ import Image from 'next/image';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createStory } from '@/lib/api/clientApi';
 import { useRouter } from 'next/navigation';
+
 import BackgroundOverlay from '../BackgroundOverlay/BackgroundOverlay';
 import Loader from '../Loader/Loader';
 import { useLockScroll } from '@/lib/hooks/useLockScroll';
 import { toast } from 'react-hot-toast';
 import StoryFormSchemaValidate from '@/lib/validation/StoryFormSchemaValidate';
 
-// interface AddStoryFormTypes {
-//   variant: 'create-story' | 'edit-story';
-// }
+import { FormikLocalStoragePersistor } from '../Forms/FormikLocalStoragePersistor';
 
 type Category =
   | 'Європа'
@@ -51,8 +50,9 @@ const createStoryInitialValues: CreateStoryInitial = {
   img: null,
 };
 
+const CREATE_STORY_DRAFT_KEY = 'create-story-draft';
+
 export default function AddStoryForm() {
-  // { variant }: AddStoryFormTypes
   const placeholderImage = '/img/AddStoryForm/placeholder-image.png';
   const fieldId = useId();
   const router = useRouter();
@@ -62,14 +62,21 @@ export default function AddStoryForm() {
   const addStory = useMutation({
     mutationFn: createStory,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['allStories'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['allStories'] });
+
       toast.success('Історія успішно опублікована!', {
-        style: {
-          maxWidth: '500px',
-        },
+        style: { maxWidth: '500px' },
       });
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+      }
+    },
+    onError: err => {
+      toast.error(
+        `Помилка збереження: ${err instanceof Error ? err.message : err}`,
+        { style: { maxWidth: '500px' } }
+      );
     },
   });
 
@@ -83,14 +90,11 @@ export default function AddStoryForm() {
   ) {
     if (values.category === 'Категорія' || !values.img) {
       toast.error('Виберіть категорію та додайте фото', {
-        style: {
-          maxWidth: '500px',
-        },
+        style: { maxWidth: '500px' },
       });
       return;
     }
 
-    // Приводимо до типу API
     const storyToSend: CreateStory = {
       ...values,
       category: values.category as Category,
@@ -103,17 +107,17 @@ export default function AddStoryForm() {
       actions.resetForm();
       setPreview(placeholderImage);
 
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+      }
+
       router.push(`/stories/${response.data._id}`);
       console.log('Successfully sent the story: ', storyToSend);
-    } catch (err: unknown) {
+    } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       toast.error(
         `Помилка збереження: ${message}. Спробуйте зберегти вашу історію пізніше.`,
-        {
-          style: {
-            maxWidth: '500px',
-          },
-        }
+        { style: { maxWidth: '500px' } }
       );
     }
   }
@@ -127,6 +131,12 @@ export default function AddStoryForm() {
       >
         {formik => (
           <Form className={css.form}>
+            <FormikLocalStoragePersistor<CreateStoryInitial>
+              formik={formik}
+              storageKey={CREATE_STORY_DRAFT_KEY}
+              excludeFields={['img']}
+            />
+
             <ul className={css.fieldsList}>
               {/* Зображення */}
               <li className={css.fieldItem}>
@@ -161,9 +171,11 @@ export default function AddStoryForm() {
                     setPreview(URL.createObjectURL(file));
                   }}
                 />
+
                 <label htmlFor={`${fieldId}-cover`} className={css.coverButton}>
                   Завантажити фото
                 </label>
+
                 <ErrorMessage
                   component="span"
                   name="img"
@@ -176,6 +188,7 @@ export default function AddStoryForm() {
                 <label htmlFor={`${fieldId}-title`} className={css.inputLabel}>
                   Заголовок
                 </label>
+
                 <Field
                   id={`${fieldId}-title`}
                   type="text"
@@ -183,6 +196,7 @@ export default function AddStoryForm() {
                   className={`${css.title} ${css.inputField}`}
                   placeholder="Введіть заголовок історії"
                 />
+
                 <ErrorMessage
                   component="span"
                   name="title"
@@ -194,10 +208,11 @@ export default function AddStoryForm() {
               <li className={css.fieldItem}>
                 <label
                   htmlFor={`${fieldId}-category`}
-                  className={`${css.inputLabel}`}
+                  className={css.inputLabel}
                 >
                   Категорія
                 </label>
+
                 <Field
                   id={`${fieldId}-category`}
                   as="select"
@@ -221,6 +236,7 @@ export default function AddStoryForm() {
                   <option value="Кавказ">Кавказ</option>
                   <option value="Океанія">Океанія</option>
                 </Field>
+
                 <ErrorMessage
                   component="span"
                   name="category"
@@ -236,6 +252,7 @@ export default function AddStoryForm() {
                 >
                   Текст історії
                 </label>
+
                 <Field
                   name="article"
                   as="textarea"
@@ -243,6 +260,7 @@ export default function AddStoryForm() {
                   className={`${css.storyText} ${css.inputField}`}
                   placeholder="Ваша історія тут"
                 />
+
                 <ErrorMessage
                   component="span"
                   name="article"
@@ -262,13 +280,19 @@ export default function AddStoryForm() {
               >
                 Зберегти
               </button>
-              <button onClick={router.back} className={css.rejectBtn}>
+
+              <button
+                type="button"
+                onClick={router.back}
+                className={css.rejectBtn}
+              >
                 Відмінити
               </button>
             </div>
           </Form>
         )}
       </Formik>
+
       {isPending && (
         <>
           <BackgroundOverlay isActive={true} isOverAll={true} />

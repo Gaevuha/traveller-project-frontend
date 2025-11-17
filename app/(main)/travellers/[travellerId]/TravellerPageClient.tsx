@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 import Loader from '@/components/Loader/Loader';
 import MessageNoStories from '@/components/MessageNoStories/MessageNoStories';
 import type { User, BackendArticleFromUser } from '@/types/user';
 import type { Story } from '@/types/story';
 import { getArticlesByUserClient } from '@/lib/api/clientApi';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSavedStoriesByUserId } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 import styles from './TravellerPage.module.css';
 
 interface Props {
@@ -14,8 +17,8 @@ interface Props {
   user: User;
   initialArticles: BackendArticleFromUser[];
   totalArticles: number;
-  loadMorePerPage: number;
-  showLoadMoreOnMobile: boolean;
+  loadMorePerPage?: number;
+  showLoadMoreOnMobile?: boolean;
 }
 
 function backendToStory(article: BackendArticleFromUser, user: User): Story {
@@ -51,10 +54,27 @@ export default function TravellerPageClient({
   const [noStories, setNoStories] = useState(initialArticles.length === 0);
   const pageRef = useRef(1);
 
-  // Динамічний перPage під мобілку/планшет/десктоп
+  // auth store
+  const auth = useAuthStore(state => state.user);
+  const userId = auth?._id || null;
+  const isAuthenticated = !!userId;
+
+  // fetch saved stories for THIS user
+  const { data: savedStories = [] } = useQuery({
+    queryKey: ['savedStoriesByUser', userId],
+    queryFn: () => fetchSavedStoriesByUserId(userId!),
+    enabled: isAuthenticated,
+  });
+
+  // IDs of saved stories (via useMemo)
+  const savedIds = useMemo(() => {
+    if (!isAuthenticated) return [];
+    return savedStories.map(s => s._id);
+  }, [isAuthenticated, savedStories]);
+
   const getPerPage = () => {
-    if (window.innerWidth < 1440) return 4; // мобільні + планшет
-    return 6; // десктоп
+    if (window.innerWidth < 1440) return 4;
+    return 6;
   };
 
   useEffect(() => {
@@ -64,7 +84,7 @@ export default function TravellerPageClient({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // Перший рендер
+  // INITIAL RENDER
   useEffect(() => {
     if (isMobile === null) return;
 
@@ -79,12 +99,20 @@ export default function TravellerPageClient({
     const firstStories = initialArticles
       .slice(0, perPage)
       .map(a => backendToStory(a, user));
+
     setStories(firstStories);
     setNoStories(false);
-
     setHasMore(totalArticles > firstStories.length);
     pageRef.current = 1;
   }, [isMobile, initialArticles, totalArticles, user]);
+
+  // MERGE isFavorite into stories
+  const mergedStories = useMemo(() => {
+    return stories.map(story => ({
+      ...story,
+      isFavorite: isAuthenticated ? savedIds.includes(story._id) : false,
+    }));
+  }, [stories, isAuthenticated, savedIds]);
 
   // LOAD MORE
   const handleLoadMore = async () => {
@@ -93,7 +121,7 @@ export default function TravellerPageClient({
     setLoading(true);
 
     try {
-      const perPage = getPerPage(); // ✅ динамічний perPage
+      const perPage = getPerPage();
       const nextPage = pageRef.current + 1;
 
       const res = await getArticlesByUserClient(travellerId, nextPage, perPage);
@@ -114,11 +142,8 @@ export default function TravellerPageClient({
           (item, index, arr) => arr.findIndex(i => i._id === item._id) === index
         );
 
-        // ✅ ховаємо кнопку на останній сторінці
         if (unique.length >= totalArticles || newArticles.length < perPage) {
           setHasMore(false);
-        } else {
-          setHasMore(true);
         }
 
         return unique;
@@ -133,13 +158,16 @@ export default function TravellerPageClient({
     }
   };
 
+  // NO STORIES CASE
   if (noStories) {
     return (
-      <MessageNoStories
-        text="У цього користувача ще немає історій."
-        buttonText="Назад до історій"
-        route="/stories"
-      />
+      <div className={styles.wrapperMessage}>
+        <MessageNoStories
+          text="Цей користувач ще не публікував історій"
+          buttonText="Назад до історій"
+          route="/stories"
+        />
+      </div>
     );
   }
 
@@ -148,12 +176,12 @@ export default function TravellerPageClient({
   return (
     <>
       <TravellersStories
-        stories={stories}
-        isAuthenticated={false}
-        className={styles.travellerPageStoriesList}
+        stories={mergedStories}
+        isAuthenticated={isAuthenticated}
+        // className={styles.travellerPageStoriesList}
       />
 
-      {hasMore && stories.length > 0 && (
+      {hasMore && mergedStories.length > 0 && (
         <div className={styles.loadMoreWrapper}>
           {loading ? (
             <Loader className={styles.loader} />

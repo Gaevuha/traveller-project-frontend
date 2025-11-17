@@ -7,6 +7,7 @@ import {
 import { fetchSavedStoriesMeServer, fetchStoriesServer, fetchStoryByIdServer } from '@/lib/api/serverApi';
 import { StoryDetailsClient } from '@/components/StoryDetailsClient/StoryDetailsClient';
 import ResponsiveTravellersStories from '@/components/StoryDetailsClient/ResponsiveTravellersStories';
+import Popular from '@/components/Popular/Popular';
 
 
 type Props = {
@@ -65,8 +66,9 @@ export default async function StoryDetails({ params }: Props) {
       <HydrationBoundary state={dehydrate(queryClient)}>
         <StoryDetailsClient />
       </HydrationBoundary>
+            <Popular withPagination={false} />
 
-      <section className="stories">
+      {/* <section className="stories">
         <div className="container">
           <h2>Популярні історії</h2>
           <ResponsiveTravellersStories
@@ -77,7 +79,7 @@ export default async function StoryDetails({ params }: Props) {
             mobileCount={2}
           />
         </div>
-      </section>
+      </section> */}
     </>
   );
 }

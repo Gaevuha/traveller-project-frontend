@@ -27,44 +27,38 @@ export default function StoriesPageClient({ initialStories, categories }: Props)
     const [isTablet, setIsTablet] = useState(false);
 
 
-    useEffect(() => {
-        const handleResize = () => setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1440);
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-      }, []);
-    
-     
-      useEffect(() => {
-        if (isTablet === null) return;
-    
-        let count = initialStories.length;
-        if (window.innerWidth >= 768 && window.innerWidth < 1440 ) count = Math.min(initialStories.length, 8);
-        else count = Math.min(initialStories.length, 9);
-    
-        setStories(initialStories.slice(0, count));
-      }, [initialStories, isTablet]);
-    
-      if (isTablet === null) return null;
-
-
-    
-    const initialPerPage = isTablet ? 8 : 9;
-
-    const loadMoreCount = isTablet ? 4 : 3;
-
   
-    
-    const handleCategoryChange = async (newCategoryId: string) => {
+ useEffect(() => {
+    const handleResize = () => {
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1440);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+ }, []);
+  
+   const PER_PAGE = isTablet ? 8 : 9; 
+  const FIRST_LOAD = PER_PAGE;
+  
+  useEffect(() => {
+    setStories(initialStories.slice(0, FIRST_LOAD));
+    setPage(1);
+    setHasMore(initialStories.length >= FIRST_LOAD);
+  }, [initialStories, isTablet, FIRST_LOAD]);
+
+  if (isTablet === null) return null;
+
+  const handleCategoryChange = async (newCategoryId: string) => {
   setCategoryId(newCategoryId);
         setLoading(true);
         try {
             const categoryParam = newCategoryId === "all" ? undefined : newCategoryId;
-            const data = await fetchStories(1, initialPerPage, categoryParam);
+            const data = await fetchStories(1, PER_PAGE, categoryParam);
             
             setStories(data);
   setPage(1);
-  setHasMore(data.length >= initialPerPage);
+  setHasMore(data.length === PER_PAGE);
         } catch (error) {
             console.error("Помилка отримання історії за категорією:", error);
         } finally {
@@ -78,7 +72,7 @@ export default function StoriesPageClient({ initialStories, categories }: Props)
       try {
           const nextPage = page + 1;
           const categoryParam = categoryId === "all" ? undefined : categoryId;
-          const newStories = await fetchStories(nextPage, loadMoreCount, categoryParam);
+          const newStories = await fetchStories(nextPage, PER_PAGE, categoryParam);
           
            if (newStories.length === 0) {
       setHasMore(false);
@@ -95,7 +89,7 @@ export default function StoriesPageClient({ initialStories, categories }: Props)
 };
 
   return (
-    <section className={css.wrapper}>
+    <section className={css.container}>
       <h1 className={css.title}>Історії Мандрівників</h1>
 
           <CategoriesMenu categories={categories} value={categoryId} onChange={handleCategoryChange} />
@@ -104,11 +98,16 @@ export default function StoriesPageClient({ initialStories, categories }: Props)
 
       <TravellersStories stories={stories} isAuthenticated={false} />
 
-      {/* пагінація */}
-      {hasMore && !loading && (
-        <button onClick={handleLoadMore} className={css.moreBtn}>
-          Переглянути всі
-        </button>
+      {hasMore && (
+        <div className={css.stories__footer}>
+                   <button
+                     onClick={handleLoadMore}
+                     disabled={loading}
+                     className={css.stories__more}
+                   >
+                     {loading ? 'Завантаження...' : 'Переглянути ще'}
+                   </button>
+                 </div>
       )}
 
       {loading && page > 1 && <Loader />}
