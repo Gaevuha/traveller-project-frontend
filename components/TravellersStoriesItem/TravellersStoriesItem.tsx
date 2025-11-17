@@ -37,7 +37,7 @@ export default function TravellersStoriesItem({
   }, [story.isFavorite]);
 
 
-  const handleSave = async () => {
+  const handleToggleFavorite = async () => {
 
     if (!isAuthenticated) {
       setIsAuthModalOpen(true);
