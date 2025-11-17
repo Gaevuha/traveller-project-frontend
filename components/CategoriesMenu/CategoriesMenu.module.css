@@ -1,16 +1,25 @@
+.label {
+  font-family: var(--font-nunito-sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #000;
+  margin-bottom: 8px;
+
+}
+
 .selectWrapper {
   position: relative;
   display: flex;
   flex-direction: column;
-  margin: 40px auto;
-  width: fit-content;
+  margin-bottom: 40px;
+  width: 100%;
   align-items: center;
 }
 
 .select {
   position: relative;
-  width: fit-content;
-  min-width: 200px;
+  width: 100%;
   height: 40px;
   padding: 8px 40px 8px 12px;
   display: flex;
@@ -29,7 +38,7 @@
   outline-offset: 0;
   box-shadow: none;
   transition: border-color 0.3s ease;
-  z-index: 2;
+  
 }
 
 .select:hover {
@@ -108,34 +117,49 @@
   background-color: var(--color-primary-hover-first);
 }
 
+.buttonsWrapper {
+  display: none;
+}
+
+
+.categoryBtn {
+  background: transparent;
+  border: none;
+  padding: 6px 10px;
+  font-size: 16px;
+    cursor: pointer;
+    color: #555;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+    .categoryBtn:hover {
+      color: #000;
+    }
+      .active {
+        font-weight: 600;
+        color: #000;
+        background: #e8e8e8;
+      }
+  
+@media screen and (min-width: 768px) {
+    .buttonsWrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+  }
+
 /* Tablet */
 @media (min-width: 768px) {
-  .select {
-    font-size: 16px;
+  .selectWrapper {
+    display: none;
   }
 
-  .dropdownItem {
-    font-size: 16px;
+  .label {
+   display: none;
   }
 }
 
-/* Desktop */
-@media (min-width: 1440px) {
-  .select {
-    height: 43px;
-    font-size: 18px;
-    padding: 8px 40px 8px 12px;
-  }
-
-  .selectIcon {
-    width: 24px;
-    height: 24px;
-    right: 12px;
-    stroke-width: 2.5;
-  }
-
-  .dropdownItem {
-    font-size: 18px;
-    padding: 10px 12px;
-  }
-}

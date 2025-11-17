@@ -44,6 +44,10 @@ export default function CategoriesMenu({ categories, value, onChange }: Props) {
   };
 
   return (
+    <>
+         <label htmlFor="categorySelect" className={css.label}>
+          Категорії
+        </label>
     <div className={css.selectWrapper} ref={wrapperRef}>
       <div 
         className={`${css.select} ${isOpen ? css.selectOpen : ''}`}
@@ -70,5 +74,24 @@ export default function CategoriesMenu({ categories, value, onChange }: Props) {
         </div>
       )}
     </div>
+    <div className={css.buttonsWrapper}>
+      <button
+        className={`${css.categoryBtn} ${value === "all" ? css.active : ""}`}
+        onClick={() => onChange("all")}
+           >
+        Всі історії
+      </button>
+
+      {categories.map((cat) => (
+        <button
+          key={cat._id}
+          className={`${css.categoryBtn} ${value === cat._id ? css.active : ""}`}
+          onClick={() => onChange(cat._id)}
+        >
+          {cat.name}
+        </button>
+      ))}
+         </div>
+      </>
   );
 }
