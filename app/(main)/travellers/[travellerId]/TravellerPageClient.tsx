@@ -135,11 +135,13 @@ export default function TravellerPageClient({
 
   if (noStories) {
     return (
-      <MessageNoStories
-        text="У цього користувача ще немає історій."
-        buttonText="Назад до історій"
-        route="/stories"
-      />
+      <div className={styles.wrapperMessage}>
+        <MessageNoStories
+          text="У цього користувача ще немає історій."
+          buttonText="Назад до історій"
+          route="/stories"
+        />
+      </div>
     );
   }
 
