@@ -1,6 +1,5 @@
 import { Story } from '@/types/story';
 import TravellersStoriesItem from '../TravellersStoriesItem/TravellersStoriesItem';
-
 import css from './TravellersStories.module.css';
 
 interface TravellersStoriesProps {
