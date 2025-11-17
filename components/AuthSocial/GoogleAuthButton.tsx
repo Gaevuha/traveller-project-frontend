@@ -1,11 +1,24 @@
 'use client';
 
-import { FaGoogle } from 'react-icons/fa';
+import { useEffect, useState } from 'react';
 import { getGoogleAuthUrl } from '@/lib/api/clientApi';
 import { toast } from 'react-hot-toast';
 import css from './GoogleAuthButton.module.css';
 
 export default function GoogleAuthButton() {
+  const [FaGoogle, setFaGoogle] = useState<React.ComponentType<{ size?: number }> | null>(null);
+
+  useEffect(() => {
+    // Динамічний імпорт для обходу проблем з Turbopack
+    import('react-icons/fa')
+      .then((module) => {
+        setFaGoogle(() => module.FaGoogle);
+      })
+      .catch((error) => {
+        console.warn('Failed to load FaGoogle icon:', error);
+      });
+  }, []);
+
   const handleGoogleLogin = async () => {
     try {
       const url = await getGoogleAuthUrl();
@@ -28,7 +41,7 @@ export default function GoogleAuthButton() {
       <button type="button" className={css.button} onClick={handleGoogleLogin}>
         <span className={css.buttonContent}>
           Увійти через Google
-          <FaGoogle size={18} />
+          {FaGoogle && <FaGoogle size={18} />}
         </span>
       </button>
     </div>
