@@ -3,7 +3,7 @@
 import { useAuthStore } from '@/lib/store/authStore';
 import { User } from '@/types/user';
 import { useEffect, useState } from 'react';
-import { getMe } from '@/lib/api/clientApi';
+import { getMe, refreshSession } from '@/lib/api/clientApi';
 
 type Props = {
   children: React.ReactNode;
@@ -27,7 +27,56 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
 
       // Якщо є initialUser з SSR - використовуємо його
       if (initialUser) {
-        setUser(initialUser);
+        // Нормалізуємо можливу відповідь API { status, message, data }
+        const asRecord = initialUser as unknown as Record<string, unknown>;
+        let normalizedUser: User | null = null;
+
+        if (
+          asRecord &&
+          typeof asRecord === 'object' &&
+          'status' in asRecord &&
+          'data' in asRecord
+        ) {
+          const rawUnknown = (asRecord as { data: unknown }).data;
+          if (rawUnknown && typeof rawUnknown === 'object') {
+            const raw = rawUnknown as Record<string, unknown>;
+            const idFromUnderscore =
+              '_id' in raw && typeof raw._id === 'string'
+                ? (raw._id as string)
+                : undefined;
+            const idFromId =
+              'id' in raw && typeof (raw.id as unknown) === 'string'
+                ? (raw.id as string)
+                : undefined;
+            const resolvedId = idFromUnderscore ?? idFromId;
+            normalizedUser = {
+              ...(raw as unknown as Omit<User, '_id'>),
+              _id: resolvedId ?? '',
+            };
+          }
+        } else {
+          // В іншому випадку це вже User — але гарантуємо наявність _id
+          const raw = initialUser as unknown as Record<string, unknown>;
+          const idFromUnderscore =
+            '_id' in raw && typeof raw._id === 'string'
+              ? (raw._id as string)
+              : undefined;
+          const idFromId =
+            'id' in raw && typeof (raw.id as unknown) === 'string'
+              ? (raw.id as string)
+              : undefined;
+          const resolvedId = idFromUnderscore ?? idFromId;
+          normalizedUser = {
+            ...(initialUser as unknown as Omit<User, '_id'>),
+            _id: resolvedId ?? '',
+          };
+        }
+
+        if (normalizedUser && normalizedUser._id) {
+          setUser(normalizedUser);
+        } else {
+          clearIsAuthenticated();
+        }
         setLoading(false);
         setIsInitialized(true);
         return;
@@ -35,31 +84,26 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
 
       // Якщо initialUser є null, але є user в store (з localStorage) - перевіряємо сесію
       if (user) {
-        const userIdInfo = {
-          id: 'id' in user ? String(user.id) : undefined,
-          _id: '_id' in user ? String(user._id) : undefined,
-        };
-        console.log('🟠 AuthProvider - user з store:', user);
-        console.log('🟠 user.id:', userIdInfo.id);
-        console.log('🟠 user._id:', userIdInfo._id);
-
         try {
           // Перевіряємо, чи сесія все ще активна
           const currentUser = await getMe(true); // silent: true - не логуємо помилки
           if (currentUser) {
-            const currentUserIdInfo = {
-              id: 'id' in currentUser ? String(currentUser.id) : undefined,
-              _id: '_id' in currentUser ? String(currentUser._id) : undefined,
-            };
-            console.log('🟣 AuthProvider - currentUser з getMe:', currentUser);
-            console.log('🟣 currentUser.id:', currentUserIdInfo.id);
-            console.log('🟣 currentUser._id:', currentUserIdInfo._id);
-
             // Сесія активна - оновлюємо дані
             setUser(currentUser);
           } else {
-            // Сесія неактивна - очищаємо
-            clearIsAuthenticated();
+            // Спробуємо оновити сесію і повторити запит
+            const refreshed = await refreshSession();
+            if (refreshed) {
+              const retried = await getMe(true);
+              if (retried) {
+                setUser(retried);
+              } else {
+                clearIsAuthenticated();
+              }
+            } else {
+              // Сесія неактивна - очищаємо
+              clearIsAuthenticated();
+            }
           }
         } catch {
           // Помилка при перевірці - очищаємо

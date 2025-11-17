@@ -1,157 +1,105 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { Metadata } from 'next';
 import ProtectedRoute from '@/components/ProtectedRoute/ProtectedRoute';
-import TravellerInfo from '@/components/TravellerInfo/TravellerInfo';
-import ProfileTabs from '@/components/ProfileTabs/ProfileTabs';
-import TravellersStories from '@/components/TravellersStories/TravellersStories';
-import MessageNoStories from '@/components/MessageNoStories/MessageNoStories';
-import Loader from '@/components/Loader/Loader';
+import ProfilePageClient from './ProfilePageClient';
+import {
+  getMeProfileServer,
+  getUserSavedArticlesServer,
+  getServerMe,
+} from '@/lib/api/serverApi';
 import { User } from '@/types/user';
 import { Story } from '@/types/story';
-import { getMe, getMeProfile, getUserSavedArticles } from '@/lib/api/clientApi';
-import { useAuthStore } from '@/lib/store/authStore';
-import toast from 'react-hot-toast';
-import css from './ProfilePage.module.css';
 
-type TabType = 'saved' | 'my';
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const currentUser = await getServerMe();
+    if (currentUser) {
+      const profileData = await getMeProfileServer();
+      if (profileData) {
+        const userName = profileData.user.name;
+        const userDescription = profileData.user.description;
+        const articlesCount = profileData.articles.length;
 
-export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<TabType>('my');
-  const [user, setUser] = useState<User | null>(null);
-  const [stories, setStories] = useState<Story[]>([]);
-  // const [savedStories, setSavedStories] = useState<Story[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // const [isLoadingStories, setIsLoadingStories] = useState(false);
-  // const [savedStoriesLoaded, setSavedStoriesLoaded] = useState(false);
-
-  const currentUser = useAuthStore(state => state.user);
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const authIsLoading = useAuthStore(state => state.isLoading);
-
-  // Завантаження профілю та "Мої історії" при монтуванні
-  useEffect(() => {
-    const fetchData = async () => {
-      if (authIsLoading) return;
-      if (!isAuthenticated) {
-        setError('Користувач не залогінений');
-        setIsLoading(false);
-        return;
+        return {
+          title: `${userName} | Мій профіль | Подорожники`,
+          description: userDescription
+            ? `${userDescription} | Перегляньте ${articlesCount} історій користувача ${userName}`
+            : `Профіль користувача ${userName} | Перегляньте ${articlesCount} історій мандрівника`,
+          openGraph: {
+            title: `${userName} | Подорожники`,
+            description: userDescription || `Профіль користувача ${userName}`,
+            url: `https://travel-fs116-teamproject-frontend-rouge.vercel.app/profile`,
+            siteName: `Подорожники: ${userName}`,
+            type: 'profile',
+            ...(profileData.user.avatarUrl && {
+              images: [
+                {
+                  url: profileData.user.avatarUrl,
+                  width: 400,
+                  height: 400,
+                  alt: userName,
+                },
+              ],
+            }),
+          },
+        };
       }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        if (activeTab === 'my') {
-          const { user: profileUser, articles } = await getMeProfile();
-          setUser(profileUser);
-          setStories(articles || []);
-        } else {
-          let userId = currentUser?._id;
-          if (!userId) {
-            const me = await getMe();
-            if (!me?._id) {
-              throw new Error('Не вдалося отримати ID користувача');
-            }
-            userId = me._id;
-          }
-          const { user: profileUser, savedStories } =
-            await getUserSavedArticles(userId);
-          setUser(profileUser);
-          setStories(savedStories || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch profile data:', error);
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : 'Не вдалося завантажити дані профілю';
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [activeTab, currentUser?._id, isAuthenticated, authIsLoading]);
-
-  const handleTabChange = (tab: 'saved' | 'my') => {
-    setActiveTab(tab);
-  };
-  const getMessageNoStoriesProps = (): {
-    text: string;
-    buttonText: string;
-    redirectPath: '/stories/create' | '/stories';
-  } => {
-    if (activeTab === 'my') {
-      return {
-        text: 'Ви ще нічого не публікували, поділіться своєю першою історією!',
-        buttonText: 'Опублікувати історію',
-        redirectPath: '/stories/create',
-      };
-    } else {
-      return {
-        text: 'У вас немає збережених історій, мершій збережіть вашу першу історію!',
-        buttonText: 'До історій',
-        redirectPath: '/stories',
-      };
     }
-  };
+  } catch (error) {
+    console.error('Error generating metadata for profile page:', error);
+  }
 
-  if (authIsLoading || isLoading) {
-    return (
-      <ProtectedRoute>
-        <div className="container">
-          <div className={css.loaderWrapper}>
-            <Loader />
-          </div>
-        </div>
-      </ProtectedRoute>
-    );
+  // Fallback metadata
+  return {
+    title: 'Мій профіль | Подорожники',
+    description: 'Перегляньте свої історії та збережені статті',
+  };
+}
+
+export default async function ProfilePage() {
+  let currentUser: User | null = null;
+  let profileData: Awaited<ReturnType<typeof getMeProfileServer>> = null;
+  let initialSavedStories: Story[] | null = null;
+
+  try {
+    currentUser = await getServerMe();
+    if (currentUser) {
+      profileData = await getMeProfileServer();
+
+      if (profileData) {
+        try {
+          const savedArticlesData = await getUserSavedArticlesServer(
+            currentUser._id
+          );
+          initialSavedStories = savedArticlesData?.savedStories || null;
+        } catch {
+          initialSavedStories = null;
+        }
+
+        const userData: User = profileData.user;
+        const myStories = profileData.articles;
+
+        return (
+          <ProtectedRoute>
+            <ProfilePageClient
+              initialUser={userData}
+              initialMyStories={myStories}
+              initialSavedStories={initialSavedStories}
+            />
+          </ProtectedRoute>
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error loading profile on server:', error);
   }
 
   return (
     <ProtectedRoute>
-      <section className={css.profile}>
-        <div className="container">
-          {error ? (
-            <div className={css.errorWrapper}>
-              <p className={css.errorText}>{error}</p>
-            </div>
-          ) : (
-            <>
-              {' '}
-              {user && (
-                <div className={css.travellerInfoWrapper}>
-                  <TravellerInfo
-                    user={user}
-                    imageSize={{ width: 120, height: 120 }}
-                    priority={true}
-                  />
-                </div>
-              )}
-              <div className={css.tabsWrapper}>
-                <ProfileTabs
-                  activeTab={activeTab}
-                  onTabChange={handleTabChange}
-                />
-              </div>
-              <div className={css.storiesWrapper}>
-                {stories.length === 0 ? (
-                  <MessageNoStories {...getMessageNoStoriesProps()} />
-                ) : (
-                  <TravellersStories
-                    stories={stories}
-                    isAuthenticated={isAuthenticated}
-                  />
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </section>
+      <ProfilePageClient
+        initialUser={null}
+        initialMyStories={[]}
+        initialSavedStories={null}
+      />
     </ProtectedRoute>
   );
 }

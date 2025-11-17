@@ -35,7 +35,7 @@ const RegistrationForm = () => {
           setFieldError('password', error.message);
         } else if (
           error.message.includes('name') ||
-          error.message.includes('ім')
+          error.message.includes('імʼя')
         ) {
           setFieldError('name', error.message);
         } else {
@@ -60,7 +60,7 @@ const RegistrationForm = () => {
         validateOnChange={true}
         validateOnBlur={true}
       >
-        {({ errors, touched, values }) => (
+        {({ errors, touched, values, isSubmitting, isValid, dirty }) => (
           <Form className={styles.form}>
             <div className={styles.fieldGroup}>
               <label htmlFor="name" className={styles.label}>
@@ -128,7 +128,7 @@ const RegistrationForm = () => {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isValid || !dirty}
             >
               {isSubmitting ? 'Реєструємо...' : 'Зареєструватися'}
             </button>

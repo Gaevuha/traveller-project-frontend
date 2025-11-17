@@ -70,7 +70,6 @@
   background-color: var(--color-primary-hover-first);
   color: var(--color-text-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--color-primary-active-first);
 }
 
 .button:active:not([aria-disabled='true']) {

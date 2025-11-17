@@ -1,12 +1,24 @@
-import { User, GetUsersResponse, GetUserByIdResponse } from '@/types/user';
+import {
+  User,
+  GetUsersResponse,
+  GetUserByIdResponse,
+  GetArticlesResponse,
+  ArticlesWithPagination,
+} from '@/types/user';
+
 import { LoginRequest, RegisterRequest } from '@/types/auth';
 import { extractUser } from './errorHandler';
 
-import { SavedStory, StoriesResponse, Story, StoryByIdResponse, UserSavedArticlesResponse } from '@/types/story';
+import {
+  SavedStory,
+  StoriesResponse,
+  Story,
+  StoryByIdResponse,
+  UserSavedArticlesResponse,
+} from '@/types/story';
 import { AxiosError, isAxiosError } from 'axios';
 import { api } from '../api/api';
-
-
+import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
 
 export type ApiError = AxiosError<{ error: string }>;
 
@@ -25,19 +37,6 @@ export const register = async (data: RegisterRequest) => {
 export const login = async (data: LoginRequest) => {
   const res = await api.post<User>('/auth/login', data);
   const user = extractUser(res.data) as User | null;
-
-  const userIdInfo =
-    user && typeof user === 'object'
-      ? {
-          id: 'id' in user ? String(user.id) : undefined,
-          _id: '_id' in user ? String(user._id) : undefined,
-        }
-      : { id: undefined, _id: undefined };
-
-  console.log('🟢 ПІСЛЯ extractUser - user:', user);
-  console.log('🟢 user.id:', userIdInfo.id);
-  console.log('🟢 user._id:', userIdInfo._id);
-  console.log('🟢 res.data:', res.data);
 
   return user;
 };
@@ -122,6 +121,17 @@ export const logout = async () => {
 };
 
 /**
+ * Try to refresh session on the client (will set cookies via Next API route)
+ */
+export async function refreshSession(): Promise<boolean> {
+  try {
+    await api.post('/auth/refresh', {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+/**
  * Check if session is valid (lightweight check)
  */
 export const checkSession = async (): Promise<boolean> => {
@@ -137,7 +147,11 @@ export const checkSession = async (): Promise<boolean> => {
   }
 };
 
-export async function fetchStories(page = 1, perPage = 3, categoryId?: string): Promise<Story[]> {
+export async function fetchStories(
+  page = 1,
+  perPage = 3,
+  categoryId?: string
+): Promise<Story[]> {
   const response = await api.get<StoriesResponse>(`/stories`, {
     params: { page, perPage, sort: 'favoriteCount', category: categoryId },
   });
@@ -151,7 +165,7 @@ export async function addStoryToFavorites(storyId: string): Promise<void> {
 export async function removeStoryFromFavorites(storyId: string): Promise<void> {
   await api.delete(`/users/me/saved/${storyId}`);
 }
-
+/*Haievoi Serhii*/
 export async function getUsersClient({
   page = 1,
   perPage = 4,
@@ -164,51 +178,65 @@ export async function getUsersClient({
   });
   return res.data;
 }
-
-export async function getUserByIdClient(
-  userId: string
-): Promise<GetUserByIdResponse> {
+export async function getArticlesByUserClient(
+  travellerId: string,
+  page: number,
+  perPage: number
+): Promise<GetArticlesResponse> {
   try {
-    const res = await api.get<GetUserByIdResponse>(`/users/${userId}`);
-    return res.data;
+    const url = `/users/${travellerId}`;
+    const res = await api.get<GetUserByIdResponse>(url, {
+      params: { page, perPage },
+    });
+
+    const articles: ArticlesWithPagination = res.data.data.articles;
+    const totalArticles = articles.pagination.totalItems;
+    return {
+      user: res.data.data.user,
+      articles: articles,
+      totalArticles: totalArticles,
+    };
   } catch (error: unknown) {
+    console.error('[getArticlesByUserClient] Full error details:', error);
+
     if (isAxiosError(error)) {
-      console.error('[getUsersServer error]', error.message);
       throw new Error(
-        error.response?.data?.error || 'Failed to fetch users from server'
+        error.response?.data?.error ||
+          `Request failed with status code ${error.response?.status}`
       );
     } else {
-      console.error('[getUsersServer unknown error]', error);
-      throw new Error('Unknown server error');
+      console.error('[getArticlesByUserClient] Unknown error type:', {
+        error,
+        errorType: typeof error,
+        isErrorInstance: error instanceof Error,
+      });
+      throw new Error('Unknown client error');
     }
   }
 }
 
+/*end Haievoi Serhii*/
 export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
   const response = await api.get<StoryByIdResponse>(`/stories/${storyId}`);
   return response.data.data;
 }
 
-
-
-
 export async function fetchSavedStoriesByUserId(
   userId: string
 ): Promise<SavedStory[]> {
-  console.log("fetchSavedStoriesByUserId CALL with userId:", userId);
-
+  console.log('fetchSavedStoriesByUserId CALL with userId:', userId);
 
   const res = await api.get<UserSavedArticlesResponse>(
     `/users/${userId}/saved-articles`
   );
 
-
-  console.log("fetchSavedStoriesByUserId RESPONSE:", res.data.data.savedStories);
-
+  console.log(
+    'fetchSavedStoriesByUserId RESPONSE:',
+    res.data.data.savedStories
+  );
 
   return res.data.data.savedStories;
 }
-
 
 /**
  * Get current user profile with articles
@@ -278,6 +306,7 @@ export async function getMeProfile(): Promise<{
 
 /**
  * Get user saved articles
+ * Завантажує повну інформацію про кожну збережену історію, включаючи ownerId
  */
 export async function getUserSavedArticles(userId: string): Promise<{
   user: User;
@@ -295,9 +324,75 @@ export async function getUserSavedArticles(userId: string): Promise<{
     description: data.user.description ?? undefined,
   };
 
+  // Завантажуємо повну інформацію про кожну збережену історію (включаючи ownerId)
+  const savedStories = await Promise.allSettled(
+    (data.savedStories || []).map(
+      async (savedStory: {
+        _id: string;
+        img: string;
+        title: string;
+        article: string;
+        date: string;
+        favoriteCount: number;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          // Завантажуємо повну інформацію про історію, включаючи ownerId
+          const fullStory = await fetchStoryByIdClient(savedStory._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без ownerId (має не статися, але на всяк випадок)
+          return {
+            _id: savedStory._id,
+            img: savedStory.img,
+            title: savedStory.title,
+            article: savedStory.article || '',
+            category: savedStory.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: savedStory.date,
+            favoriteCount: savedStory.favoriteCount,
+          } as Story;
+        }
+      }
+    )
+  );
+
+  const stories = savedStories
+    .map(result => (result.status === 'fulfilled' ? result.value : null))
+    .filter((story): story is Story => story !== null);
+
   return {
     user,
-    savedStories: data.savedStories || [],
+    savedStories: stories,
   };
 }
 
+export async function fetchSavedStoriesMe(): Promise<SavedStory[]> {
+  const res = await api.get<UserSavedArticlesResponse>(
+    '/users/me/saved-articles'
+  );
+  return res.data.data.savedStories;
+}
+
+// Story create form
+
+export async function createStory(
+  newStory: CreateStory
+): Promise<StoryResponse> {
+  const formData = new FormData();
+  formData.append('title', newStory.title);
+  formData.append('article', newStory.article);
+  formData.append('category', newStory.category);
+  formData.append('img', newStory.img);
+
+  const { data } = await api.post<StoryResponse>('/stories', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}

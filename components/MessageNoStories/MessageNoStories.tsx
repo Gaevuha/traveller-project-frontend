@@ -2,32 +2,62 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { useCallback } from 'react';
 import styles from './MessageNoStories.module.css';
 
-type MessageNoStoriesProps = {
-  text: string;
-  buttonText: string;
-  redirectPath?: '/stories' | '/stories/create';
-  title?: string;
+import { useRouter } from 'next/navigation';
+
+export type MessageNoStoriesProps = {
+  /**
+   * Текст сповіщення, який відображається користувачу.
+   */
+  text?: string;
+  /**
+   * Текст на кнопці дії.
+   */
+  buttonText?: string;
+  /**
+   * Маршрут для навігації (використовується, якщо не передано onClick).
+   */
+  route?: '/stories' | '/stories/create' | string;
+  /**
+   * Опціональний обробник кліку. Якщо передано, використовуємо його замість навігації.
+   */
+  onClick?: () => void;
+  /**
+   * Опціональний клас для додаткового стилювання контейнера.
+   */
+  className?: string;
 };
 
 const MessageNoStories = ({
-  text,
-  buttonText,
-  redirectPath = '/stories',
-  title = 'Історії Мандрівника',
+  text = 'Цей користувач ще не публікував історій',
+  buttonText = 'До історій',
+  route = '/stories',
+  onClick,
+  className,
 }: MessageNoStoriesProps) => {
-  return (
-    <section className={styles.container}>
-      <h2 className={styles.title}>{title}</h2>
+  const router = useRouter();
 
-      <div className={styles.messageBox}>
-        <p className={styles.text}>{text}</p>
-        <Link href={redirectPath} className={styles.button}>
-          {buttonText}
-        </Link>
-      </div>
+  const handleClick = useCallback(() => {
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    router.push(route);
+  }, [onClick, route, router]);
+
+  const wrapperClassName = [styles.container, className]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <section className={wrapperClassName} role="alert">
+      <p className={styles.text}>{text}</p>
+      <button type="button" className={styles.button} onClick={handleClick}>
+        {buttonText}
+      </button>
     </section>
   );
 };

@@ -45,15 +45,6 @@ export const useAuth = () => {
       }
       setUser(user);
 
-      const userIdInfo = {
-        id: 'id' in user ? String(user.id) : undefined,
-        _id: '_id' in user ? String(user._id) : undefined,
-      };
-
-      console.log('🔵 ПІСЛЯ ЛОГІНУ - user:', user);
-      console.log('🔵 user.id:', userIdInfo.id);
-      console.log('🔵 user._id:', userIdInfo._id);
-
       toast.success(`Вітаємо, ${user.name || 'користувач'}!`);
       router.push('/');
     } catch (error) {

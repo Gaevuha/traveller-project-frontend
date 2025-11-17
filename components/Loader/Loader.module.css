@@ -84,16 +84,8 @@
       10px 50px;
   }
 }
-
-@media only screen and (min-width: 768px) {
-  .loader {
-    width: 85px;
-    height: 30px;
-  }
-}
-
-@media only screen and (min-width: 1440px) {
-  .loader {
-    height: 50px;
-  }
+.loader {
+  top: 0;
+  width: 65px;
+  height: 48px;
 }

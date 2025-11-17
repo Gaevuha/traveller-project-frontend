@@ -1,6 +1,14 @@
 .wrapper__content {
   margin-bottom: 16px;
 }
+
+.traveller__avatar {
+  border-radius: 100%;
+  width: 112px;
+  height: 112px;
+  margin-bottom: 24px;
+}
+
 .traveller__name {
   display: block;
   width: 100%;

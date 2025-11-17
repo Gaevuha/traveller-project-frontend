@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ storyId: string }> }
 ) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const { storyId } = await params;
 
     const res = await api.post(`/users/me/saved/${storyId}`, null, {

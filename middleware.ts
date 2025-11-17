@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { parse } from 'cookie';
-import { checkServerSession } from './lib/api/serverApi';
 
 const privateRoutes = ['/profile'];
 const publicRoutes = ['/auth/login', '/auth/register'];
@@ -17,70 +15,27 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  if (!accessToken) {
-    if (refreshToken) {
-      console.log('🔁 Trying to refresh session via /auth/refresh ...');
-      try {
-        const data = await checkServerSession();
-
-        const setCookie = data.headers['set-cookie'];
-
-        if (setCookie) {
-          const cookieArray = Array.isArray(setCookie)
-            ? setCookie
-            : [setCookie];
-          for (const cookieStr of cookieArray) {
-            const parsed = parse(cookieStr);
-            const options = {
-              expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
-              path: parsed.Path || '/',
-              maxAge: Number(parsed['Max-Age']) || undefined,
-            };
-            if (parsed.accessToken)
-              cookieStore.set('accessToken', parsed.accessToken, options);
-            if (parsed.refreshToken)
-              cookieStore.set('refreshToken', parsed.refreshToken, options);
-            if (parsed.sessionId)
-              cookieStore.set('sessionId', parsed.sessionId, options);
-          }
-          if (isPublicRoute) {
-            return NextResponse.redirect(new URL('/', request.url), {
-              headers: {
-                Cookie: cookieStore.toString(),
-              },
-            });
-          }
-          if (isPrivateRoute) {
-            return NextResponse.next({
-              headers: {
-                Cookie: cookieStore.toString(),
-              },
-            });
-          }
-        }
-      } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : JSON.stringify(err);
-      }
-    }
-
-    if (isPublicRoute) {
-      return NextResponse.next();
-    }
-
-    if (isPrivateRoute) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-  }
-
+  // 1) Публічні маршрути: завжди дозволяємо відкрити
+  //    (редіректимо на / тільки якщо є валідний accessToken)
   if (isPublicRoute) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  if (isPrivateRoute) {
+    if (accessToken) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
     return NextResponse.next();
   }
 
+  // 2) Приватні маршрути: допускаємо лише з accessToken.
+  //    Якщо його немає — скеровуємо на /auth/login.
+  //    Наявність лише refreshToken НЕ вважаємо сесією,
+  //    щоб не блокувати форму логіну.
+  if (isPrivateRoute) {
+    if (accessToken) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+
+  // 3) Інші маршрути — пропускаємо
   return NextResponse.next();
 }
 

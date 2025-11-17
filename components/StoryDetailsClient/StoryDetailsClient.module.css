@@ -1,0 +1,192 @@
+.storyDetails {
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+.title {
+  color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+  font-family: var(--font-sora), sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.wrapperButton {
+  display: flex;
+  flex-direction: column;
+}
+
+.text {
+  color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0%;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.addText {
+  font-weight: 400;
+}
+
+.textCategory {
+  width: 76px;
+  height: 26px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 4px 10px 4px 10px;
+  background-color: azure;
+  border: 1px solid var(--Opacity-Transparent, rgba(255, 255, 255, 0));
+  border-radius: 6px;
+  background: var(--Opacity-NeutralDarkest5, rgba(0, 0, 0, 0.05));
+  margin-bottom: 16px;
+}
+
+.storyCardImage {
+  height: 223px;
+  width: 335px;
+  border-radius: 24px;
+  margin-bottom: 32px;
+}
+
+.mainText {
+  color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.saveStory {
+  border: 1px solid var(--ColorScheme1-Border, rgba(0, 0, 0, 0.15));
+  border-radius: var(--Radius-Large, 24px);
+  background: var(--ColorScheme1-Foreground, rgba(242, 242, 242, 1));
+  height: 217px;
+  padding: 32px 20px;
+}
+
+.titleStory {
+  color: var(--ColorScheme1-Text, rgba(0, 0, 0, 1));
+  font-family: var(--font-sora), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.textStory {
+  color: var(--ColorScheme1-Text, rgba(0, 0, 0, 1));
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0%;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+@media only screen and (min-width: 768px) {
+  .storyDetails {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .title {
+    color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+    font-family: var(--font-sora), sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-align: left;
+    margin-bottom: 32px;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 48px;
+    margin-bottom: 18px;
+  }
+
+  .wrapperButton {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .text {
+    margin-bottom: 0px;
+  }
+
+  .textCategory {
+    margin-left: auto;
+    margin-right: 0px;
+  }
+
+  .storyCardImage {
+    object-fit: cover;
+    height: auto;
+    width: 704px;
+    border-radius: 24px;
+  }
+
+  .mainText {
+    color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+    font-family: var(--font-nunito-sans), sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .saveStory {
+    padding: 32px 32px;
+    max-width: 418px;
+  }
+}
+
+@media only screen and (min-width: 1440px) {
+  .storyDetails {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .wrapper {
+    margin-bottom: 21px;
+  }
+
+  .storyCardImage {
+    object-fit: cover;
+    width: 1312px;
+    height: auto;
+    margin-bottom: 96px;
+  }
+
+  .wrapperButton {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .mainText {
+    max-width: 865px;
+  }
+}

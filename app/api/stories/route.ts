@@ -4,6 +4,9 @@ import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../_utils/utils';
 
+/**
+ * GET /api/stories
+ */
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -43,29 +46,36 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/stories
+ */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
 
-    const body = await request.json();
+    const formData = await request.formData();
 
-    const res = await api.post('/stories', body, {
+    const remoteFormData = new FormData();
+    formData.forEach((value, key) => {
+      remoteFormData.append(key, value);
+    });
+
+    const res = await api.post('/stories', remoteFormData, {
       headers: {
         Cookie: cookieStore.toString(),
-        'Content-Type': 'application/json',
       },
     });
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {
-      logErrorResponse(error.response?.data);
+      console.error(error.response?.data);
       return NextResponse.json(
         { error: error.message, response: error.response?.data },
-        { status: error.status }
+        { status: error.response?.status || 500 }
       );
     }
-    logErrorResponse({ message: (error as Error).message });
+    console.error({ message: (error as Error).message });
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

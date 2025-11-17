@@ -7,10 +7,12 @@ import React from 'react';
 interface TravellerInfoProps {
   user: User;
   className?: {
+    image?: string;
     name?: string;
     wrapper?: string;
     text?: string;
     container?: string;
+    travellerInfoWraper?: string;
   };
   imageSize?: {
     width: number;
@@ -40,20 +42,28 @@ export default function TravellerInfo({
   const wrapperClassName = useDefaultStyles
     ? defaultStyles.wrapper__content
     : className.wrapper;
+  const wrapperTravellerInfo = useDefaultStyles
+    ? defaultStyles.wrapper__travellerInfo
+    : className.travellerInfoWraper;
+  const imageClassName = useDefaultStyles
+    ? defaultStyles.traveller__avatar
+    : className.image;
 
   return (
     <>
-      <Image
-        src={avatarSrc}
-        alt={user.name || 'Traveller'}
-        width={imageSize.width}
-        height={imageSize.height}
-        priority={priority}
-        style={{ borderRadius: '100%', marginBottom: '24px' }}
-      />
-      <div className={wrapperClassName}>
-        <strong className={nameClassName}>{user.name}</strong>
-        <p className={textClassName}>{user.description}</p>
+      <div className={wrapperTravellerInfo}>
+        <Image
+          className={imageClassName}
+          src={avatarSrc}
+          alt={user.name || 'Traveller'}
+          width={imageSize.width}
+          height={imageSize.height}
+          priority={priority}
+        />
+        <div className={wrapperClassName}>
+          <strong className={nameClassName}>{user.name}</strong>
+          <p className={textClassName}>{user.description}</p>
+        </div>
       </div>
     </>
   );

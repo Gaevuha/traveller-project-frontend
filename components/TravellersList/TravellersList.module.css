@@ -94,15 +94,6 @@
   .travellers__item {
     width: 340px;
   }
-
-  .loadMoreWrapper {
-    display: flex;
-    justify-content: center;
-    position: relative;
-  }
-  .loader {
-    position: static;
-  }
 }
 
 @media only screen and (min-width: 1440px) {
