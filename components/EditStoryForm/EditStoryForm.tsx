@@ -4,7 +4,7 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
 import css from './EditStoryForm.module.css';
 import { useId, useState } from 'react';
 import Image from 'next/image';
-import StoryFormSchemaValidate from '@/YupSchemes/StoryFormSchemaValidate';
+import StoryFormSchemaValidate from '../../YupSchemes/StoryFormSchemaValidate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createStory } from '@/lib/api/clientApi';
 import { useRouter } from 'next/navigation';
