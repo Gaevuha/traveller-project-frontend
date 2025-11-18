@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '../Icon/Icon';
+import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import styles from './Modal.module.css';
 
 interface ModalProps {
@@ -27,6 +29,7 @@ export default function Modal({
 }: ModalProps) {
   // Використовуємо onClose якщо передано, інакше onCancel
   const handleClose = onClose || onCancel;
+  const closeMobileMenu = useMobileMenuOpen(state => state.closeMobileMenu);
   
   // Створюємо ref для onClose та onCancel окремо для правильної роботи з ESC
   const onCloseRef = useRef(onClose);
@@ -42,6 +45,9 @@ export default function Modal({
       document.body.style.overflow = '';
       return;
     }
+
+    // Закриваємо мобільне меню при відкритті модального вікна
+    closeMobileMenu();
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -61,7 +67,7 @@ export default function Modal({
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, closeMobileMenu]);
 
   if (!isOpen) return null;
 
@@ -93,7 +99,7 @@ export default function Modal({
     }
   };
 
-  return (
+  const modalContent = (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal}>
         <button
@@ -128,5 +134,13 @@ export default function Modal({
       </div>
     </div>
   );
+
+  // Використовуємо Portal для рендерингу модального вікна безпосередньо в body
+  // Це гарантує, що воно не буде обмежене батьківськими контейнерами
+  if (typeof window !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+
+  return null;
 }
 
