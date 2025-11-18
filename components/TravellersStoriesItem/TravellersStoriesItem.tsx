@@ -18,6 +18,7 @@ import Modal from '../Modal/Modal';
 interface TravellersStoriesItemProps {
   story: Story;
   isAuthenticated: boolean;
+  isMyStory?: boolean;
   onRemoveSavedStory?: (id: string) => void; // ⬅ додаємо!
 }
 
@@ -25,6 +26,7 @@ export default function TravellersStoriesItem({
   story,
   isAuthenticated,
   onRemoveSavedStory,
+  isMyStory,
 }: TravellersStoriesItemProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -55,6 +57,11 @@ export default function TravellersStoriesItem({
     // оптимістичне оновлення UI в самій картці
     setIsSaved(nextSaved);
     setFavoriteCount(prevCount + (nextSaved ? 1 : -1));
+
+    // ❗ відразу видаляємо картку зі сторінки, якщо "unfavorite"
+    if (!nextSaved && onRemoveSavedStory) {
+      onRemoveSavedStory(story._id);
+    }
     setLoading(true);
 
     const prevSavedMe = queryClient.getQueryData<Story[]>(['savedStoriesMe']);
@@ -178,16 +185,26 @@ export default function TravellersStoriesItem({
               Переглянути статтю
             </Link>
 
-            <button
-              onClick={handleToggleFavorite}
-              disabled={loading}
-              className={`${css.story__save} ${isSaved ? css.saved : ''}`}
-            >
-              <Icon
-                name="icon-bookmark"
-                className={`${isSaved ? css.icon__saved : css.icon__bookmark}`}
-              />
-            </button>
+            {/* Якщо моя історія → EDIT */}
+            {isMyStory ? (
+              <button
+                onClick={() => router.push(`/stories/${story._id}/edit`)}
+                className={css.story__save}
+              >
+                <Icon name="icon-edit" className={css.iconEdit} />
+              </button>
+            ) : (
+              <button
+                onClick={handleToggleFavorite}
+                disabled={loading}
+                className={`${css.story__save} ${isSaved ? css.saved : ''}`}
+              >
+                <Icon
+                  name="icon-bookmark"
+                  className={`${isSaved ? css.icon__saved : css.icon__bookmark}`}
+                />
+              </button>
+            )}
           </div>
         </div>
       </li>

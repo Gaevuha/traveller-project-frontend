@@ -152,19 +152,19 @@ export default function ProfilePageClient({
   const getMessageNoStoriesProps = (): {
     text: string;
     buttonText: string;
-    redirectPath: '/stories/create' | '/stories';
+    route: '/stories/create' | '/stories';
   } => {
     if (activeTab === 'my') {
       return {
         text: 'Ви ще нічого не публікували, поділіться своєю першою історією!',
         buttonText: 'Опублікувати історію',
-        redirectPath: '/stories/create',
+        route: '/stories/create',
       };
     } else {
       return {
         text: 'У вас ще немає збережених історій, мершій збережіть вашу першу історію!',
         buttonText: 'До історій',
-        redirectPath: '/stories',
+        route: '/stories',
       };
     }
   };
@@ -220,6 +220,7 @@ export default function ProfilePageClient({
                   stories={stories}
                   isAuthenticated={isAuthenticated}
                   onRemoveSavedStory={handleRemoveSavedStory}
+                  isMyStory={activeTab === 'my'}
                 />
               )}
             </div>

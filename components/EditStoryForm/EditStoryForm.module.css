@@ -1,0 +1,251 @@
+.form {
+}
+
+.fieldsList {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+
+  margin-bottom: 42px;
+}
+
+.fieldItem {
+  position: relative;
+}
+
+.coverLabel {
+  pointer-events: none;
+}
+
+.inputLabel {
+  /* font-family: "Nunito Sans", sans-serif; */
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #000;
+
+  display: block;
+  margin-bottom: 8px;
+}
+
+.inputField {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 8px;
+  width: 100%;
+  height: 40px;
+
+  background-color: rgba(255, 255, 255, 0);
+  outline: none;
+}
+
+.categoryInput {
+  padding-left: 6px;
+}
+
+.inputField:focus {
+  border: 1px solid transparent;
+  outline: 1px solid black;
+}
+
+.errorMessage {
+  position: absolute;
+  bottom: -23px;
+  left: 0;
+  color: red;
+}
+
+.errorMessageImage {
+  bottom: -28px;
+}
+
+/* .inputField:hover,
+.inputField:focus {
+  border: 1px solid black;
+} */
+
+.imageWrapper {
+  width: 100%;
+  max-width: 335px;
+  aspect-ratio: 335 / 223;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.imagePreview {
+}
+
+.coverInput {
+  display: none;
+}
+
+.coverButton {
+  /* font-family: 'Nunito Sans', sans-serif; */
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  background-color: rgba(0, 0, 0, 0.05);
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 4px 9px;
+  /* width: 163px; */
+  height: 32px;
+
+  cursor: pointer;
+  transition:
+    color 250ms ease,
+    background-color 250ms ease;
+}
+
+.coverButton:hover,
+.coverButton:focus {
+  border: 1px solid rgba(255, 255, 255, 0);
+  color: #fff;
+  background-color: #4169e1;
+}
+
+.coverButton:active {
+  background-color: #1a2a5a;
+}
+
+.optionDisabled {
+  /* color: red; */
+}
+
+.description {
+  /* width: 100%; */
+  height: 120px;
+  padding: 12px;
+  resize: none;
+}
+
+.description::placeholder {
+  /* color: red; */
+}
+
+.storyText {
+  min-height: 180px;
+  max-height: 550px;
+  overflow: hidden;
+  padding: 12px;
+  resize: none;
+}
+
+.buttonsContainer {
+  margin-bottom: 64px;
+}
+
+.saveBtn {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #fff;
+
+  border: 1px solid #4169e1;
+  border-radius: 8px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+  margin-bottom: 16px;
+  width: 100%;
+
+  background-color: #4169e1;
+  transition:
+    color 250ms ease,
+    background-color 250ms ease;
+}
+
+.saveBtn:hover,
+.saveBtn:focus {
+  color: #000;
+  background-color: #e8eeff;
+}
+
+.saveBtn:active {
+  background-color: #7a96ea;
+}
+
+.btnDisabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.saveBtn.btnDisabled:hover,
+.saveBtn.btnDisabled:focus {
+  color: #fff;
+  background-color: #4169e1;
+}
+
+.saveBtn.btnDisabled:active {
+  background-color: #4169e1;
+}
+
+.rejectBtn {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #000;
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+  width: 100%;
+
+  background-color: rgba(0, 0, 0, 0.05);
+  transition:
+    color 250ms ease,
+    background-color 250ms ease;
+}
+
+.rejectBtn:hover,
+.rejectBtn:focus {
+  border: 1px solid #4169e1;
+  color: #fff;
+  background-color: #4169e1;
+}
+
+.rejectBtn:active {
+  border: 1px solid #1a2a5a;
+  background-color: #1a2a5a;
+}
+
+@media screen and (min-width: 768px) {
+  .imageWrapper {
+    max-width: 704px;
+    aspect-ratio: 704 / 469;
+  }
+
+  .errorMessageImage {
+    bottom: 3px;
+    left: 220px;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .form {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 72px;
+  }
+
+  .fieldsList {
+    width: 865px;
+    margin-bottom: 0;
+  }
+
+  .imageWrapper {
+    max-width: 865px;
+    aspect-ratio: 865 / 576;
+  }
+
+  .coverButton {
+    font-size: 18px;
+    padding: 4.5px 9px;
+  }
+
+  .buttonsContainer {
+    padding-top: 32px;
+    flex-grow: 1;
+  }
+}
