@@ -6,6 +6,7 @@ import ProfileTabs from '@/components/ProfileTabs/ProfileTabs';
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 import MessageNoStories from '@/components/MessageNoStories/MessageNoStories';
 import Loader from '@/components/Loader/Loader';
+import EditProfileModal from '@/components/EditProfileModal/EditProfileModal';
 import { User } from '@/types/user';
 import { Story } from '@/types/story';
 import { getMeProfile, getUserSavedArticles } from '@/lib/api/clientApi';
@@ -33,6 +34,7 @@ export default function ProfilePageClient({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const savedStoriesLoadedRef = useRef(initialSavedStories !== null);
   const myStoriesLoadedRef = useRef(initialMyStories.length > 0);
@@ -149,6 +151,15 @@ export default function ProfilePageClient({
 
   const handleTabChange = (tab: 'saved' | 'my') => setActiveTab(tab);
 
+  const handleUpdateProfile = (updatedUser: User) => {
+    setUser(updatedUser);
+    // Оновлюємо також в authStore, якщо це поточний користувач
+    const { setUser: setAuthUser } = useAuthStore.getState();
+    if (currentUser?._id === updatedUser._id) {
+      setAuthUser(updatedUser);
+    }
+  };
+
   const getMessageNoStoriesProps = (): {
     text: string;
     buttonText: string;
@@ -190,21 +201,39 @@ export default function ProfilePageClient({
           <>
             {user && (
               <div className={css.containerTraveller}>
-                <TravellerInfo
-                  user={user}
-                  useDefaultStyles={false}
-                  priority
-                  className={{
-                    travellerInfoWraper: css.travellerInfoWraper,
-                    image: css.image,
-                    wrapper: css.wrapperContent,
-                    container: css.travellerContainer,
-                    name: css.travellerName,
-                    text: css.travellerText,
-                  }}
-                  imageSize={{ width: 199, height: 199 }}
-                />
+                <div className={css.travellerInfoWrapper}>
+                  <TravellerInfo
+                    user={user}
+                    useDefaultStyles={false}
+                    priority
+                    className={{
+                      travellerInfoWraper: css.travellerInfoWraper,
+                      image: css.image,
+                      wrapper: css.wrapperContent,
+                      container: css.travellerContainer,
+                      name: css.travellerName,
+                      text: css.travellerText,
+                    }}
+                    imageSize={{ width: 199, height: 199 }}
+                  />
+                  <button
+                    className={css.editButton}
+                    onClick={() => setIsEditModalOpen(true)}
+                    type="button"
+                    aria-label="Редагувати профіль"
+                  >
+                    Редагувати профіль
+                  </button>
+                </div>
               </div>
+            )}
+            {user && (
+              <EditProfileModal
+                user={user}
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onUpdate={handleUpdateProfile}
+              />
             )}
             <div className={css.tabsWrapper}>
               <ProfileTabs
