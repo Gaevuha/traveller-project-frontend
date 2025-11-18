@@ -13,14 +13,19 @@ import { StoryDetailsClient } from '@/components/StoryDetailsClient/StoryDetails
 import ResponsiveTravellersStories from '@/components/StoryDetailsClient/ResponsiveTravellersStories';
 import Popular from '@/components/Popular/Popular';
 
+
+type storyId = {
+  storyId: string;
+};
+
 type Props = {
-  params: { storyId: string };
+  params: Promise<storyId>
 };
 
 export const generateMetadata = async ({
   params,
 }: Props): Promise<Metadata> => {
-  const { storyId } = params;
+  const { storyId } = await params;
   const data = await fetchStoryByIdServer(storyId);
   const story = data;
 

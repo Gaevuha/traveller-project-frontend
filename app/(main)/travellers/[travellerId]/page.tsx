@@ -15,17 +15,18 @@ import {
 import type { BackendArticleFromUser, User } from '@/types/user';
 import styles from './TravellerPage.module.css';
 
+type Traveller ={
+ travellerId: string
+} 
+
 interface TravellerPageProps {
-  params: Promise<{ travellerId: string }>;
+  params: Promise<Traveller>;
 }
 
-interface GenerateMetadataProps {
-  params: { travellerId: string };
-}
 
 export const generateMetadata = async ({
   params,
-}: GenerateMetadataProps): Promise<Metadata> => {
+}: TravellerPageProps): Promise<Metadata> => {
   const { travellerId } = await params;
 
   const res = await getUserByIdServer(travellerId);

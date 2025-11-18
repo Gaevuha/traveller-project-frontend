@@ -5,14 +5,18 @@ import LoginForm from '@/components/AuthForms/LoginForm/LoginForm';
 import AuthRoute from '@/components/AuthRoute/AuthRoute';
 import { Metadata } from 'next';
 
+type AuthPageParams = {
+  authType: string;
+};
+
 type AuthPageProps = {
-  params: { authType: string };
+  params: Promise<AuthPageParams>;
 };
 
 export async function generateMetadata({
   params,
 }: AuthPageProps): Promise<Metadata> {
-  const { authType } = params;
+  const { authType } = await params;
 
   const titles = {
     register: 'Реєстрація | Подорожники',
