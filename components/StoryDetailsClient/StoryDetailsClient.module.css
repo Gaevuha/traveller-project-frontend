@@ -41,7 +41,6 @@
 }
 
 .textCategory {
-  width: 76px;
   height: 26px;
   display: flex;
   flex-direction: row;
@@ -55,11 +54,17 @@
   margin-bottom: 16px;
 }
 
-.storyCardImage {
+.storyImageWrapper {
+  position: relative;
+  width: 100%;
   height: 223px;
-  width: 335px;
   border-radius: 24px;
+  overflow: hidden;
   margin-bottom: 32px;
+}
+
+.storyCardImage {
+  object-fit: cover;
 }
 
 .mainText {
@@ -102,6 +107,39 @@
   margin-bottom: 16px;
 }
 
+.button {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8;
+  padding: 6px 12px 6px 12px;
+  border: 1px solid var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
+  border-radius: var(--Radius-Small, 8px);
+  background: var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
+  color: var(--Color-White, rgba(255, 255, 255, 1));
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+  line-height: 1.5;
+  letter-spacing: 0%;
+  text-align: left;
+    transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+
+.button:disabled{
+border: 1px solid var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
+background: var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
+opacity: 0.3;
+color: var(--Color-White, rgba(255, 255, 255, 1));
+}
+
 @media only screen and (min-width: 768px) {
   .storyDetails {
     padding-top: 32px;
@@ -140,11 +178,10 @@
     margin-right: 0px;
   }
 
-  .storyCardImage {
-    object-fit: cover;
-    height: auto;
-    width: 704px;
-    border-radius: 24px;
+  .storyImageWrapper {
+    height: 469px;
+    max-width: 704px;
+    margin: 0 auto 40px;
   }
 
   .mainText {
@@ -173,11 +210,10 @@
     margin-bottom: 21px;
   }
 
-  .storyCardImage {
-    object-fit: cover;
-    width: 1312px;
-    height: auto;
-    margin-bottom: 96px;
+    .storyImageWrapper {
+    height: 874px;
+    max-width: 1312px;
+    margin: 0 auto 96px;
   }
 
   .wrapperButton {
@@ -190,3 +226,5 @@
     max-width: 865px;
   }
 }
+
+

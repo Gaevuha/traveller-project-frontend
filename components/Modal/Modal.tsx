@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Icon } from '../Icon/Icon';
 import styles from './Modal.module.css';
 
@@ -11,6 +11,7 @@ interface ModalProps {
   cancelButtonText: string;
   onConfirm: () => void;
   onCancel: () => void;
+  onClose?: () => void;
   isOpen?: boolean;
 }
 
@@ -21,14 +22,35 @@ export default function Modal({
   cancelButtonText,
   onConfirm,
   onCancel,
+  onClose,
   isOpen = true,
 }: ModalProps) {
+  // Використовуємо onClose якщо передано, інакше onCancel
+  const handleClose = onClose || onCancel;
+  
+  // Створюємо ref для onClose та onCancel окремо для правильної роботи з ESC
+  const onCloseRef = useRef(onClose);
+  const onCancelRef = useRef(onCancel);
+
   useEffect(() => {
-    if (!isOpen) return;
+    onCloseRef.current = onClose;
+    onCancelRef.current = onCancel;
+  }, [onClose, onCancel]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = '';
+      return;
+    }
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onCancel();
+        // При ESC викликаємо onClose якщо він є, інакше onCancel
+        if (onCloseRef.current) {
+          onCloseRef.current();
+        } else {
+          onCancelRef.current();
+        }
       }
     };
 
@@ -39,14 +61,18 @@ export default function Modal({
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onCancel();
+      // При кліку на backdrop викликаємо onClose якщо він є, інакше onCancel
+      if (onCloseRef.current) {
+        onCloseRef.current();
+      } else {
+        onCancelRef.current();
+      }
     }
   };
 
@@ -58,12 +84,21 @@ export default function Modal({
     onCancel();
   };
 
+  const handleCloseButton = () => {
+    // При кліку на кнопку закриття викликаємо onClose якщо він є, інакше onCancel
+    if (onCloseRef.current) {
+      onCloseRef.current();
+    } else {
+      onCancelRef.current();
+    }
+  };
+
   return (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal}>
         <button
           className={styles.closeButton}
-          onClick={handleCancel}
+          onClick={handleCloseButton}
           aria-label="Закрити"
           type="button"
         >

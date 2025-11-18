@@ -6,6 +6,7 @@ import ProfileTabs from '@/components/ProfileTabs/ProfileTabs';
 import TravellersStories from '@/components/TravellersStories/TravellersStories';
 import MessageNoStories from '@/components/MessageNoStories/MessageNoStories';
 import Loader from '@/components/Loader/Loader';
+import EditProfileModal from '@/components/EditProfileModal/EditProfileModal';
 import { User } from '@/types/user';
 import { Story } from '@/types/story';
 import { getMeProfile, getUserSavedArticles } from '@/lib/api/clientApi';
@@ -33,15 +34,24 @@ export default function ProfilePageClient({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const savedStoriesLoadedRef = useRef(initialSavedStories !== null);
   const myStoriesLoadedRef = useRef(initialMyStories.length > 0);
+
+  // рефи для стабільних значень initial
+  const initialMyStoriesRef = useRef(initialMyStories);
+  const initialSavedStoriesRef = useRef(initialSavedStories);
 
   const currentUser = useAuthStore(state => state.user);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const authIsLoading = useAuthStore(state => state.isLoading);
 
-  // Завантаження даних при зміні табу
+  // Видалення картки зі сторінки після "unfavorite"
+  const handleRemoveSavedStory = (storyId: string) => {
+    setStories(prev => prev.filter(story => story._id !== storyId));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (authIsLoading) return;
@@ -51,14 +61,17 @@ export default function ProfilePageClient({
         return;
       }
 
-      // Якщо дані вже завантажені з SSR для поточного табу, використовуємо їх
+      // --- Мої історії ---
       if (activeTab === 'my') {
-        if (myStoriesLoadedRef.current && initialMyStories.length > 0) {
-          setStories(initialMyStories);
+        if (
+          myStoriesLoadedRef.current &&
+          initialMyStoriesRef.current.length > 0
+        ) {
+          setStories(initialMyStoriesRef.current);
           setIsLoading(false);
           return;
         }
-        // Завантажуємо "Мої історії" тільки якщо не завантажені з SSR
+
         try {
           setIsLoading(true);
           setError(null);
@@ -80,10 +93,19 @@ export default function ProfilePageClient({
         return;
       }
 
-      // Для табу "Збережені історії"
+      // --- Збережені історії ---
       if (activeTab === 'saved') {
-        if (savedStoriesLoadedRef.current && initialSavedStories !== null) {
-          setStories(initialSavedStories);
+        if (
+          savedStoriesLoadedRef.current &&
+          initialSavedStoriesRef.current !== null
+        ) {
+          const savedStoriesWithFavorite = initialSavedStoriesRef.current.map(
+            story => ({
+              ...story,
+              isFavorite: true,
+            })
+          );
+          setStories(savedStoriesWithFavorite);
           setIsLoading(false);
           return;
         }
@@ -91,22 +113,24 @@ export default function ProfilePageClient({
         try {
           setIsLoading(true);
           setError(null);
-          let userId = currentUser?._id;
-          if (!userId && user?._id) {
-            userId = user._id;
-          }
+          let userId = currentUser?._id || user?._id;
           if (!userId) {
             const { getMe } = await import('@/lib/api/clientApi');
             const me = await getMe(true);
-            if (!me?._id) {
-              throw new Error('Не вдалося отримати ID користувача');
-            }
+            if (!me?._id) throw new Error('Не вдалося отримати ID користувача');
             userId = me._id;
           }
+
           const { user: profileUser, savedStories } =
             await getUserSavedArticles(userId);
           setUser(profileUser);
-          setStories(savedStories || []);
+
+          const savedStoriesWithFavorite = (savedStories || []).map(story => ({
+            ...story,
+            isFavorite: true,
+          }));
+
+          setStories(savedStoriesWithFavorite);
           savedStoriesLoadedRef.current = true;
         } catch (error) {
           console.error('Failed to fetch saved stories:', error);
@@ -121,29 +145,37 @@ export default function ProfilePageClient({
         }
       }
     };
-    fetchData();
-  }, [activeTab, isAuthenticated, authIsLoading]);
 
-  const handleTabChange = (tab: 'saved' | 'my') => {
-    setActiveTab(tab);
+    fetchData();
+  }, [activeTab, isAuthenticated, authIsLoading, currentUser?._id, user?._id]);
+
+  const handleTabChange = (tab: 'saved' | 'my') => setActiveTab(tab);
+
+  const handleUpdateProfile = (updatedUser: User) => {
+    setUser(updatedUser);
+    // Оновлюємо також в authStore, якщо це поточний користувач
+    const { setUser: setAuthUser } = useAuthStore.getState();
+    if (currentUser?._id === updatedUser._id) {
+      setAuthUser(updatedUser);
+    }
   };
 
   const getMessageNoStoriesProps = (): {
     text: string;
     buttonText: string;
-    redirectPath: '/stories/create' | '/stories';
+    route: '/stories/create' | '/stories';
   } => {
     if (activeTab === 'my') {
       return {
         text: 'Ви ще нічого не публікували, поділіться своєю першою історією!',
         buttonText: 'Опублікувати історію',
-        redirectPath: '/stories/create',
+        route: '/stories/create',
       };
     } else {
       return {
         text: 'У вас ще немає збережених історій, мершій збережіть вашу першу історію!',
         buttonText: 'До історій',
-        redirectPath: '/stories',
+        route: '/stories',
       };
     }
   };
@@ -169,21 +201,39 @@ export default function ProfilePageClient({
           <>
             {user && (
               <div className={css.containerTraveller}>
-                <TravellerInfo
-                  user={user}
-                  useDefaultStyles={false}
-                  priority
-                  className={{
-                    travellerInfoWraper: css.travellerInfoWraper,
-                    image: css.image,
-                    wrapper: css.wrapperContent,
-                    container: css.travellerContainer,
-                    name: css.travellerName,
-                    text: css.travellerText,
-                  }}
-                  imageSize={{ width: 199, height: 199 }}
-                />
+                <div className={css.travellerInfoWrapper}>
+                  <TravellerInfo
+                    user={user}
+                    useDefaultStyles={false}
+                    priority
+                    className={{
+                      travellerInfoWraper: css.travellerInfoWraper,
+                      image: css.image,
+                      wrapper: css.wrapperContent,
+                      container: css.travellerContainer,
+                      name: css.travellerName,
+                      text: css.travellerText,
+                    }}
+                    imageSize={{ width: 199, height: 199 }}
+                  />
+                  <button
+                    className={css.editButton}
+                    onClick={() => setIsEditModalOpen(true)}
+                    type="button"
+                    aria-label="Редагувати профіль"
+                  >
+                    Редагувати профіль
+                  </button>
+                </div>
               </div>
+            )}
+            {user && (
+              <EditProfileModal
+                user={user}
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onUpdate={handleUpdateProfile}
+              />
             )}
             <div className={css.tabsWrapper}>
               <ProfileTabs
@@ -198,6 +248,8 @@ export default function ProfilePageClient({
                 <TravellersStories
                   stories={stories}
                   isAuthenticated={isAuthenticated}
+                  onRemoveSavedStory={handleRemoveSavedStory}
+                  isMyStory={activeTab === 'my'}
                 />
               )}
             </div>

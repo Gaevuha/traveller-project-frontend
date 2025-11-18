@@ -45,7 +45,7 @@ export default function GoogleCallbackPage() {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <p>Підтвердження входу через Google...</p>
+      <p>Підтвердження входу через Google.....</p>
     </div>
   );
 }

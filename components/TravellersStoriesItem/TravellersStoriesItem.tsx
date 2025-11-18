@@ -13,26 +13,32 @@ import {
 import css from './TravellersStoriesItem.module.css';
 import { Icon } from '../Icon/Icon';
 import Link from 'next/link';
-import Modal from '../Modal/Modal'
+import Modal from '../Modal/Modal';
 
 interface TravellersStoriesItemProps {
   story: Story;
   isAuthenticated: boolean;
+  isMyStory?: boolean;
+  onRemoveSavedStory?: (id: string) => void; // ⬅ додаємо!
 }
 
 export default function TravellersStoriesItem({
   story,
   isAuthenticated,
+  onRemoveSavedStory,
+  isMyStory,
 }: TravellersStoriesItemProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isSaved, setIsSaved] = useState<boolean>(story.isFavorite ?? false);
   // const [isSaving, setIsSaving] = useState(false);
-  const [favoriteCount, setFavoriteCount] = useState<number>(story.favoriteCount);
+  const [favoriteCount, setFavoriteCount] = useState<number>(
+    story.favoriteCount
+  );
   const [loading, setLoading] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-    useEffect(() => {
+  useEffect(() => {
     setIsSaved(story.isFavorite ?? false);
   }, [story.isFavorite]);
 
@@ -44,7 +50,6 @@ export default function TravellersStoriesItem({
 
     if (loading) return;
 
-    
     const prevSaved = isSaved;
     const prevCount = favoriteCount;
     const nextSaved = !prevSaved;
@@ -52,18 +57,23 @@ export default function TravellersStoriesItem({
     // оптимістичне оновлення UI в самій картці
     setIsSaved(nextSaved);
     setFavoriteCount(prevCount + (nextSaved ? 1 : -1));
+
+    // ❗ відразу видаляємо картку зі сторінки, якщо "unfavorite"
+    if (!nextSaved && onRemoveSavedStory) {
+      onRemoveSavedStory(story._id);
+    }
     setLoading(true);
 
-        const prevSavedMe = queryClient.getQueryData<Story[]>(['savedStoriesMe']);
+    const prevSavedMe = queryClient.getQueryData<Story[]>(['savedStoriesMe']);
 
     try {
       if (nextSaved) {
         // пушимо цю історію в кеш savedStoriesMe
         queryClient.setQueryData<Story[] | undefined>(
           ['savedStoriesMe'],
-          (prev) => {
+          prev => {
             if (!prev) return [story];
-            if (prev.some((prevOne) => prevOne._id === story._id)) return prev;
+            if (prev.some(prevOne => prevOne._id === story._id)) return prev;
             return [...prev, story];
           }
         );
@@ -73,17 +83,22 @@ export default function TravellersStoriesItem({
         // прибираємо історію з кешу savedStoriesMe
         queryClient.setQueryData<Story[] | undefined>(
           ['savedStoriesMe'],
-          (prev) => (prev ? prev.filter((prevOne) => prevOne._id !== story._id) : prev)
+          prev =>
+            prev ? prev.filter(prevOne => prevOne._id !== story._id) : prev
         );
 
         await removeStoryFromFavorites(story._id);
+        // >>> ВАЖЛИВО: видалити картку зі сторінки
+        if (onRemoveSavedStory) {
+          onRemoveSavedStory(story._id);
+        }
       }
       queryClient.invalidateQueries({ queryKey: ['savedStoriesByUser'] });
       queryClient.invalidateQueries({ queryKey: ['savedStoriesMe'] });
     } catch (error) {
       console.error(error);
 
-      //  відкат UI якщо зламаэться
+      // відкат UI якщо зламаэться
       setIsSaved(prevSaved);
       setFavoriteCount(prevCount);
 
@@ -96,102 +111,104 @@ export default function TravellersStoriesItem({
     }
   };
 
-
-
-
-
   // const handleSave = async () => {
-  //   if (!isAuthenticated) {
-  //     router.push('/auth/register');
-  //     return;
-  //   }
+  // if (!isAuthenticated) {
+  // router.push('/auth/register');
+  // return;
+  // }
 
-  //   try {
-  //     setIsSaving(true);
-  //     if (!isSaved) {
-  //       await addStoryToFavorites(story._id);
-  //       setFavoriteCount(prev => prev + 1);
-  //       setIsSaved(true);
-  //       toast.success('Додано до збережених!');
-  //     } else {
-  //       await removeStoryFromFavorites(story._id);
-  //       setFavoriteCount(prev => prev - 1);
-  //       setIsSaved(false);
-  //       toast('Видалено із збережених');
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
+  // try {
+  // setIsSaving(true);
+  // if (!isSaved) {
+  // await addStoryToFavorites(story._id);
+  // setFavoriteCount(prev => prev + 1);
+  // setIsSaved(true);
+  // toast.success('Додано до збережених!');
+  // } else {
+  // await removeStoryFromFavorites(story._id);
+  // setFavoriteCount(prev => prev - 1);
+  // setIsSaved(false);
+  // toast('Видалено із збережених');
+  // }
+  // } catch (error) {
+  // console.error(error);
+  // } finally {
+  // setIsSaving(false);
+  // }
   // };
 
   function formatDate(dateString: string) {
-  const d = new Date(dateString);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}.${month}.${year}`; 
-  };
-
-
- 
+    const d = new Date(dateString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
 
   return (
     <>
-    <li className={css.story}>
-      <Image
-        src={story.img}
-        alt={story.title}
-        width={400}
-        height={200}
-        className={css.story__img}
-      />
+      <li className={css.story}>
+        <Image
+          src={story.img}
+          alt={story.title}
+          width={400}
+          height={200}
+          className={css.story__img}
+        />
 
-      <div className={css.story__content}>
-        <p className={css.story__category}>{story.category.name}</p>
-        <h3 className={css.story__title}>{story.title}</h3>
-        <p className={css.story__text}>{story.article}</p>
+        <div className={css.story__content}>
+          <p className={css.story__category}>{story.category.name}</p>
+          <h3 className={css.story__title}>{story.title}</h3>
+          <p className={css.story__text}>{story.article}</p>
 
-        <div className={css.story__author}>
-          <Image
-            src={story.ownerId.avatarUrl}
-            alt="Автор"
-            width={48}
-            height={48}
-            className={css.story__avatar}
-          />
-          <div className={css.story__info}>
-            <p className={css.story__name}>{story.ownerId.name}</p>
-            <div className={css.meta}>
-              <span className={css.story__meta}>{formatDate(story.date)}</span>
-              <span className={css.favoriteCount}>{favoriteCount}</span>
-              <Icon name="icon-bookmark" className={css.icon} />
+          <div className={css.story__author}>
+            <Image
+              src={story.ownerId.avatarUrl}
+              alt="Автор"
+              width={48}
+              height={48}
+              className={css.story__avatar}
+            />
+            <div className={css.story__info}>
+              <p className={css.story__name}>{story.ownerId.name}</p>
+              <div className={css.meta}>
+                <span className={css.story__meta}>
+                  {formatDate(story.date)}
+                </span>
+                <span className={css.favoriteCount}>{favoriteCount}</span>
+                <Icon name="icon-bookmark" className={css.icon} />
+              </div>
             </div>
           </div>
-        </div>
-        <div className={css.story__actions}>
-          <Link
-            href={`/stories/${story._id}`}
-            className={css.story__btn}
-          >
-            Переглянути статтю
-          </Link>
+          <div className={css.story__actions}>
+            <Link href={`/stories/${story._id}`} className={css.story__btn}>
+              Переглянути статтю
+            </Link>
 
-          <button
-            onClick={handleToggleFavorite}
-            disabled={loading}
-            className={`${css.story__save} ${isSaved ? css.saved : ''}`}
-          >
-            <Icon
-              name="icon-bookmark"
-              className={`${isSaved ? css.icon__saved : css.icon__bookmark}`}
-            />
-          </button>
+            {/* Якщо моя історія → EDIT */}
+            {isMyStory ? (
+              <button
+                onClick={() => router.push(`/stories/${story._id}/edit`)}
+                className={css.story__save}
+              >
+                <Icon name="icon-edit" className={css.iconEdit} />
+              </button>
+            ) : (
+              <button
+                onClick={handleToggleFavorite}
+                disabled={loading}
+                className={`${css.story__save} ${isSaved ? css.saved : ''}`}
+              >
+                <Icon
+                  name="icon-bookmark"
+                  className={`${isSaved ? css.icon__saved : css.icon__bookmark}`}
+                />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    </li>
-          <Modal
+      </li>
+      <Modal
         title="Помилка під час збереження"
         message="Щоб зберегти статтю вам треба увійти, якщо ще немає облікового запису — зареєструйтесь."
         confirmButtonText="Зареєструватись"
@@ -204,8 +221,11 @@ export default function TravellersStoriesItem({
           setIsAuthModalOpen(false);
           router.push('/auth/login');
         }}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+        }}
         isOpen={isAuthModalOpen}
       />
-</>
+    </>
   );
 }

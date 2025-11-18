@@ -2,23 +2,37 @@ import { Metadata } from 'next';
 import css from './Home.module.css';
 
 export const metadata: Metadata = {
-  title: 'Page not found',
+  title: 'Сторінку не знайдено | Подорожники',
   description:
-    "The page you're looking for doesn't exist or has been moved. Try going back to the homepage or explore other notes.",
+    'Сторінку не знайдено або вона була видалена. Поверніться на головну сторінку або перегляньте інші історії мандрівників.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+
   openGraph: {
-    title: 'Page not found',
+    title: 'Сторінку не знайдено | Подорожники',
     description:
-      "The page you're looking for doesn't exist or has been moved. Try going back to the homepage or explore other notes.",
+      'Сторінку не знайдено або вона була видалена. Поверніться на головну сторінку або перегляньте інші історії мандрівників.',
+    url: '/not-found',
+    siteName: 'Подорожники',
+    type: 'website',
     images: [
       {
-        url: '/page-note-found.jpeg',
+        url: '/page-not-found.jpeg',
         width: 1200,
         height: 630,
-        alt: 'page not found',
+        alt: 'Сторінку не знайдено',
       },
     ],
-    siteName: 'travellers',
-    url: 'http://localhost:3000/not-found',
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Сторінку не знайдено | Подорожники',
+    description:
+      'Сторінку не знайдено або вона була видалена. Поверніться на головну сторінку або перегляньте інші історії мандрівників.',
+    images: ['/page-not-found.jpeg'],
   },
 };
 

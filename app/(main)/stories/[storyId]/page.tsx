@@ -4,13 +4,22 @@ import {
   HydrationBoundary,
   QueryClient,
 } from '@tanstack/react-query';
-import { fetchSavedStoriesMeServer, fetchStoriesServer, fetchStoryByIdServer } from '@/lib/api/serverApi';
+import {
+  fetchSavedStoriesMeServer,
+  fetchStoriesServer,
+  fetchStoryByIdServer,
+} from '@/lib/api/serverApi';
 import { StoryDetailsClient } from '@/components/StoryDetailsClient/StoryDetailsClient';
 import ResponsiveTravellersStories from '@/components/StoryDetailsClient/ResponsiveTravellersStories';
+import Popular from '@/components/Popular/Popular';
 
+
+type storyId = {
+  storyId: string;
+};
 
 type Props = {
-  params: Promise<{ storyId: string }>;
+  params: Promise<storyId>
 };
 
 export const generateMetadata = async ({
@@ -18,24 +27,46 @@ export const generateMetadata = async ({
 }: Props): Promise<Metadata> => {
   const { storyId } = await params;
   const data = await fetchStoryByIdServer(storyId);
+  const story = data;
+
+  const title = `${story.title} — Подорожники`;
+  const rawDescription =
+    story.article && story.article.length > 0
+      ? story.article
+      : `Історія подорожі у категорії ${story.category?.name || ''}.`;
+
+  const description =
+    rawDescription.length > 200
+      ? `${rawDescription.slice(0, 197)}…`
+      : rawDescription;
+
+  const imageUrl =
+    story.img ||
+    'https://res.cloudinary.com/dcyt4kr5s/image/upload/v1763071406/hg4accqwhzuuabjoko4a.png';
 
   return {
-    title: data.title,
-    description: data.article.slice(0, 25),
+    title,
+    description,
     openGraph: {
-      title: `Найкращі історії: ${data.title}`,
-      description: data.article.slice(0, 25),
-      url: `https://travel-fs116-teamproject-frontend-rouge.vercel.app/api/stories/${storyId}`,
-      siteName: `Подорожники: ${data.title}`,
+      type: 'article',
+      title,
+      description,
+      url: `/stories/${storyId}`,
+      siteName: 'Подорожники',
       images: [
         {
-          url: 'https://res.cloudinary.com/dcyt4kr5s/image/upload/v1763071406/hg4accqwhzuuabjoko4a.png',
+          url: imageUrl,
           width: 1200,
           height: 630,
-          alt: `${data.title}`,
+          alt: story.title,
         },
       ],
-      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
     },
   };
 };
@@ -49,24 +80,23 @@ export default async function StoryDetails({ params }: Props) {
     queryFn: () => fetchStoryByIdServer(storyId),
   });
 
-    await queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['savedStoriesMe'],
     queryFn: fetchSavedStoriesMeServer,
   });
 
   const popularStoriesResponse = await fetchStoriesServer(1, 12, storyId);
 
-  
-
   const isAuthenticated = false;
 
- return (
+  return (
     <>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <StoryDetailsClient />
       </HydrationBoundary>
+      <Popular withPagination={false} />
 
-      <section className="stories">
+      {/* <section className="stories">
         <div className="container">
           <h2>Популярні історії</h2>
           <ResponsiveTravellersStories
@@ -77,10 +107,7 @@ export default async function StoryDetails({ params }: Props) {
             mobileCount={2}
           />
         </div>
-      </section>
+      </section> */}
     </>
   );
 }
-
-
-

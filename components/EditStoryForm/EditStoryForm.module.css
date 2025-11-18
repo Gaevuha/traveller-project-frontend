@@ -210,14 +210,6 @@
   background-color: #1a2a5a;
 }
 
-.loaderContainer {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 999;
-}
-
 @media screen and (min-width: 768px) {
   .imageWrapper {
     max-width: 704px;
