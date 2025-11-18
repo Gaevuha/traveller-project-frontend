@@ -171,7 +171,7 @@
   align-items: center;
 }
 
-/* основная кнопка — как раньше */
+
 .story__btn {
   display: flex;
   justify-content: center;
@@ -221,7 +221,7 @@
   flex-shrink: 0;
 }
 
-/* иконка внутри */
+
 .story__save .icon__bookmark {
   color: #0a0a0a;
   width: 24px;
@@ -234,7 +234,7 @@
   fill: currentColor;
 }
 
-/* hover / focus */
+
 .story__save:hover,
 .story__save:focus {
   background: #4169e1;
@@ -243,7 +243,7 @@
   border: none;
 }
 
-/* состояние "сохранено" — выделяется цветом */
+
 .story__save.saved {
   background: #7a96ea;
   border-color: #4169e1;
@@ -253,7 +253,7 @@
   color: #fff;
   fill: currentColor;
   stroke: none;
-  /* если хотим сплошную заливку */
+
 }
 
 .story__save:focus {
