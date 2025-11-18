@@ -15,7 +15,8 @@ const BASE_URL = `${API_ROOT}/api`;
 export const api = axios.create({
   baseURL: BASE_URL,         // теперь /api запрашивается на правильный домен и порт
   withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
+  // Не встановлюємо Content-Type за замовчуванням - axios автоматично встановить для JSON,
+  // а для FormData встановить multipart/form-data з boundary
 });
 
 

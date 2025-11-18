@@ -400,3 +400,46 @@ export async function createStory(
   });
   return data;
 }
+
+/**
+ * Update user profile
+ * Оновлює профіль користувача (ім'я, опис, аватар)
+ * Відповідь від бекенду: { status: 200, message: "...", data: { ... } }
+ */
+export async function updateUserProfile(data: {
+  name?: string;
+  description?: string;
+  avatar?: File | null;
+}): Promise<User> {
+  const formData = new FormData();
+
+  if (data.name !== undefined) {
+    formData.append('name', data.name);
+  }
+
+  if (data.description !== undefined) {
+    formData.append('description', data.description);
+  }
+
+  // Перевіряємо наявність avatar (не null і не undefined)
+  if (data.avatar !== undefined && data.avatar !== null) {
+    formData.append('avatar', data.avatar);
+  }
+
+  // Перевірка, що хоча б одне поле надано
+  if (!formData.has('name') && !formData.has('description') && !formData.has('avatar')) {
+    throw new Error('At least one field must be provided');
+  }
+
+  // Відповідь від бекенду: { status: 200, message: "...", data: { ... } }
+  // axios обгортає в data, тому res.data = { status, message, data }
+  const res = await api.patch<{ status: number; message: string; data: User }>('/users/me', formData, {
+    // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
+    headers: {
+      'Content-Type': undefined, // Явно видаляємо Content-Type, щоб axios міг встановити multipart/form-data
+    },
+  });
+
+  // Повертаємо data з відповіді бекенду
+  return res.data.data;
+}

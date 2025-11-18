@@ -31,20 +31,36 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: 'Подорожники — Діліться враженнями від подорожей',
   description:
-    'Платформа для мандрівників, де можна ділитися враженнями від подорожей, знаходити натхнення для нових пригод та відкривати цікаві місця.',
+    'Подорожники — платформа для мандрівників, де можна ділитися історіями, знаходити натхнення для нових пригод та відкривати цікаві місця світу.',
+  metadataBase: new URL(
+    'https://travel-fs116-teamproject-frontend-rouge.vercel.app/'
+  ),
+
   openGraph: {
+    type: 'website',
     title: 'Подорожники — Діліться враженнями від подорожей',
-    description: 'NoteHub helps you create, browse and search personal notes.',
-    url: 'https://localhost:3000',
+    description:
+      'Подорожники — платформа для мандрівників, де можна ділитися історіями, надихатися досвідом інших і планувати нові пригоди.',
+    url: '/',
+    siteName: 'Подорожники',
     images: [
       {
-        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+        url: 'https://res.cloudinary.com/dcyt4kr5s/image/upload/v1763071406/hg4accqwhzuuabjoko4a.png',
         width: 1200,
         height: 630,
-        alt: 'Подорожники',
+        alt: 'Подорожники — ілюстрація для соціальних мереж',
       },
     ],
-    type: 'website',
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Подорожники — Діліться враженнями від подорожей',
+    description:
+      'Платформа для мандрівників, де можна знаходити натхнення та ділитися власними історіями.',
+    images: [
+      'https://res.cloudinary.com/dcyt4kr5s/image/upload/v1763071406/hg4accqwhzuuabjoko4a.png',
+    ],
   },
 
   icons: {

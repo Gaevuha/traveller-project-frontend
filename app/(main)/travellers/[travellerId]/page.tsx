@@ -15,17 +15,18 @@ import {
 import type { BackendArticleFromUser, User } from '@/types/user';
 import styles from './TravellerPage.module.css';
 
+type Traveller ={
+ travellerId: string
+} 
+
 interface TravellerPageProps {
-  params: Promise<{ travellerId: string }>;
+  params: Promise<Traveller>;
 }
 
-interface GenerateMetadataProps {
-  params: Promise<{ travellerId: string }>;
-}
 
 export const generateMetadata = async ({
   params,
-}: GenerateMetadataProps): Promise<Metadata> => {
+}: TravellerPageProps): Promise<Metadata> => {
   const { travellerId } = await params;
 
   const res = await getUserByIdServer(travellerId);
@@ -42,7 +43,6 @@ export const generateMetadata = async ({
     title,
     description,
 
-    // Open Graph (Facebook, Instagram, Telegram)
     openGraph: {
       title,
       description,
@@ -60,7 +60,6 @@ export const generateMetadata = async ({
       locale: 'uk_UA',
     },
 
-    // Twitter / X
     twitter: {
       card: 'summary_large_image',
       title,
@@ -68,12 +67,10 @@ export const generateMetadata = async ({
       images: [imageUrl],
     },
 
-    // Canonical
     alternates: {
       canonical: pageUrl,
     },
 
-    // Icons
     icons: {
       icon: '/favicon.ico',
       shortcut: '/favicon.ico',

@@ -26,6 +26,57 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+}
+
+.travellerInfoWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.editButton {
+  font-family: var(--font-family, var(--font-nunito-sans)), sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+  color: var(--color-text-primary);
+  background: var(--opacity-neutral-darkest-5, var(--color-bg-secondary));
+  border: 1px solid var(--color-scheme-2-border, var(--color-border-light));
+  border-radius: 8px;
+  padding: 6px 12px;
+  height: 48px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editButton:hover:not(:disabled),
+.editButton:focus:not(:disabled) {
+  background: var(--opacity-neutral-darkest-5, var(--color-bg-secondary));
+  border-color: rgba(65, 105, 225, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.editButton:active:not(:disabled) {
+  transform: translateY(0);
+  background-color: #8daefb;
+  border-color: #6a90f0;
+  color: var(--color-text-primary);
+}
+
+.editButton:disabled {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-light);
+  color: var(--color-text-primary);
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 .travellerInfoWraper {
   display: flex;
@@ -82,11 +133,15 @@
     max-width: 422px;
   }
 
+  .travellerInfoWrapper {
+    align-items: flex-start;
+  }
+
   .travellerInfoWraper {
     flex-direction: row;
     gap: 24px;
     align-self: flex-start;
-    margin-bottom: 32px;
+    margin-bottom: 0;
   }
   .image {
     margin-bottom: 0;
@@ -100,6 +155,11 @@
   .travellerText {
     width: 480px;
     text-align: left;
+  }
+
+  .editButton {
+    align-self: flex-start;
+    font-size: 18px;
   }
 }
 
@@ -118,6 +178,11 @@
     width: 367px;
   }
   .travellerInfoWraper {
-    margin-bottom: 48px;
+    margin-bottom: 0;
+  }
+
+  .editButton {
+    font-size: 18px;
+    height: 48px;
   }
 }

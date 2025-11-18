@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import ProtectedRoute from '@/components/ProtectedRoute/ProtectedRoute';
 import ProfilePageClient from './ProfilePageClient';
 import {
@@ -6,43 +6,77 @@ import {
   getUserSavedArticlesServer,
   getServerMe,
 } from '@/lib/api/serverApi';
-import { User } from '@/types/user';
-import { Story } from '@/types/story';
+import type { User } from '@/types/user';
+import type { Story } from '@/types/story';
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const currentUser = await getServerMe();
-    if (currentUser) {
-      const profileData = await getMeProfileServer();
-      if (profileData) {
-        const userName = profileData.user.name;
-        const userDescription = profileData.user.description;
-        const articlesCount = profileData.articles.length;
+    if (!currentUser) {
+      return {
+        title: 'Мій профіль | Подорожники',
+        description:
+          'Перегляньте свої історії та збережені статті на платформі Подорожники.',
+        openGraph: {
+          title: 'Мій профіль | Подорожники',
+          description:
+            'Перегляньте свої історії та збережені статті на платформі Подорожники.',
+          url: '/profile',
+          type: 'profile',
+        },
+        twitter: {
+          card: 'summary',
+          title: 'Мій профіль | Подорожники',
+          description:
+            'Перегляньте свої історії та збережені статті на платформі Подорожники.',
+        },
+      };
+    }
 
-        return {
-          title: `${userName} | Мій профіль | Подорожники`,
-          description: userDescription
-            ? `${userDescription} | Перегляньте ${articlesCount} історій користувача ${userName}`
-            : `Профіль користувача ${userName} | Перегляньте ${articlesCount} історій мандрівника`,
-          openGraph: {
-            title: `${userName} | Подорожники`,
-            description: userDescription || `Профіль користувача ${userName}`,
-            url: `https://travel-fs116-teamproject-frontend-rouge.vercel.app/profile`,
-            siteName: `Подорожники: ${userName}`,
-            type: 'profile',
-            ...(profileData.user.avatarUrl && {
-              images: [
-                {
-                  url: profileData.user.avatarUrl,
-                  width: 400,
-                  height: 400,
-                  alt: userName,
-                },
-              ],
-            }),
-          },
-        };
-      }
+    const profileData = await getMeProfileServer();
+    if (profileData) {
+      const userName = profileData.user.name;
+      const userDescription = profileData.user.description;
+      const articlesCount = profileData.articles.length;
+
+      const baseDescription = userDescription
+        ? `${userDescription} | Перегляньте ${articlesCount} історій користувача ${userName}.`
+        : `Профіль користувача ${userName}. Перегляньте ${articlesCount} історій мандрівника.`;
+
+      const description =
+        baseDescription.length > 200
+          ? `${baseDescription.slice(0, 197)}…`
+          : baseDescription;
+
+      const avatarUrl = profileData.user.avatarUrl;
+
+      return {
+        title: `${userName} | Мій профіль | Подорожники`,
+        description,
+        openGraph: {
+          title: `${userName} | Профіль мандрівника | Подорожники`,
+          description,
+          url: '/profile',
+          siteName: 'Подорожники',
+          type: 'profile',
+          ...(avatarUrl && {
+            images: [
+              {
+                url: avatarUrl,
+                width: 400,
+                height: 400,
+                alt: userName,
+              },
+            ],
+          }),
+        },
+        twitter: {
+          card: 'summary',
+          title: `${userName} | Профіль мандрівника`,
+          description,
+          ...(avatarUrl && { images: [avatarUrl] }),
+        },
+      };
     }
   } catch (error) {
     console.error('Error generating metadata for profile page:', error);
@@ -51,7 +85,21 @@ export async function generateMetadata(): Promise<Metadata> {
   // Fallback metadata
   return {
     title: 'Мій профіль | Подорожники',
-    description: 'Перегляньте свої історії та збережені статті',
+    description:
+      'Перегляньте свої історії та збережені статті на платформі Подорожники.',
+    openGraph: {
+      title: 'Мій профіль | Подорожники',
+      description:
+        'Перегляньте свої історії та збережені статті на платформі Подорожники.',
+      url: '/profile',
+      type: 'profile',
+    },
+    twitter: {
+      card: 'summary',
+      title: 'Мій профіль | Подорожники',
+      description:
+        'Перегляньте свої історії та збережені статті на платформі Подорожники.',
+    },
   };
 }
 
