@@ -1,6 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  type MouseEvent,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
+import Image from 'next/image';
 import { Icon } from '../Icon/Icon';
 import { User } from '@/types/user';
 import { updateUserProfile } from '@/lib/api/clientApi';
@@ -12,6 +20,21 @@ interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (updatedUser: User) => void;
+}
+
+interface ApiErrorResponseData {
+  message?: string;
+  error?: string;
+  response?: {
+    message?: string;
+  };
+}
+
+interface ApiErrorWithResponse {
+  response?: {
+    data?: ApiErrorResponseData;
+  };
+  message?: string;
 }
 
 export default function EditProfileModal({
@@ -70,7 +93,7 @@ export default function EditProfileModal({
 
   if (!isOpen) return null;
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -89,9 +112,9 @@ export default function EditProfileModal({
 
     if (name) {
       if (name.length < 3) {
-        newErrors.name = 'Ім\'я має містити мінімум 3 символи';
+        newErrors.name = "Ім'я має містити мінімум 3 символи";
       } else if (name.length > 20) {
-        newErrors.name = 'Ім\'я має містити максимум 20 символів';
+        newErrors.name = "Ім'я має містити максимум 20 символів";
       }
     }
 
@@ -119,20 +142,20 @@ export default function EditProfileModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setAvatar(file);
       // Створюємо preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
+        setAvatarPreview(typeof reader.result === 'string' ? reader.result : null);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -177,12 +200,14 @@ export default function EditProfileModal({
       onUpdate(updatedUser);
       toast.success('Профіль успішно оновлено!');
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to update profile:', error);
       let errorMessage = 'Не вдалося оновити профіль';
-      
-      if (error?.response?.data) {
-        const errorData = error.response.data;
+
+      const err = error as ApiErrorWithResponse;
+
+      if (err.response?.data) {
+        const errorData = err.response.data;
         // Бекенд повертає помилки у форматі: { status, message, error?, response? }
         // Пріоритет: message з data, потім error, потім message з response
         errorMessage =
@@ -190,10 +215,10 @@ export default function EditProfileModal({
           errorData?.error ||
           errorData?.response?.message ||
           errorMessage;
-      } else if (error?.message) {
-        errorMessage = error.message;
+      } else if (err.message) {
+        errorMessage = err.message;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -220,10 +245,12 @@ export default function EditProfileModal({
             <label className={css.label}>Аватар</label>
             <div className={css.avatarSection}>
               <div className={css.avatarPreviewWrapper}>
-                <img
-                  src={avatarPreview || '/Avatar Image.svg'}
+                <Image
+                  src={avatarPreview ?? '/Avatar Image.svg'}
                   alt="Avatar preview"
                   className={css.avatarPreview}
+                  width={120}
+                  height={120}
                 />
               </div>
               <input
@@ -246,7 +273,7 @@ export default function EditProfileModal({
           {/* Ім'я */}
           <div className={css.fieldGroup}>
             <label htmlFor="name" className={css.label}>
-              Ім'я *
+              Ім&apos;я *
             </label>
             <input
               type="text"
@@ -309,4 +336,3 @@ export default function EditProfileModal({
     </div>
   );
 }
-
