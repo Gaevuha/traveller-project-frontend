@@ -280,3 +280,59 @@ export default function AddStoryForm() {
     </>
   );
 }
+
+function sortCategories(categoryName: string) {
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f0',
+      name: 'Азія',
+    };
+  if (categoryName === '68fb50c80ae91338641121f1')
+    return {
+      _id: '68fb50c80ae91338641121f0',
+      name: 'Гори',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f2',
+      name: 'Європа',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f3',
+      name: 'Америка',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f4',
+      name: 'Африка',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f6',
+      name: 'Пустелі',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f7',
+      name: 'Балкани',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f8',
+      name: 'Кавказ',
+    };
+  if (categoryName === '68fb50c80ae91338641121f0')
+    return {
+      _id: '68fb50c80ae91338641121f9',
+      name: 'Океанія',
+    };
+  //   if (categoryName === '68fb50c80ae91338641121f1') return 'Гори';
+  //   if (categoryName === '68fb50c80ae91338641121f2') return 'Європа';
+  //   if (categoryName === '68fb50c80ae91338641121f3') return 'Америка';
+  //   if (categoryName === '68fb50c80ae91338641121f4') return 'Африка';
+  //   if (categoryName === '68fb50c80ae91338641121f6') return 'Пустелі';
+  //   if (categoryName === '68fb50c80ae91338641121f7') return 'Балкани';
+  //   if (categoryName === '68fb50c80ae91338641121f8') return 'Кавказ';
+  //   if (categoryName === '68fb50c80ae91338641121f9') return 'Океанія';
+}
