@@ -122,6 +122,7 @@ export default function ProfileAndLogoutLinks({
         cancelButtonText="Відмінити"
         onConfirm={handleConfirmLogout}
         onCancel={handleCancelLogout}
+        onClose={handleCancelLogout}
         isOpen={isModalOpen}
       />
     </div>

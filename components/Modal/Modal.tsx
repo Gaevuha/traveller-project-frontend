@@ -25,12 +25,17 @@ export default function Modal({
   onClose,
   isOpen = true,
 }: ModalProps) {
+  // Використовуємо onClose якщо передано, інакше onCancel
   const handleClose = onClose || onCancel;
-  const handleCloseRef = useRef(handleClose);
+  
+  // Створюємо ref для onClose та onCancel окремо для правильної роботи з ESC
+  const onCloseRef = useRef(onClose);
+  const onCancelRef = useRef(onCancel);
 
   useEffect(() => {
-    handleCloseRef.current = handleClose;
-  }, [handleClose]);
+    onCloseRef.current = onClose;
+    onCancelRef.current = onCancel;
+  }, [onClose, onCancel]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -40,7 +45,12 @@ export default function Modal({
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleCloseRef.current();
+        // При ESC викликаємо onClose якщо він є, інакше onCancel
+        if (onCloseRef.current) {
+          onCloseRef.current();
+        } else {
+          onCancelRef.current();
+        }
       }
     };
 
@@ -57,7 +67,12 @@ export default function Modal({
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      handleClose();
+      // При кліку на backdrop викликаємо onClose якщо він є, інакше onCancel
+      if (onCloseRef.current) {
+        onCloseRef.current();
+      } else {
+        onCancelRef.current();
+      }
     }
   };
 
@@ -70,7 +85,12 @@ export default function Modal({
   };
 
   const handleCloseButton = () => {
-    handleClose();
+    // При кліку на кнопку закриття викликаємо onClose якщо він є, інакше onCancel
+    if (onCloseRef.current) {
+      onCloseRef.current();
+    } else {
+      onCancelRef.current();
+    }
   };
 
   return (
