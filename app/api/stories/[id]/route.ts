@@ -11,13 +11,10 @@ type StoryRouteParams = {
 /**
  * GET /api/stories/[id]
  */
-export async function GET(
-  request: NextRequest,
-  { params }: StoryRouteParams
-) {
+export async function GET(request: NextRequest, { params }: StoryRouteParams) {
   try {
     const cookieStore = cookies();
-    const { id } = await params; 
+    const { id } = await params;
 
     const res = await api.get(`/stories/${id}`, {
       headers: {
@@ -47,11 +44,11 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: StoryRouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = cookies();
-
+    const { id } = await params;
     const formData = await request.formData();
     const remoteFormData = new FormData();
 
@@ -59,7 +56,6 @@ export async function PATCH(
       remoteFormData.append(key, value);
     });
 
-    const { id } = await params; 
     const res = await api.patch(`/stories/${id}`, remoteFormData, {
       headers: {
         Cookie: cookieStore.toString(),
