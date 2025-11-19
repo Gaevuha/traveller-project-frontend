@@ -195,7 +195,7 @@
   .story__btn {
     font-size: 18px;
   }
-}
+
 
 .story__btn:hover,
 .story__btn:focus {
@@ -204,6 +204,7 @@
   color: #fff;
   transform: translateY(-1px);
   box-shadow: 0 6px 12px rgba(59, 130, 246, 0.08);
+}
 }
 
 .story__save {
@@ -228,12 +229,29 @@
   height: 24px;
 }
 
+.story__save.saved {
+ background-color: #1a2a5a;;
+ 
+}
+
+.story__save.saved .icon__saved {
+ 
+  fill: #fff;
+  stroke: none;
+  width: 30px;
+    height: 30px;
+
+}
+
+
+
+@media screen and (min-width: 1440px){
+
 .story__save:hover .icon__bookmark,
 .story__save:focus .icon__bookmark {
   color: #fff;
   fill: currentColor;
 }
-
 
 .story__save:hover,
 .story__save:focus {
@@ -243,20 +261,7 @@
   border: none;
 }
 
-
-.story__save.saved {
-  background: #7a96ea;
-  border-color: #4169e1;
 }
 
-.story__save.saved .icon__bookmark {
-  color: #fff;
-  fill: currentColor;
-  stroke: none;
 
-}
 
-.story__save:focus {
-  outline: 3px solid rgba(59, 130, 246, 0.12);
-  outline-offset: 2px;
-}
