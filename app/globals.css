@@ -20,10 +20,61 @@
   --color-error: #b00101; /* Помилки */
   --color-primary: #4169e1; /* Основний колір (синій), для disabled + opacity: 0.3;*/
   --opacity-neutral-darkest-5: rgba(0, 0, 0, 0.05);
-  --color-primary-hover-first: #e8eeff; /* Hover стану  + фон футеру + картки*/
-  --color-primary-hover-second: #4169e1; /* Hover стану  для кнопок*/
-  --color-primary-active-first: #7a96ea; /* Active стану */
-  --color-primary-active-second: #1a2a5a; /* Active стану для світлих кнопок*/
+
+  /* Light theme hero */
+  --color-text-inverse-bg: #ffffff;
+  --color-bg-hero: #0b1f3a;
+  --color-primary: #4169e1; /* для disabled + opacity: 0.3;*/
+  --color-text-inverse: #ffffff;
+  --color-primary-hover-first: #e8eeff;
+  --color-text-primary: #000000;
+  --color-primary-active-first: #7a96ea;
+  --color-border-active-first: #4169e1;
+  --box-shadow: rgba(59, 130, 246, 0.08);
+
+  /* Light theme about */
+  --color-text-primary: #000000;
+
+  /* Light theme popular */
+  --color-text-primary: #000000;
+  --color-bg-popular: #e8eeff;
+  --color-bg-popular-light: rgba(0, 0, 0, 0.05);
+  --color-border: rgba(0, 0, 0, 0.15);
+  --color-primary-hover-second: #4169e1;
+  --color-text-inverse: #ffffff;
+  --color-primary-active-second: #1a2a5a;
+  --color-bg-popular-dis: rgba(0, 0, 0, 0.05); /* opacity: 0.3;*/
+
+  /* Light theme traveller item */
+  --color-light-date: #555555;
+
+  /* Light theme logo */
+  --logo-bg-active: rgba(216, 216, 216, 0.2);
+
+  /* Light theme modal */
+  --color-bg-secondary: #ffffff;
+  --color-border-tab: rgba(0, 0, 0, 0.15);
+
+  /* Categories */
+  --select-icon: rgba(0, 0, 0, 0.6);
+  --category-bg: #f2f2f2;
+
+  /* Story */
+  --opacity-neutral-darkest: rgba(0, 0, 0, 0.05);
+  --color-bg-tertiary: #f2f2f2;
+
+  /* Profile */
+  --border-tab: rgba(255, 255, 255, 0);
+  --color-bg-tab: #e8eeff;
+  --color-hover-tab: #4169e1;
+  --color-bg-tab-active: #f7f9ff;
+  --tab-active-border: rgba(0, 0, 0, 0.15);
+
+  /* Toggle */
+  --toggle-bg: #ffffff;
+  --thumb: #a4b4e6;
+
+  --color-toast: #4169e1;
 }
 
 [data-theme='dark'] {
@@ -47,10 +98,57 @@
   --color-error: #b00101;
   --color-primary: #ffffff; /* Основний колір (синій), для disabled + opacity: 0.3;*/
   --opacity-neutral-darkest-5: rgba(255, 255, 255, 0.05);
-  --color-primary-hover-first: #7f7f7f; /* Hover стану  + фон футеру + картки*/
-  --color-primary-hover-second: #e8eeff; /* Hover стану  для кнопок*/
-  --color-primary-active-first: #4c4c4c; /* Active стану */
-  --color-primary-active-second: #7a96ea; /* Active стану для світлих кнопок*/
+
+  /* Dark theme hero */
+  --color-text-inverse-bg: #ffffff;
+  --color-bg-hero: #0b1f3a;
+  --color-primary: #ffffff; /* для disabled + opacity: 0.3;*/
+  --color-text-inverse: #000000;
+  --color-primary-hover-first: #7f7f7f;
+  --color-text-primary: #ffffff;
+  --color-primary-active-first: #4c4c4c;
+  --color-border-active-first: #7f7f7f;
+  --box-shadow: rgba(0, 0, 0, 0.15);
+
+  /* Dark theme about */
+  --color-text-primary: #ffffff;
+
+  /* Dark theme popular */
+  --color-text-primary: #ffffff;
+  --color-bg-popular: #2c2c2c;
+  --color-bg-popular-light: rgba(255, 255, 255, 0.1);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-primary-hover-second: #e8eeff;
+  --color-text-inverse: #000000;
+  --color-primary-active-second: #7a96ea;
+  --color-bg-popular-dis: rgba(0, 0, 0, 0.05); /* opacity: 0.3;*/
+
+  /* Dark theme traveller item */
+  --color-light-date: #939393;
+
+  /* Dark theme modal */
+  --color-bg-secondary: #1a1a1a;
+  --color-border-tab: rgba(255, 255, 255, 0.1);
+
+  /* Categories */
+  --select-icon: #4c4c4c;
+  --category-bg: #7f7f7f;
+
+  /* Story */
+  --opacity-neutral-darkest: #7f7f7f;
+  --color-bg-tertiary: #7c8691;
+
+  /* Profile */
+  --border-tab: rgba(255, 255, 255, 0);
+  --color-bg-tab: #b7caf9;
+  --color-hover-tab: #ffffffcb;
+  --color-bg-tab-active: #5e7acf;
+  --tab-active-border: #5e7acf;
+
+  /* Toggle */
+  --toggle-bg: #1a1a1a;
+
+  --color-toast: #4169e1;
 }
 
 /* RESET */

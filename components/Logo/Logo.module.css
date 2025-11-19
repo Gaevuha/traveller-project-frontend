@@ -25,7 +25,7 @@
 
 .logoLink:hover,
 .logoLink:focus {
-  border: 1px solid #000;
+  border: 1px solid var(--color-text-primary);
 }
 
 .logoLink:active {
@@ -34,7 +34,7 @@
 
 .logoLinkHeaderMain:hover,
 .logoLinkHeaderMain:focus {
-  border: 1px solid #fff;
+  border: 1px solid var(--color-text-inverse-bg);
 }
 
 .logoLinkFooter {
@@ -48,13 +48,13 @@
   font-size: 17px;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: #000;
+  color: var(--color-text-primary);
 
   transition: color 250ms ease;
 }
 
 .logoTextHeaderMain {
-  color: #fff;
+  color: var(--color-text-inverse-bg);
 }
 
 @media screen and (min-width: 768px) {
@@ -66,22 +66,15 @@
 
   .logoLinkMobileMenuOpen {
     transform: translateX(380px);
-    /* background-color: red; */
   }
 }
 
 @media screen and (min-width: 1440px) {
-  .logoLink {
-  }
-
   .logoLinkFooter {
     margin-bottom: 68px;
   }
 
   .logoLink:active {
-    background-color: rgba(216, 216, 216, 0.2);
-  }
-
-  .logoText {
+    background-color: var(--logo-bg-active);
   }
 }

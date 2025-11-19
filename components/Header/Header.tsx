@@ -7,13 +7,13 @@ import Logo from '../Logo/Logo';
 import Navigation from '../Navigation/Navigation';
 import css from './Header.module.css';
 import MobileMenuBtn from '../MobileMenuBtn/MobileMenuBtn';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import { useLockScroll } from '@/lib/hooks/useLockScroll';
 // import { useBreakpointStore } from '@/lib/store/breakpointStore';
 // import { useAuthStore } from '@/lib/store/authStore';
 // import PublishStoryLink from '../Navigation/PublishStoryLink/PublishStoryLink';
-
 
 export default function Header() {
   const isMainPage = usePathname() === '/';
@@ -39,7 +39,6 @@ export default function Header() {
   if (!isMobileMenuOpen && isMainPage) LogoProps = 'header-main-page';
 
   return (
-
     <>
       <header
         className={`${css.header} ${isMainPage ? css.headerMainPage : ''}`}
@@ -48,11 +47,12 @@ export default function Header() {
           <div className={css.logoWrapper}>
             <Logo variant={LogoProps} handleClick={closeMobileMenu} />
           </div>
-          <Navigation
-            variant={isMainPage ? 'header-main-page' : 'header'}
-            handleClick={closeMobileMenu}
-          />
-
+          <div className={css.navWrapper}>
+            <Navigation
+              variant={isMainPage ? 'header-main-page' : 'header'}
+              handleClick={closeMobileMenu}
+            />
+          </div>
           {/* {isAuthenticated && isTablet && (
             <li>
               <PublishStoryLink
@@ -60,15 +60,18 @@ export default function Header() {
               />
             </li>
           )} */}
+          <ThemeToggle variant={isMainPage ? 'header-main-page' : 'header'} />
 
-          <MobileMenuBtn
-            variant={isMainPage ? 'header-main-page' : undefined}
-            handleClick={setIsMobileMenuOpen}
-            isOpen={isMobileMenuOpen}
-          />
+          <div className={css.controls}>
+            {/* <ThemeToggle variant={isMainPage ? 'header-main-page' : 'header'} /> */}
+            <MobileMenuBtn
+              variant={isMainPage ? 'header-main-page' : undefined}
+              handleClick={setIsMobileMenuOpen}
+              isOpen={isMobileMenuOpen}
+            />
+          </div>
         </div>
       </header>
     </>
-
   );
 }

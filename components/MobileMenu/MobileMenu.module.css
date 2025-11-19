@@ -24,7 +24,7 @@
   height: 100vh;
   top: 0;
   right: 0;
-  background-color: #fff;
+  background-color: var(--color-bg-primary);
   transition: transform 500ms ease;
   transform: translateX(100%);
   padding-top: 88px;
