@@ -25,6 +25,7 @@
 .logoLink:hover,
 .logoLink:focus {
   border: 1px solid var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
 }
 
 .logoLink:active {
@@ -39,6 +40,7 @@
 
 .logoLinkHeaderMain:hover,
 .logoLinkHeaderMain:focus {
+  border: 1px solid var(--color-text-inverse-bg);
   border: 1px solid var(--color-text-inverse-bg);
 }
 
@@ -65,12 +67,15 @@
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--color-text-primary);
+  color: var(--color-text-primary);
 
   transition: color 250ms ease;
 }
 
 .logoTextHeaderMain {
   color: var(--color-text-inverse-bg);
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* Media queries */
@@ -83,12 +88,17 @@
 
   .logoLinkMobileMenuOpen {
     transform: translateX(380px);
+    /* background-color: red; */
   }
 }
 
 @media screen and (min-width: 1440px) {
   .logoLinkFooter {
     margin-bottom: 68px;
+  }
+
+  .logoLink:active {
+    background-color: var(--logo-bg-active);
   }
 
   .logoLink:active {

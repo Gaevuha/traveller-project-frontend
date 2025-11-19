@@ -78,6 +78,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 4px 9px;
+
   height: 32px;
 
   cursor: pointer;
@@ -93,7 +94,7 @@
 }
 
 .coverButton:active {
-  background-color: #1a2a5a;
+  background-color: var(--color-primary-active-second);
 }
 
 .description {
