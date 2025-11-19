@@ -7,6 +7,7 @@ import {
   login as loginApi,
   register as registerApi,
   logout as logoutApi,
+  getMeProfile,
 } from '@/lib/api/clientApi';
 import { extractErrorMessage } from '@/lib/api/errorHandler';
 import { LoginRequest, RegisterRequest } from '@/types/auth';
@@ -43,7 +44,23 @@ export const useAuth = () => {
       if (!user) {
         throw new Error('Користувач не знайдений');
       }
-      setUser(user);
+      
+      // Після успішного входу отримуємо повні дані користувача з avatarUrl
+      // Це вирішує проблему, коли /auth/login повертає неповні дані
+      // Використовуємо getMeProfile() для отримання повного профілю з avatarUrl
+      try {
+        const profileData = await getMeProfile();
+        if (profileData && profileData.user) {
+          // Використовуємо повні дані з avatarUrl
+          setUser(profileData.user);
+        } else {
+          // Якщо не вдалося отримати повні дані - використовуємо дані з login
+          setUser(user);
+        }
+      } catch {
+        // Якщо помилка при отриманні повних даних - використовуємо дані з login
+        setUser(user);
+      }
 
       toast.success(`Вітаємо, ${user.name || 'користувач'}!`);
       router.push('/');
