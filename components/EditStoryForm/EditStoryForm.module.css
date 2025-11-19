@@ -1,6 +1,3 @@
-.form {
-}
-
 .fieldsList {
   display: flex;
   flex-direction: column;
@@ -18,7 +15,6 @@
 }
 
 .inputLabel {
-  /* font-family: "Nunito Sans", sans-serif; */
   font-weight: 400;
   font-size: 16px;
   line-height: 1.5;
@@ -59,11 +55,6 @@
   bottom: -28px;
 }
 
-/* .inputField:hover,
-.inputField:focus {
-  border: 1px solid black;
-} */
-
 .imageWrapper {
   width: 100%;
   max-width: 335px;
@@ -72,15 +63,11 @@
   margin-bottom: 24px;
 }
 
-.imagePreview {
-}
-
 .coverInput {
   display: none;
 }
 
 .coverButton {
-  /* font-family: 'Nunito Sans', sans-serif; */
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
@@ -89,7 +76,6 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   padding: 4px 9px;
-  /* width: 163px; */
   height: 32px;
 
   cursor: pointer;
@@ -109,19 +95,11 @@
   background-color: #1a2a5a;
 }
 
-.optionDisabled {
-  /* color: red; */
-}
-
 .description {
   /* width: 100%; */
   height: 120px;
   padding: 12px;
   resize: none;
-}
-
-.description::placeholder {
-  /* color: red; */
 }
 
 .storyText {
@@ -208,6 +186,14 @@
 .rejectBtn:active {
   border: 1px solid #1a2a5a;
   background-color: #1a2a5a;
+}
+
+.loaderContainer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
 }
 
 @media screen and (min-width: 768px) {

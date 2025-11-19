@@ -39,3 +39,47 @@ export async function GET(
     );
   }
 }
+
+/**
+ * PATCH /api/stories/[id]
+ */
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const cookieStore = cookies();
+
+    const formData = await request.formData();
+
+    const remoteFormData = new FormData();
+    formData.forEach((value, key) => {
+      remoteFormData.append(key, value);
+    });
+
+    const res = await api.patch(`/stories/${params.id}`, remoteFormData, {
+      headers: {
+        Cookie: cookieStore.toString(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      console.error(error.response?.data);
+      return NextResponse.json(
+        { error: error.message, response: error.response?.data },
+        { status: error.response?.status || 500 }
+      );
+    }
+
+    console.error({ message: (error as Error).message });
+
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
