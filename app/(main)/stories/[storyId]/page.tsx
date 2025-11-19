@@ -14,17 +14,14 @@ import ResponsiveTravellersStories from '@/components/StoryDetailsClient/Respons
 import Popular from '@/components/Popular/Popular';
 
 
-type storyId = {
-  storyId: string;
+type StoryPageProps = {
+  params: Promise<{ storyId: string }>;
 };
 
-type Props = {
-  params: Promise<storyId>
-};
 
 export const generateMetadata = async ({
   params,
-}: Props): Promise<Metadata> => {
+}: StoryPageProps): Promise<Metadata> => {
   const { storyId } = await params;
   const data = await fetchStoryByIdServer(storyId);
   const story = data;
@@ -71,7 +68,7 @@ export const generateMetadata = async ({
   };
 };
 
-export default async function StoryDetails({ params }: Props) {
+export default async function StoryDetails({ params }: StoryPageProps) {
   const { storyId } = await params;
   const queryClient = new QueryClient();
 
