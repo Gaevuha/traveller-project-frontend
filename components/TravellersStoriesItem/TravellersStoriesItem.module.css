@@ -1,6 +1,6 @@
 .story {
   width: 100%;
-  background-color: #e8eeff;
+  background-color: var(--color-bg-popular);
   border-radius: 16px;
   overflow: hidden;
   display: flex;
@@ -39,7 +39,7 @@
   font-weight: 600;
   font-size: 12px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
@@ -55,7 +55,7 @@
   font-size: 18px;
   line-height: 1.5;
   height: 3em;
-  color: #000;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -75,7 +75,7 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -110,7 +110,7 @@
   font-weight: 600;
   font-size: 12px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 @media screen and (min-width: 1440px) {
@@ -123,7 +123,7 @@
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #555;
+  color: var(--color-light-date);
 }
 
 .story__meta {
@@ -156,11 +156,11 @@
 .favoriteCount::before {
   content: '•';
   margin: 0 6px;
-  color: #555;
+  color: var(--color-light-date);
 }
 
 .icon {
-  fill: #0a0a0a;
+  fill: var(--color-text-primary);
   width: 16px;
   height: 16px;
 }
@@ -171,7 +171,6 @@
   align-items: center;
 }
 
-
 .story__btn {
   display: flex;
   justify-content: center;
@@ -180,15 +179,15 @@
   padding: 6px 12px;
   width: 100%;
   height: 48px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background-color: var(--color-bg-popular-light);
+  border: 1px solid var(--color-border);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-nunito-sans);
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 @media screen and (min-width: 1440px) {
@@ -199,11 +198,17 @@
 
 .story__btn:hover,
 .story__btn:focus {
-  background: #4169e1;
+  background-color: var(--color-primary-hover-second);
   border: none;
-  color: #fff;
+  color: var(--color-text-inverse);
   transform: translateY(-1px);
-  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 6px 12px var(--box-shadow);
+}
+
+.story__btn:active {
+  transform: translateY(0);
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary-active-second);
 }
 }
 
@@ -211,8 +216,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background-color: var(--color-bg-popular-light);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 6px;
   width: 48px;
@@ -222,9 +227,10 @@
   flex-shrink: 0;
 }
 
-
-.story__save .icon__bookmark {
-  color: #0a0a0a;
+.story__save .icon__bookmark,
+.story__save .iconEdit {
+  color: var(--color-text-primary);
+  fill: var(--color-text-primary);
   width: 24px;
   height: 24px;
 }
@@ -248,20 +254,43 @@
 @media screen and (min-width: 1440px){
 
 .story__save:hover .icon__bookmark,
-.story__save:focus .icon__bookmark {
-  color: #fff;
+.story__save:focus .icon__bookmark,
+.story__save:hover .iconEdit,
+.story__save:focus .iconEdit {
+  color: var(--color-text-inverse);
+  fill: var(--color-text-inverse);
   fill: currentColor;
 }
 
 .story__save:hover,
 .story__save:focus {
-  background: #4169e1;
+  background-color: var(--color-primary-hover-second);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 6px 12px var(--box-shadow);
   border: none;
 }
 
+
+.story__save.saved {
+  background: var(--color-primary-active-second);
+  border-color: var(--color-primary-active-second);
+  fill: var(--color-text-inverse);
 }
 
+.story__save.saved .icon__bookmark,
+.story__save.saved .iconEdit {
+  color: var(--color-text-inverse);
+  fill: var(--color-text-inverse);
+  stroke: none;
+}
 
+.story__save:focus {
+  outline: 3px solid rgba(59, 130, 246, 0.12);
+  outline-offset: 2px;
+}
 
+.story__save:active {
+  transform: translateY(0);
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary-active-second);
+}

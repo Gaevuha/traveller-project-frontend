@@ -2,7 +2,6 @@
   padding-top: 18px;
   padding-bottom: 18px;
 
-
   position: static;
 
   top: 0;
@@ -19,8 +18,32 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
 }
 
 .logoWrapper {
   position: relative;
+  flex-shrink: 0;
+}
+
+.navWrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+@media screen and (min-width: 1440px) {
+  .controls {
+    margin-left: auto;
+  }
 }

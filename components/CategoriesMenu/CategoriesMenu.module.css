@@ -3,9 +3,8 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
-
 }
 
 .selectWrapper {
@@ -38,7 +37,6 @@
   outline-offset: 0;
   box-shadow: none;
   transition: border-color 0.3s ease;
-  
 }
 
 .select:hover {
@@ -68,10 +66,12 @@
   width: 20px;
   height: 20px;
   pointer-events: none;
-  fill: rgba(0, 0, 0, 0.6);
-  stroke: rgba(0, 0, 0, 0.6);
+  fill: var(--select-icon);
+  stroke: var(--select-icon);
   stroke-width: 2;
-  transition: fill 0.3s ease, stroke 0.3s ease;
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease;
   flex-shrink: 0;
   margin-left: 8px;
 }
@@ -121,36 +121,35 @@
   display: none;
 }
 
-
 .categoryBtn {
   background: transparent;
   border: none;
   padding: 6px 10px;
   font-size: 16px;
-    cursor: pointer;
-    color: #555;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+  cursor: pointer;
+  color: var(--color-light-date);
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
-    .categoryBtn:hover {
-      color: #000;
-    }
-      .active {
-        font-weight: 600;
-        color: #000;
-        background: #e8e8e8;
-      }
-  
+.categoryBtn:hover {
+  color: var(--color-text-primary);
+}
+.active {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background-color: var(--category-bg);
+}
+
 @media screen and (min-width: 768px) {
-    .buttonsWrapper {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 40px;
-    }
+  .buttonsWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
   }
+}
 
 /* Tablet */
 @media (min-width: 768px) {
@@ -159,7 +158,6 @@
   }
 
   .label {
-   display: none;
+    display: none;
   }
 }
-

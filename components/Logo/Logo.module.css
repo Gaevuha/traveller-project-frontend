@@ -1,7 +1,6 @@
 .logoLink {
-  display: inline-flex;
-  align-items: self-end;
-  justify-content: flex-start;
+  display: flex;
+  align-items: center;
   gap: 3px;
 
   padding: 6px 10px;
@@ -25,38 +24,61 @@
 
 .logoLink:hover,
 .logoLink:focus {
-  border: 1px solid #000;
+  border: 1px solid var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
 }
 
 .logoLink:active {
   background-color: rgba(216, 216, 216, 0.2);
 }
 
-.logoLinkHeaderMain:hover,
-.logoLinkHeaderMain:focus {
-  border: 1px solid #fff;
+/* Header-main-page */
+.logoLinkHeaderMain {
+  display: flex;
+  align-items: center;
 }
 
+.logoLinkHeaderMain:hover,
+.logoLinkHeaderMain:focus {
+  border: 1px solid var(--color-text-inverse-bg);
+  border: 1px solid var(--color-text-inverse-bg);
+}
+
+/* Footer */
 .logoLinkFooter {
   position: static;
+  display: flex;
+  align-items: center;
   margin-bottom: 48px;
 }
 
+/* Mobile menu */
+.logoLinkMobileMenuOpen {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* можна змінити на space-between, якщо буде кнопка в одному рядку */
+}
+
+/* Текст логотипу */
 .logoText {
-  font-family: var(--font-sora), sans-serif;
   font-weight: 400;
   font-size: 17px;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: #000;
+  color: var(--color-text-primary);
+  color: var(--color-text-primary);
 
   transition: color 250ms ease;
 }
 
 .logoTextHeaderMain {
-  color: #fff;
+  color: var(--color-text-inverse-bg);
+  display: inline-block;
+  vertical-align: middle;
 }
 
+/* Media queries */
 @media screen and (min-width: 768px) {
   .logoLinkFooter {
     margin-bottom: 41px;
@@ -71,17 +93,15 @@
 }
 
 @media screen and (min-width: 1440px) {
-  .logoLink {
-  }
-
   .logoLinkFooter {
     margin-bottom: 68px;
   }
 
   .logoLink:active {
-    background-color: rgba(216, 216, 216, 0.2);
+    background-color: var(--logo-bg-active);
   }
 
-  .logoText {
+  .logoLink:active {
+    background-color: var(--logo-bg-active);
   }
 }

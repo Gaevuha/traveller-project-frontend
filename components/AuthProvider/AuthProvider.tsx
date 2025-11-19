@@ -100,9 +100,9 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
               } else {
                 clearIsAuthenticated();
               }
-            } else {
-              // Сесія неактивна - очищаємо
-              clearIsAuthenticated();
+          } else {
+            // Сесія неактивна - очищаємо
+            clearIsAuthenticated();
             }
           }
         } catch {
