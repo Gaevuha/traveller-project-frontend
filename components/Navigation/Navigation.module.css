@@ -1,6 +1,12 @@
 .nav {
-  /* display: none; */
-  /* min-width: 280px; */
+  display: none;
+  min-width: 280px;
+}
+
+.nav.mobileMenuNav {
+  display: block;
+  width: 100%;
+  padding: 0 20px;
 }
 
 .navHeader {

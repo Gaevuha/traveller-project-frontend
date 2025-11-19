@@ -62,7 +62,7 @@ export default function AddStoryForm() {
   const addStory = useMutation({
     mutationFn: createStory,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allStories'] });
+      queryClient.invalidateQueries({ queryKey: ['allStories', 'myStories'] });
 
       toast.success('Історія успішно опублікована!', {
         style: { maxWidth: '500px' },
@@ -72,11 +72,8 @@ export default function AddStoryForm() {
         window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
       }
     },
-    onError: err => {
-      toast.error(
-        `Помилка збереження: ${err instanceof Error ? err.message : err}`,
-        { style: { maxWidth: '500px' } }
-      );
+    onError: () => {
+      toast.error(`Помилка збереження`, { style: { maxWidth: '500px' } });
     },
   });
 
@@ -113,10 +110,9 @@ export default function AddStoryForm() {
 
       router.push(`/stories/${response.data._id}`);
       console.log('Successfully sent the story: ', storyToSend);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+    } catch {
       toast.error(
-        `Помилка збереження: ${message}. Спробуйте зберегти вашу історію пізніше.`,
+        `Помилка збереження. Спробуйте зберегти вашу історію пізніше.`,
         { style: { maxWidth: '500px' } }
       );
     }
@@ -160,7 +156,8 @@ export default function AddStoryForm() {
                 <input
                   id={`${fieldId}-cover`}
                   type="file"
-                  accept="image/*"
+                  // accept="image/*"
+                  accept=".jpg,.jpeg,.png"
                   name="img"
                   className={css.coverInput}
                   onChange={e => {

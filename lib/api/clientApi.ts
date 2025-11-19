@@ -19,6 +19,7 @@ import {
 import { AxiosError, isAxiosError } from 'axios';
 import { api } from '../api/api';
 import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
+import { EditStory } from '@/types/editStoryForm/editStoryForm';
 
 export type ApiError = AxiosError<{ error: string }>;
 
@@ -44,24 +45,28 @@ export const login = async (data: LoginRequest) => {
 /**
  * Google OAuth — отримання URL для входу через Google
  */
-export async function getGoogleAuthUrl(): Promise<string> {
-  const { data } = await api.get('/auth/google/get-oauth-url');
-  // сервер возвращает data.data.url, а не data.url
-  return data?.data?.url || '';
-}
+export const getGoogleOAuthUrl = async () => {
+  const res = await api.get<{
+    status: number;
+    message: string;
+    data: { url: string };
+  }>('/auth/google/get-oauth-url');
+
+  return res.data.data.url;
+};
+
 
 /**
  * Підтвердження входу після редіректу з Google
  */
 export const authConfirmGoogle = async (code: string) => {
-  try {
-    const res = await api.post<User>('/auth/google/confirm-oauth', { code });
-    const user = extractUser(res.data) as User | null;
-    return user;
-  } catch (error) {
-    console.error('❌ Google OAuth confirm error:', error);
-    throw error;
-  }
+  const res = await api.post<{
+    status: number;
+    message: string;
+    data: { user: User };
+  }>('/auth/google/confirm-oauth', { code });
+
+  return res.data.data.user;
 };
 
 /**
@@ -423,19 +428,48 @@ export async function updateUserProfile(data: {
   }
 
   // Перевірка, що хоча б одне поле надано
-  if (!formData.has('name') && !formData.has('description') && !formData.has('avatar')) {
+  if (
+    !formData.has('name') &&
+    !formData.has('description') &&
+    !formData.has('avatar')
+  ) {
     throw new Error('At least one field must be provided');
   }
 
   // Відповідь від бекенду: { status: 200, message: "...", data: { ... } }
   // axios обгортає в data, тому res.data = { status, message, data }
-  const res = await api.patch<{ status: number; message: string; data: User }>('/users/me', formData, {
-    // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
-    headers: {
-      'Content-Type': undefined, // Явно видаляємо Content-Type, щоб axios міг встановити multipart/form-data
-    },
-  });
+  const res = await api.patch<{ status: number; message: string; data: User }>(
+    '/users/me',
+    formData,
+    {
+      // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
+      headers: {
+        'Content-Type': undefined, // Явно видаляємо Content-Type, щоб axios міг встановити multipart/form-data
+      },
+    }
+  );
 
   // Повертаємо data з відповіді бекенду
   return res.data.data;
+}
+
+export async function patchStoryByIdClient(params: {
+  storyToEdit: EditStory;
+  id: string;
+}): Promise<Story> {
+  const formData = new FormData();
+  const { storyToEdit, id } = params;
+  if (storyToEdit.title) formData.append('title', storyToEdit.title);
+  if (storyToEdit.article) formData.append('article', storyToEdit.article);
+  if (storyToEdit.category) formData.append('category', storyToEdit.category);
+  if (storyToEdit.img) formData.append('img', storyToEdit.img);
+
+  const { data } = await api.patch<StoryByIdResponse>(
+    `/stories/${id}`,
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }
+  );
+  return data.data;
 }
