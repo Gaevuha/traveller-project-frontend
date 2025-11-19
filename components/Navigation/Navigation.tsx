@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import css from './Navigation.module.css';
 import AuthNavigation from '../AuthNavigation/AuthNavigation';
+import { useAuthStore } from '@/lib/store/authStore'; // припустимо, у тебе є цей стор
 
 type NavProps = {
   variant?: 'header' | 'header-main-page' | 'footer' | 'mobile-menu';
@@ -16,6 +17,8 @@ const navItems = [
 ];
 
 export default function Navigation({ variant, handleClick }: NavProps) {
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated); // стан авторизації
+
   function getNavClass() {
     switch (variant) {
       case 'footer':
@@ -40,10 +43,19 @@ export default function Navigation({ variant, handleClick }: NavProps) {
     if (variant === 'footer') return css.navLinkFooter;
     return variant === 'header-main-page' ? css.navLinkHeaderMain : '';
   }
+
+  // Додаємо "Мій профіль" лише для авторизованого
+  const itemsToRender = [...navItems];
+  if (isAuthenticated) {
+    itemsToRender.push({ href: '/profile', label: 'Мій Профіль' });
+  }
+
   return (
-    <nav className={`${css.nav} ${getNavClass()}`}>
+    <nav
+      className={`${css.nav} ${getNavClass()} ${variant === 'mobile-menu' ? css.mobileMenuNav : ''}`}
+    >
       <ul className={`${css.navList} ${getNavListClass()}`}>
-        {navItems.map(({ href, label }) => (
+        {itemsToRender.map(({ href, label }) => (
           <li key={label} className={`${css.navItem} ${getNavItemClass()}`}>
             <Link
               href={href}

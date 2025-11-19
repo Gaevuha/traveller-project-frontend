@@ -14,7 +14,6 @@ import { useLockScroll } from '@/lib/hooks/useLockScroll';
 // import { useAuthStore } from '@/lib/store/authStore';
 // import PublishStoryLink from '../Navigation/PublishStoryLink/PublishStoryLink';
 
-
 export default function Header() {
   const isMainPage = usePathname() === '/';
 
@@ -39,7 +38,6 @@ export default function Header() {
   if (!isMobileMenuOpen && isMainPage) LogoProps = 'header-main-page';
 
   return (
-
     <>
       <header
         className={`${css.header} ${isMainPage ? css.headerMainPage : ''}`}
@@ -69,6 +67,5 @@ export default function Header() {
         </div>
       </header>
     </>
-
   );
 }

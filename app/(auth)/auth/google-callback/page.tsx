@@ -2,12 +2,14 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { authConfirmGoogle } from '@/lib/api/clientApi';
+import { authConfirmGoogle, getMeProfile } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
 
 export default function GoogleCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const setUser = useAuthStore(state => state.setUser);
 
   useEffect(() => {
     const code = searchParams.get('code');
@@ -28,6 +30,22 @@ export default function GoogleCallbackPage() {
           throw new Error('Користувача не знайдено');
         }
 
+        // Після успішного входу через Google отримуємо повні дані користувача з avatarUrl
+        // Це вирішує проблему, коли Google OAuth повертає неповні дані
+        try {
+          const profileData = await getMeProfile();
+          if (profileData && profileData.user) {
+            // Використовуємо повні дані з avatarUrl
+            setUser(profileData.user);
+          } else {
+            // Якщо не вдалося отримати повні дані - використовуємо дані з Google OAuth
+            setUser(user);
+          }
+        } catch {
+          // Якщо помилка при отриманні повних даних - використовуємо дані з Google OAuth
+          setUser(user);
+        }
+
         toast.dismiss(loadingId);
         toast.success(`Вітаємо, ${user.name || 'мандрівнику'}!`);
 
@@ -41,7 +59,7 @@ export default function GoogleCallbackPage() {
     };
 
     confirmGoogleLogin();
-  }, [searchParams, router]);
+  }, [searchParams, router, setUser]);
 
   return (
     <div className="flex h-screen items-center justify-center">

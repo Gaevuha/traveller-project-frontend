@@ -45,24 +45,28 @@ export const login = async (data: LoginRequest) => {
 /**
  * Google OAuth — отримання URL для входу через Google
  */
-export async function getGoogleAuthUrl(): Promise<string> {
-  const { data } = await api.get('/auth/google/get-oauth-url');
-  // сервер возвращает data.data.url, а не data.url
-  return data?.data?.url || '';
-}
+export const getGoogleOAuthUrl = async () => {
+  const res = await api.get<{
+    status: number;
+    message: string;
+    data: { url: string };
+  }>('/auth/google/get-oauth-url');
+
+  return res.data.data.url;
+};
+
 
 /**
  * Підтвердження входу після редіректу з Google
  */
 export const authConfirmGoogle = async (code: string) => {
-  try {
-    const res = await api.post<User>('/auth/google/confirm-oauth', { code });
-    const user = extractUser(res.data) as User | null;
-    return user;
-  } catch (error) {
-    console.error('❌ Google OAuth confirm error:', error);
-    throw error;
-  }
+  const res = await api.post<{
+    status: number;
+    message: string;
+    data: { user: User };
+  }>('/auth/google/confirm-oauth', { code });
+
+  return res.data.data.user;
 };
 
 /**

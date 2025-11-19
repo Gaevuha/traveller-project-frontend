@@ -4,20 +4,22 @@ import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../../_utils/utils';
 
+type StoryRouteParams = {
+  params: Promise<{ id: string }>;
+};
+
 /**
  * GET /api/stories/[id]
  */
 export async function GET(
   request: NextRequest,
-
-  { params }: { params: Promise<{ id: string }> }
+  { params }: StoryRouteParams
 ) {
   try {
-    const cookieStore = await cookies();
-    const { id } = await params;
-    const storyId = id;
+    const cookieStore = cookies();
+    const { id } = await params; 
 
-    const res = await api.get(`/stories/${storyId}`, {
+    const res = await api.get(`/stories/${id}`, {
       headers: {
         Cookie: cookieStore.toString(),
       },
@@ -43,7 +45,6 @@ export async function GET(
 /**
  * PATCH /api/stories/[id]
  */
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
