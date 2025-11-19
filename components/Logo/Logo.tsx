@@ -14,10 +14,13 @@ type LogoProps = {
 export default function Logo({ variant, handleClick }: LogoProps) {
   return (
     <Link
-      onClick={() => {
-        handleClick?.(false);
-      }}
-      className={`${css.logoLink} ${variant === 'footer' ? css.logoLinkFooter : ''} ${variant === 'header-main-page' ? css.logoLinkHeaderMain : ''} ${variant === 'mobile-menu-open' ? css.logoLinkMobileMenuOpen : ''}`}
+      onClick={() => handleClick?.(false)}
+      className={`
+    ${css.logoLink}                       /* завжди базовий клас */
+    ${variant === 'footer' ? css.logoLinkFooter : ''} 
+    ${variant === 'header-main-page' ? css.logoLinkHeaderMain : ''} 
+    ${variant === 'mobile-menu-open' ? css.logoLinkMobileMenuOpen : ''}
+  `}
       href="/"
     >
       <Image
@@ -27,8 +30,7 @@ export default function Logo({ variant, handleClick }: LogoProps) {
         height={22.4}
       />
       <span
-        className={`${css.logoText}  
-        ${variant === 'header-main-page' ? css.logoTextHeaderMain : ''}`}
+        className={`${css.logoText} ${variant === 'header-main-page' ? css.logoTextHeaderMain : ''}`}
       >
         Подорожники
       </span>

@@ -1,7 +1,6 @@
 .logoLink {
-  display: inline-flex;
-  align-items: self-end;
-  justify-content: flex-start;
+  display: flex;
+  align-items: center;
   gap: 3px;
 
   padding: 6px 10px;
@@ -32,56 +31,58 @@
   background-color: rgba(216, 216, 216, 0.2);
 }
 
+/* Header-main-page */
+.logoLinkHeaderMain {
+  display: flex;
+  align-items: center;
+}
+
 .logoLinkHeaderMain:hover,
 .logoLinkHeaderMain:focus {
   border: 1px solid #fff;
 }
 
+/* Footer */
 .logoLinkFooter {
   position: static;
+  display: flex;
+  align-items: center;
   margin-bottom: 48px;
 }
 
+/* Mobile menu */
+.logoLinkMobileMenuOpen {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* можна змінити на space-between, якщо буде кнопка в одному рядку */
+}
+
+/* Текст логотипу */
 .logoText {
-  font-family: var(--font-sora), sans-serif;
   font-weight: 400;
   font-size: 17px;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: #000;
 
   transition: color 250ms ease;
 }
 
 .logoTextHeaderMain {
   color: #fff;
+  display: inline-block;
+  vertical-align: middle;
 }
 
+/* Media queries */
 @media screen and (min-width: 768px) {
   .logoLinkFooter {
     margin-bottom: 41px;
-    grid-row: 1;
-    grid-column: 1;
-  }
-
-  .logoLinkMobileMenuOpen {
-    transform: translateX(380px);
-    /* background-color: red; */
   }
 }
 
 @media screen and (min-width: 1440px) {
-  .logoLink {
-  }
-
   .logoLinkFooter {
     margin-bottom: 68px;
-  }
-
-  .logoLink:active {
-    background-color: rgba(216, 216, 216, 0.2);
-  }
-
-  .logoText {
   }
 }
