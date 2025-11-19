@@ -48,10 +48,12 @@ export async function PATCH(
 ) {
   try {
     const cookieStore = cookies();
-    const { id } = await params;
-    const formData = await request.formData();
-    const remoteFormData = new FormData();
 
+    const { id } = await params;
+
+    const formData = await request.formData();
+
+    const remoteFormData = new FormData();
     formData.forEach((value, key) => {
       remoteFormData.append(key, value);
     });
