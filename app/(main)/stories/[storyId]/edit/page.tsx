@@ -6,11 +6,11 @@ import EditStoryForm from '@/components/EditStoryForm/EditStoryForm';
 import { fetchStoryByIdServer } from '@/lib/api/serverApi';
 
 type Props = {
-  params: { storyId: string };
+  params: Promise<{ storyId: string }>;
 };
 
 export default async function AddStoryPage({ params }: Props) {
-  const { storyId } = params;
+  const { storyId } = await params;
   const story = await fetchStoryByIdServer(storyId);
   console.log(story);
   return (

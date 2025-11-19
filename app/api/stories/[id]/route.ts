@@ -46,11 +46,11 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = cookies();
-
+    const {id} = await params;
     const formData = await request.formData();
 
     const remoteFormData = new FormData();
@@ -58,7 +58,7 @@ export async function PATCH(
       remoteFormData.append(key, value);
     });
 
-    const res = await api.patch(`/stories/${params.id}`, remoteFormData, {
+    const res = await api.patch(`/stories/${id}`, remoteFormData, {
       headers: {
         Cookie: cookieStore.toString(),
         'Content-Type': 'multipart/form-data',
