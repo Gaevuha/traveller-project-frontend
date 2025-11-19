@@ -41,12 +41,12 @@
 
 .navItem:hover,
 .navItem:focus {
-  border: 1px solid #000;
+  border: 1px solid var(--color-text-primary);
 }
 
 .navItemHeaderMain:hover,
 .navItemHeaderMain:focus {
-  border: 1px solid #fff;
+  border: 1px solid var(--color-text-inverse-bg);
 }
 
 .navLink {
@@ -62,7 +62,7 @@
 }
 
 .navLinkHeaderMain {
-  color: #fff;
+  color: var(--color-text-inverse-bg);
 }
 
 .navItemFooter {
@@ -93,7 +93,6 @@
   }
 
   .navLinkFooter {
-    /* background-color: red; */
     padding-left: 10px;
     padding-right: 10px;
   }
@@ -128,7 +127,7 @@
   }
 
   .navItem:active {
-    background-color: rgba(216, 216, 216, 0.2);
+    background-color: var(--logo-bg-active);
   }
 
   .navLink {

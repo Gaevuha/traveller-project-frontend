@@ -4,7 +4,7 @@
 }
 
 .title {
-  color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+  color: var(--color-text-primary);
   font-family: var(--font-sora), sans-serif;
   font-size: 56px;
   font-weight: 700;
@@ -26,7 +26,7 @@
 }
 
 .text {
-  color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+  color: var(--color-text-primary);
   font-family: var(--font-nunito-sans), sans-serif;
   font-size: 18px;
   font-weight: 700;
@@ -47,10 +47,8 @@
   justify-content: flex-start;
   align-items: flex-start;
   padding: 4px 10px 4px 10px;
-  background-color: azure;
-  border: 1px solid var(--Opacity-Transparent, rgba(255, 255, 255, 0));
+  background-color: var(--opacity-neutral-darkest);
   border-radius: 6px;
-  background: var(--Opacity-NeutralDarkest5, rgba(0, 0, 0, 0.05));
   margin-bottom: 16px;
 }
 
@@ -68,7 +66,7 @@
 }
 
 .mainText {
-  color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
+  color: var(--color-text-primary);
   font-family: var(--font-nunito-sans), sans-serif;
   font-size: 18px;
   font-weight: 400;
@@ -78,15 +76,14 @@
 }
 
 .saveStory {
-  border: 1px solid var(--ColorScheme1-Border, rgba(0, 0, 0, 0.15));
   border-radius: var(--Radius-Large, 24px);
-  background: var(--ColorScheme1-Foreground, rgba(242, 242, 242, 1));
+  background: var(--color-bg-tertiary);
   height: 217px;
   padding: 32px 20px;
 }
 
 .titleStory {
-  color: var(--ColorScheme1-Text, rgba(0, 0, 0, 1));
+  color: var(--color-text-primary);
   font-family: var(--font-sora), sans-serif;
   font-size: 18px;
   font-weight: 700;
@@ -97,7 +94,7 @@
 }
 
 .textStory {
-  color: var(--ColorScheme1-Text, rgba(0, 0, 0, 1));
+  color: var(--color-text-primary);
   font-family: var(--font-nunito-sans), sans-serif;
   font-size: 16px;
   font-weight: 400;
@@ -116,28 +113,27 @@
   align-items: center;
   gap: 8;
   padding: 6px 12px 6px 12px;
-  border: 1px solid var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
+  border: 1px solid var(--color-primary);
   border-radius: var(--Radius-Small, 8px);
-  background: var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
-  color: var(--Color-White, rgba(255, 255, 255, 1));
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
   font-family: var(--font-nunito-sans), sans-serif;
   font-size: 18px;
   font-weight: 200;
   line-height: 1.5;
   letter-spacing: 0%;
   text-align: left;
-    transition:
+  transition:
     background-color 0.3s ease,
     color 0.3s ease,
     border-color 0.3s ease;
 }
 
-
-.button:disabled{
-border: 1px solid var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
-background: var(--Color-RoyalBlue, rgba(65, 105, 225, 1));
-opacity: 0.3;
-color: var(--Color-White, rgba(255, 255, 255, 1));
+.button:disabled {
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-primary);
+  opacity: 0.3;
+  color: var(--color-text-inverse);
 }
 
 @media only screen and (min-width: 768px) {
@@ -147,7 +143,6 @@ color: var(--Color-White, rgba(255, 255, 255, 1));
   }
 
   .title {
-    color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
     font-family: var(--font-sora), sans-serif;
     font-size: 56px;
     font-weight: 700;
@@ -185,7 +180,6 @@ color: var(--Color-White, rgba(255, 255, 255, 1));
   }
 
   .mainText {
-    color: var(--ColorScheme2-Text, rgba(0, 0, 0, 1));
     font-family: var(--font-nunito-sans), sans-serif;
     font-size: 18px;
     font-weight: 400;
@@ -210,7 +204,7 @@ color: var(--Color-White, rgba(255, 255, 255, 1));
     margin-bottom: 21px;
   }
 
-    .storyImageWrapper {
+  .storyImageWrapper {
     height: 874px;
     max-width: 1312px;
     margin: 0 auto 96px;
@@ -226,5 +220,3 @@ color: var(--Color-White, rgba(255, 255, 255, 1));
     max-width: 865px;
   }
 }
-
-

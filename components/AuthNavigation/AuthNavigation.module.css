@@ -14,7 +14,7 @@
 }
 
 .loginLink {
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   display: block;
   font-weight: 500;
@@ -26,8 +26,8 @@
   padding-top: 3px;
   padding-bottom: 3px;
   /* width: 100%; */
-  color: #000;
-  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-popular-light);
 
   transition: all 0.3s ease;
 }
@@ -35,31 +35,33 @@
 .loginLink:hover,
 .loginLink:focus {
   border: 1px solid transparent;
-  background-color: #4169e1;
-  color: #fff;
+  background-color: var(--color-primary-hover-second);
+  color: var(--color-text-inverse);
   transform: translateY(-1px);
 }
 
 .loginLink:active {
-  background-color: #1a2a5a;
+  background-color: var(--color-primary-active-second);
+  transform: translateY(0px);
 }
 
 .loginLinkRegister {
   padding: 3px 125.5px;
   border: 1px solid transparent;
-  color: #fff;
-  background-color: #4169e1;
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary);
 }
 
 .loginLinkRegister:hover,
 .loginLinkRegister:focus {
-  border: 1px solid #4169e1;
-  background-color: #e8eeff;
-  color: #000;
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-primary-hover-first);
+  color: var(--color-text-primary);
 }
 
 .loginLinkRegister:active {
-  background-color: #7a96ea;
+  background-color: var(--color-primary-active-first);
+  border-color: var(--color-border-active-first);
 }
 
 .loginLinkMainPage {
@@ -154,12 +156,6 @@
   .loginLink {
     padding: 4px 10px;
     font-size: 16px;
-  }
-
-  .loginLinkRegister {
-  }
-
-  .publichStoryItem {
   }
 
   .publichStoryLink {

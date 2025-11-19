@@ -44,8 +44,8 @@
   font-size: 16px;
   line-height: 150%;
   color: var(--color-text-primary);
-  background: var(--opacity-neutral-darkest-5, var(--color-bg-secondary));
-  border: 1px solid var(--color-scheme-2-border, var(--color-border-light));
+  background: var(--color-bg-popular-light);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 6px 12px;
   height: 48px;
@@ -58,17 +58,16 @@
 
 .editButton:hover:not(:disabled),
 .editButton:focus:not(:disabled) {
-  background: var(--opacity-neutral-darkest-5, var(--color-bg-secondary));
-  border-color: rgba(65, 105, 225, 0.3);
+  background: var(--color-primary-hover-second);
+
+  color: var(--color-text-inverse);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .editButton:active:not(:disabled) {
   transform: translateY(0);
-  background-color: #8daefb;
-  border-color: #6a90f0;
-  color: var(--color-text-primary);
+  background-color: var(--color-primary-active-second);
 }
 
 .editButton:disabled {

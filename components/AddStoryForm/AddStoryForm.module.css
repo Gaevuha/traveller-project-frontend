@@ -18,20 +18,21 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
 
   display: block;
   margin-bottom: 8px;
 }
 
 .inputField {
-  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   padding: 8px;
   width: 100%;
   height: 40px;
 
-  background-color: rgba(255, 255, 255, 0);
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: 1px solid var(--color-border);
   outline: none;
 }
 
@@ -40,15 +41,16 @@
 }
 
 .inputField:focus {
-  border: 1px solid transparent;
-  outline: 1px solid black;
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: none;
 }
 
 .errorMessage {
   position: absolute;
   bottom: -23px;
   left: 0;
-  color: red;
+  color: var(--color-error);
 }
 
 .errorMessageImage {
@@ -71,11 +73,12 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--color-bg-popular-light);
 
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 4px 9px;
+
   height: 32px;
 
   cursor: pointer;
@@ -86,13 +89,12 @@
 
 .coverButton:hover,
 .coverButton:focus {
-  border: 1px solid rgba(255, 255, 255, 0);
-  color: #fff;
-  background-color: #4169e1;
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary-hover-second);
 }
 
 .coverButton:active {
-  background-color: #1a2a5a;
+  background-color: var(--color-primary-active-second);
 }
 
 .description {
@@ -117,16 +119,15 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  color: #fff;
-
-  border: 1px solid #4169e1;
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
   padding-top: 11px;
   padding-bottom: 11px;
   margin-bottom: 16px;
   width: 100%;
 
-  background-color: #4169e1;
   transition:
     color 250ms ease,
     background-color 250ms ease;
@@ -134,17 +135,21 @@
 
 .saveBtn:hover,
 .saveBtn:focus {
-  color: #000;
-  background-color: #e8eeff;
+  background-color: var(--color-primary-hover-first);
+  transform: translateY(-1px);
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 12px var(--box-shadow);
 }
 
 .saveBtn:active {
-  background-color: #7a96ea;
+  transform: translateY(0);
+  color: var(--color-text-primary);
+  background-color: var(--color-primary-active-first);
 }
 
 .btnDisabled {
   opacity: 0.3;
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .saveBtn.btnDisabled:hover,
@@ -161,15 +166,15 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  color: #000;
+  color: var(--color-text-primary);
 
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding-top: 11px;
   padding-bottom: 11px;
   width: 100%;
 
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--color-bg-popular-light);
   transition:
     color 250ms ease,
     background-color 250ms ease;
@@ -177,14 +182,18 @@
 
 .rejectBtn:hover,
 .rejectBtn:focus {
-  border: 1px solid #4169e1;
-  color: #fff;
-  background-color: #4169e1;
+  background-color: var(--color-primary-hover-second);
+  border-color: var(--color-primary-hover-second);
+  color: var(--color-text-inverse);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--box-shadow);
 }
 
 .rejectBtn:active {
-  border: 1px solid #1a2a5a;
-  background-color: #1a2a5a;
+  transform: translateY(0);
+  background-color: var(--color-primary-active-second);
+  border-color: var(--color-primary-active-second);
+  color: var(--color-text-inverse);
 }
 
 .loaderContainer {
