@@ -14,6 +14,7 @@ import { User } from '@/types/user';
 import { updateUserProfile } from '@/lib/api/clientApi';
 import toast from 'react-hot-toast';
 import css from './EditProfileModal.module.css';
+import { useLocalStorageForm } from '@/lib/hooks/useLocalStorageForm';
 
 interface EditProfileModalProps {
   user: User;
@@ -37,6 +38,8 @@ interface ApiErrorWithResponse {
   message?: string;
 }
 
+const EDIT_PROFILE_DRAFT_KEY = 'edit-profile-draft';
+
 export default function EditProfileModal({
   user,
   isOpen,
@@ -58,6 +61,19 @@ export default function EditProfileModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
+  const isRestoredFromStorageRef = useRef(false);
+
+  // Хук для збереження форми в localStorage (тільки збереження, не відновлення)
+  // Відновлення відбувається вручну в useEffect при відкритті модального вікна
+  const { clearStorage } = useLocalStorageForm({
+    storageKey: EDIT_PROFILE_DRAFT_KEY,
+    values: {
+      name,
+      description,
+      avatarPreview,
+    },
+    enabled: isOpen,
+  });
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -69,12 +85,73 @@ export default function EditProfileModal({
       return;
     }
 
-    // Скидаємо форму до початкових значень при відкритті
-    setName(user.name);
-    setDescription(user.description || '');
-    setAvatar(null);
-    setAvatarPreview(user.avatarUrl || null);
+    // Перевіряємо localStorage при відкритті модального вікна
+    if (typeof window !== 'undefined') {
+      const raw = window.localStorage.getItem(EDIT_PROFILE_DRAFT_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as {
+            name?: string;
+            description?: string;
+            avatarPreview?: string | null;
+          };
+          
+          // Відновлюємо збережені дані
+          if (parsed.name !== undefined) {
+            setName(parsed.name);
+          } else {
+            setName(user.name);
+          }
+          
+          if (parsed.description !== undefined) {
+            setDescription(parsed.description);
+          } else {
+            setDescription(user.description || '');
+          }
+          
+          // Перевіряємо avatarPreview
+          if (parsed.avatarPreview !== undefined) {
+            // Якщо avatarPreview - це base64 (починається з "data:"), значить було завантажено нове зображення
+            // Але File об'єкт не можна відновити з localStorage, тому показуємо оригінальний аватар
+            // Це дасть зрозуміти користувачу, що файл не зберігся
+            if (parsed.avatarPreview && parsed.avatarPreview.startsWith('data:')) {
+              // Base64 зображення не зберігся - показуємо оригінальний аватар
+              setAvatarPreview(user.avatarUrl || null);
+            } else {
+              // Це URL (оригінальний аватар) - можна відновити
+              setAvatarPreview(parsed.avatarPreview);
+            }
+          } else {
+            setAvatarPreview(user.avatarUrl || null);
+          }
+          
+          setAvatar(null); // File не можна відновити з localStorage
+          isRestoredFromStorageRef.current = true;
+        } catch (error) {
+          console.error('Cannot parse stored form draft:', error);
+          // Якщо помилка парсингу - встановлюємо початкові значення
+          setName(user.name);
+          setDescription(user.description || '');
+          setAvatar(null);
+          setAvatarPreview(user.avatarUrl || null);
+        }
+      } else {
+        // Немає збережених даних - встановлюємо початкові значення
+        setName(user.name);
+        setDescription(user.description || '');
+        setAvatar(null);
+        setAvatarPreview(user.avatarUrl || null);
+      }
+    } else {
+      // SSR - встановлюємо початкові значення
+      setName(user.name);
+      setDescription(user.description || '');
+      setAvatar(null);
+      setAvatarPreview(user.avatarUrl || null);
+    }
+    
     setErrors({});
+    isRestoredFromStorageRef.current = false;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -146,10 +223,11 @@ export default function EditProfileModal({
     const file = e.target.files?.[0];
     if (file) {
       setAvatar(file);
-      // Створюємо preview
+      // Створюємо preview (base64 для збереження в localStorage)
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarPreview(typeof reader.result === 'string' ? reader.result : null);
+        const base64 = typeof reader.result === 'string' ? reader.result : null;
+        setAvatarPreview(base64);
       };
       reader.readAsDataURL(file);
     }
@@ -196,6 +274,9 @@ export default function EditProfileModal({
       }
 
       const updatedUser = await updateUserProfile(updateData);
+
+      // Очищаємо localStorage після успішного збереження
+      clearStorage();
 
       onUpdate(updatedUser);
       toast.success('Профіль успішно оновлено!');
