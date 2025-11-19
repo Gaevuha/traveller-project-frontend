@@ -98,11 +98,11 @@ export default function StoriesPageClient({
       const nextPage = page + 1;
       const categoryParam = categoryId === 'all' ? undefined : categoryId;
       const newStories = await fetchStories(nextPage, PER_PAGE, categoryParam);
-
-      if (newStories.length === 0) {
+       setStories(prev => [...prev, ...newStories]);   
+      if (newStories.length < FIRST_LOAD) {
         setHasMore(false);
       } else {
-        setStories(prev => [...prev, ...newStories]);
+       
         setPage(nextPage);
       }
     } catch (error) {
