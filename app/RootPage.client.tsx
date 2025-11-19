@@ -16,22 +16,25 @@ export default function RootPageClient() {
 
   const screenSize = useBreakpointStore(state => state.screenSize);
 
-  // const menuContainerRef = useRef<HTMLDivElement>(null);
-  // useClickOutside({
-  //   ref: menuContainerRef,
-  //   callback: () => setIsMobileMenuOpen(false),
-  // });
-
   useLockScroll(isMobileMenuOpen);
 
   useEffect(() => {
     if (screenSize && screenSize === 'desktop') {
       closeMobileMenu();
     }
-  }, [screenSize]);
+  }, [screenSize, closeMobileMenu]);
 
   useEffect(() => {
-    closeMobileMenu();
+    const handler = () => {
+      console.log('Назад нажали');
+      closeMobileMenu();
+    };
+
+    window.addEventListener('popstate', handler);
+
+    return () => {
+      window.removeEventListener('popstate', handler);
+    };
   }, [closeMobileMenu]);
 
   return (
