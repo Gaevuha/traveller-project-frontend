@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '../Icon/Icon';
+import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import styles from './Modal.module.css';
 
 interface ModalProps {
@@ -25,12 +27,18 @@ export default function Modal({
   onClose,
   isOpen = true,
 }: ModalProps) {
+  // Використовуємо onClose якщо передано, інакше onCancel
   const handleClose = onClose || onCancel;
-  const handleCloseRef = useRef(handleClose);
+  const closeMobileMenu = useMobileMenuOpen(state => state.closeMobileMenu);
+  
+  // Створюємо ref для onClose та onCancel окремо для правильної роботи з ESC
+  const onCloseRef = useRef(onClose);
+  const onCancelRef = useRef(onCancel);
 
   useEffect(() => {
-    handleCloseRef.current = handleClose;
-  }, [handleClose]);
+    onCloseRef.current = onClose;
+    onCancelRef.current = onCancel;
+  }, [onClose, onCancel]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -38,9 +46,17 @@ export default function Modal({
       return;
     }
 
+    // Закриваємо мобільне меню при відкритті модального вікна
+    closeMobileMenu();
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleCloseRef.current();
+        // При ESC викликаємо onClose якщо він є, інакше onCancel
+        if (onCloseRef.current) {
+          onCloseRef.current();
+        } else {
+          onCancelRef.current();
+        }
       }
     };
 
@@ -51,13 +67,18 @@ export default function Modal({
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, closeMobileMenu]);
 
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      handleClose();
+      // При кліку на backdrop викликаємо onClose якщо він є, інакше onCancel
+      if (onCloseRef.current) {
+        onCloseRef.current();
+      } else {
+        onCancelRef.current();
+      }
     }
   };
 
@@ -70,10 +91,15 @@ export default function Modal({
   };
 
   const handleCloseButton = () => {
-    handleClose();
+    // При кліку на кнопку закриття викликаємо onClose якщо він є, інакше onCancel
+    if (onCloseRef.current) {
+      onCloseRef.current();
+    } else {
+      onCancelRef.current();
+    }
   };
 
-  return (
+  const modalContent = (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal}>
         <button
@@ -108,5 +134,13 @@ export default function Modal({
       </div>
     </div>
   );
+
+  // Використовуємо Portal для рендерингу модального вікна безпосередньо в body
+  // Це гарантує, що воно не буде обмежене батьківськими контейнерами
+  if (typeof window !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+
+  return null;
 }
 

@@ -1,19 +1,16 @@
 .backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001;
+  z-index: 1000;
   padding: 20px;
-  margin: 0;
   animation: fadeIn 0.2s ease-out;
-  /* Гарантуємо, що модальне вікно не обмежене батьківськими контейнерами */
-  isolation: isolate;
-  /* Переконаємося, що модальне вікно завжди поверх всього */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
 }
 
 @keyframes fadeIn {
@@ -29,16 +26,14 @@
   position: relative;
   width: 100%;
   max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   background-color: var(--color-bg-secondary);
   border-radius: 24px;
-  padding: 64px;
+  padding: 64px 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: slideUp 0.2s ease-out;
   transition: background-color 0.3s ease;
-  /* Гарантуємо центрування незалежно від батьківських контейнерів */
-  margin: auto;
-  /* Переконаємося, що модальне вікно не обрізається */
-  overflow: visible;
 }
 
 @keyframes slideUp {
@@ -68,6 +63,7 @@
     color 0.3s ease,
     transform 0.2s ease;
   border-radius: 4px;
+  z-index: 10;
 }
 
 .closeButton:hover {
@@ -95,19 +91,153 @@
   letter-spacing: -0.01em;
   text-align: center;
   color: var(--color-scheme-1-text, var(--color-text-primary));
-  margin: 0 0 16px 0;
+  margin: 0 0 32px 0;
   padding-right: 40px;
   transition: color 0.3s ease;
 }
 
-.message {
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
   font-family: var(--font-family, var(--font-nunito-sans)), sans-serif;
   font-weight: 400;
   font-size: 16px;
-  line-height: 150%;
-  text-align: center;
-  color: var(--color-scheme-1-text, var(--color-text-primary));
-  margin: 0 0 24px 0;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: var(--font-nunito-sans), sans-serif;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.input {
+  height: 40px;
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: var(--font-nunito-sans), sans-serif;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+}
+
+.inputError,
+.textarea.inputError {
+  border-color: var(--color-error);
+}
+
+.inputError:focus,
+.textarea.inputError:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.hint {
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-error);
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatarPreviewWrapper {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-tertiary);
+}
+
+.avatarPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileButton {
+  font-family: var(--font-nunito-sans), sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 4px 9px;
+  height: 32px;
+  cursor: pointer;
+  transition:
+    color 250ms ease,
+    background-color 250ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileButton:hover,
+.fileButton:focus {
+  border: 1px solid rgba(255, 255, 255, 0);
+  color: #fff;
+  background-color: #4169e1;
+}
+
+.fileButton:active {
+  background-color: #1a2a5a;
 }
 
 .buttons {
@@ -115,40 +245,7 @@
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-/* Mobile - гарантуємо правильне центрування */
-@media (max-width: 767px) {
-  .backdrop {
-    /* Додаткова гарантія центрування на мобільних */
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    /* Переконаємося, що backdrop займає весь екран */
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-  }
-  
-  .modal {
-    /* Переконаємося, що модальне вікно не виходить за межі екрану */
-    max-width: calc(100% - 40px);
-    width: calc(100% - 40px);
-    padding: 32px 24px;
-    margin: 0 auto;
-  }
-  
-  .buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .cancelButton,
-  .confirmButton {
-    width: 100%;
-    min-width: unset;
-  }
+  margin-top: 8px;
 }
 
 .cancelButton {
@@ -161,7 +258,8 @@
   border: 1px solid var(--color-scheme-2-border, var(--color-border-light));
   border-radius: 8px;
   padding: 6px 12px;
-  width: 203px;
+  width: 100%;
+  min-width: 140px;
   height: 48px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -203,7 +301,8 @@
   border: 1px solid var(--color-royal-blue, var(--color-primary));
   border-radius: 8px;
   padding: 6px 12px;
-  width: 203px;
+  width: 100%;
+  min-width: 140px;
   height: 48px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -238,20 +337,9 @@
 
 /* Tablet */
 @media (min-width: 768px) {
-  .backdrop {
-    /* Гарантуємо центрування на планшеті */
-    align-items: center;
-    justify-content: center;
-    /* Переконаємося, що backdrop займає весь екран */
-    width: 100vw;
-    height: 100vh;
-  }
-  
   .modal {
     width: 704px;
-    max-width: 704px;
     padding: 64px;
-    margin: 0 auto;
   }
 
   .title {
@@ -262,12 +350,17 @@
     letter-spacing: -0.01em;
     text-align: center;
     color: var(--color-scheme-1-text, var(--color-text-primary));
-    margin-bottom: 20px;
+    margin-bottom: 32px;
   }
 
-  .message {
-    font-size: 18px;
-    margin-bottom: 32px;
+  .input,
+  .textarea {
+    font-size: 16px;
+  }
+
+  .input::placeholder,
+  .textarea::placeholder {
+    font-size: 16px;
   }
 
   .buttons {
@@ -276,6 +369,7 @@
 
   .cancelButton,
   .confirmButton {
+    width: 203px;
     min-width: 140px;
     font-size: 18px;
   }
@@ -290,12 +384,25 @@
 
   .title {
     font-size: 48px;
-    margin-bottom: 16px;
+    margin-bottom: 32px;
   }
 
-  .message {
-    font-size: 20px;
-    margin-bottom: 32px;
+  .label {
+    font-size: 18px;
+  }
+
+  .input {
+    font-size: 18px;
+    height: 43px;
+  }
+
+  .textarea {
+    font-size: 18px;
+  }
+
+  .input::placeholder,
+  .textarea::placeholder {
+    font-size: 18px;
   }
 
   .cancelButton {
@@ -308,3 +415,4 @@
     font-size: 18px;
   }
 }
+

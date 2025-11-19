@@ -178,7 +178,7 @@ export default function TravellerPageClient({
       <TravellersStories
         stories={mergedStories}
         isAuthenticated={isAuthenticated}
-        // className={styles.travellerPageStoriesList}
+        className={styles.travellerPageStoriesList}
       />
 
       {hasMore && mergedStories.length > 0 && (

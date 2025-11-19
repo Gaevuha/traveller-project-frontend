@@ -72,7 +72,7 @@ export default function EditStoryForm({ story }: Props) {
   const editStory = useMutation({
     mutationFn: patchStoryByIdClient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myStories', 'allStories'] });
+      queryClient.invalidateQueries({ queryKey: ['myStories'] });
 
       toast.success('Історію успішно оновлено!', {
         style: { maxWidth: '500px' },

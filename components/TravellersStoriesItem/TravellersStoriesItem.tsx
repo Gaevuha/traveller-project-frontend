@@ -18,6 +18,7 @@ import Modal from '../Modal/Modal';
 interface TravellersStoriesItemProps {
   story: Story;
   isAuthenticated: boolean;
+  isMyStory?: boolean;
   onRemoveSavedStory?: (id: string) => void; // ⬅ додаємо!
 }
 
@@ -25,6 +26,7 @@ export default function TravellersStoriesItem({
   story,
   isAuthenticated,
   onRemoveSavedStory,
+  isMyStory,
 }: TravellersStoriesItemProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -55,6 +57,11 @@ export default function TravellersStoriesItem({
     // оптимістичне оновлення UI в самій картці
     setIsSaved(nextSaved);
     setFavoriteCount(prevCount + (nextSaved ? 1 : -1));
+
+    // видалення картки зі сторінки, якщо "unfavorite"
+    if (!nextSaved && onRemoveSavedStory) {
+      onRemoveSavedStory(story._id);
+    }
     setLoading(true);
 
     const prevSavedMe = queryClient.getQueryData<Story[]>(['savedStoriesMe']);
@@ -81,7 +88,7 @@ export default function TravellersStoriesItem({
         );
 
         await removeStoryFromFavorites(story._id);
-        // >>> ВАЖЛИВО: видалити картку зі сторінки
+      // видалити картку зі сторінки
         if (onRemoveSavedStory) {
           onRemoveSavedStory(story._id);
         }
@@ -104,32 +111,6 @@ export default function TravellersStoriesItem({
     }
   };
 
-  // const handleSave = async () => {
-  // if (!isAuthenticated) {
-  // router.push('/auth/register');
-  // return;
-  // }
-
-  // try {
-  // setIsSaving(true);
-  // if (!isSaved) {
-  // await addStoryToFavorites(story._id);
-  // setFavoriteCount(prev => prev + 1);
-  // setIsSaved(true);
-  // toast.success('Додано до збережених!');
-  // } else {
-  // await removeStoryFromFavorites(story._id);
-  // setFavoriteCount(prev => prev - 1);
-  // setIsSaved(false);
-  // toast('Видалено із збережених');
-  // }
-  // } catch (error) {
-  // console.error(error);
-  // } finally {
-  // setIsSaving(false);
-  // }
-  // };
-
   function formatDate(dateString: string) {
     const d = new Date(dateString);
     const day = String(d.getDate()).padStart(2, '0');
@@ -137,7 +118,7 @@ export default function TravellersStoriesItem({
     const year = d.getFullYear();
     return `${day}.${month}.${year}`;
   }
-
+const categoryName = story.category?.name ?? 'Без категорії';
   return (
     <>
       <li className={css.story}>
@@ -150,7 +131,7 @@ export default function TravellersStoriesItem({
         />
 
         <div className={css.story__content}>
-          <p className={css.story__category}>{story.category.name}</p>
+          <p className={css.story__category}>{categoryName}</p>
           <h3 className={css.story__title}>{story.title}</h3>
           <p className={css.story__text}>{story.article}</p>
 
@@ -178,16 +159,26 @@ export default function TravellersStoriesItem({
               Переглянути статтю
             </Link>
 
-            <button
-              onClick={handleToggleFavorite}
-              disabled={loading}
-              className={`${css.story__save} ${isSaved ? css.saved : ''}`}
-            >
-              <Icon
-                name="icon-bookmark"
-                className={`${isSaved ? css.icon__saved : css.icon__bookmark}`}
-              />
-            </button>
+            {/* Якщо моя історія → EDIT */}
+            {isMyStory ? (
+              <button
+                onClick={() => router.push(`/stories/${story._id}/edit`)}
+                className={css.story__save}
+              >
+                <Icon name="icon-edit" className={css.iconEdit} />
+              </button>
+            ) : (
+              <button
+                onClick={handleToggleFavorite}
+                disabled={loading}
+                className={`${css.story__save} ${isSaved ? css.saved : ''}`}
+              >
+                <Icon
+                  name="icon-bookmark"
+                  className={`${isSaved ? css.icon__saved : css.icon__bookmark}`}
+                />
+              </button>
+            )}
           </div>
         </div>
       </li>
@@ -203,6 +194,9 @@ export default function TravellersStoriesItem({
         onCancel={() => {
           setIsAuthModalOpen(false);
           router.push('/auth/login');
+        }}
+        onClose={() => {
+          setIsAuthModalOpen(false);
         }}
         isOpen={isAuthModalOpen}
       />
