@@ -133,16 +133,13 @@ export default async function RootLayout({
             <AuthProvider initialUser={initialUser}>
               {children}
               <Toaster
-                position="top-right"
+                position="bottom-center"
                 gutter={16}
                 containerStyle={{
-                  top: 16,
-                  right: 16,
                   bottom: 16,
-                  left: 16,
                 }}
                 toastOptions={{
-                  duration: 4000,
+                  duration: 5000,
                   style: {
                     background: 'var(--color-bg-secondary)',
                     color: 'var(--color-text-primary)',
@@ -155,9 +152,9 @@ export default async function RootLayout({
                     overflowWrap: 'break-word',
                   },
                   success: {
-                    duration: 3000,
+                    duration: 5000,
                     iconTheme: {
-                      primary: 'var(--color-toast)',
+                      primary: 'var(--color-primary)',
                       secondary: 'var(--color-text-primary)',
                     },
                   },
@@ -165,7 +162,7 @@ export default async function RootLayout({
                     duration: 5000,
                     iconTheme: {
                       primary: 'var(--color-error)',
-                      secondary: 'var(--color-text-inverse-bg)',
+                      secondary: 'var(--color-text-primary)',
                     },
                   },
                 }}
