@@ -17,12 +17,12 @@ export async function middleware(request: NextRequest) {
 
   // 1) Публічні маршрути: завжди дозволяємо відкрити
   //    (редіректимо на / тільки якщо є валідний accessToken)
-  if (isPublicRoute) {
+          if (isPublicRoute) {
     if (accessToken) {
       return NextResponse.redirect(new URL('/', request.url));
+      }
+      return NextResponse.next();
     }
-    return NextResponse.next();
-  }
 
   // 2) Приватні маршрути: допускаємо лише з accessToken.
   //    Якщо його немає — скеровуємо на /auth/login.
@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   //    щоб не блокувати форму логіну.
   if (isPrivateRoute) {
     if (accessToken) {
-      return NextResponse.next();
+    return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }

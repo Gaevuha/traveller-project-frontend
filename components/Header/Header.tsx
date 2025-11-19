@@ -7,6 +7,7 @@ import Logo from '../Logo/Logo';
 import Navigation from '../Navigation/Navigation';
 import css from './Header.module.css';
 import MobileMenuBtn from '../MobileMenuBtn/MobileMenuBtn';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import { useLockScroll } from '@/lib/hooks/useLockScroll';
@@ -46,11 +47,12 @@ export default function Header() {
           <div className={css.logoWrapper}>
             <Logo variant={LogoProps} handleClick={closeMobileMenu} />
           </div>
-          <Navigation
-            variant={isMainPage ? 'header-main-page' : 'header'}
-            handleClick={closeMobileMenu}
-          />
-
+          <div className={css.navWrapper}>
+            <Navigation
+              variant={isMainPage ? 'header-main-page' : 'header'}
+              handleClick={closeMobileMenu}
+            />
+          </div>
           {/* {isAuthenticated && isTablet && (
             <li>
               <PublishStoryLink
@@ -58,12 +60,16 @@ export default function Header() {
               />
             </li>
           )} */}
+          <ThemeToggle variant={isMainPage ? 'header-main-page' : 'header'} />
 
-          <MobileMenuBtn
-            variant={isMainPage ? 'header-main-page' : undefined}
-            handleClick={setIsMobileMenuOpen}
-            isOpen={isMobileMenuOpen}
-          />
+          <div className={css.controls}>
+            {/* <ThemeToggle variant={isMainPage ? 'header-main-page' : 'header'} /> */}
+            <MobileMenuBtn
+              variant={isMainPage ? 'header-main-page' : undefined}
+              handleClick={setIsMobileMenuOpen}
+              isOpen={isMobileMenuOpen}
+            />
+          </div>
         </div>
       </header>
     </>

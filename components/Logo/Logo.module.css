@@ -24,7 +24,8 @@
 
 .logoLink:hover,
 .logoLink:focus {
-  border: 1px solid #000;
+  border: 1px solid var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
 }
 
 .logoLink:active {
@@ -39,7 +40,8 @@
 
 .logoLinkHeaderMain:hover,
 .logoLinkHeaderMain:focus {
-  border: 1px solid #fff;
+  border: 1px solid var(--color-text-inverse-bg);
+  border: 1px solid var(--color-text-inverse-bg);
 }
 
 /* Footer */
@@ -64,12 +66,14 @@
   font-size: 17px;
   line-height: 1.1;
   letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  color: var(--color-text-primary);
 
   transition: color 250ms ease;
 }
 
 .logoTextHeaderMain {
-  color: #fff;
+  color: var(--color-text-inverse-bg);
   display: inline-block;
   vertical-align: middle;
 }
@@ -78,11 +82,26 @@
 @media screen and (min-width: 768px) {
   .logoLinkFooter {
     margin-bottom: 41px;
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .logoLinkMobileMenuOpen {
+    transform: translateX(380px);
+    /* background-color: red; */
   }
 }
 
 @media screen and (min-width: 1440px) {
   .logoLinkFooter {
     margin-bottom: 68px;
+  }
+
+  .logoLink:active {
+    background-color: var(--logo-bg-active);
+  }
+
+  .logoLink:active {
+    background-color: var(--logo-bg-active);
   }
 }

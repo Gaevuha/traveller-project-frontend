@@ -15,6 +15,18 @@
 .icon {
   width: 32px;
   height: 32px;
+  fill: var(--color-text-primary);
+  transition: all 0.3s ease;
+}
+
+.icon:hover,
+.icon:focus {
+  fill: var(--color-primary-hover-first);
+  transform: translateY(-3px);
+}
+
+.icon:active {
+  fill: var(--color-primary-active-first);
 }
 
 @media screen and (min-width: 768px) {
