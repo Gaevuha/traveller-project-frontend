@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import css from './Navigation.module.css';
 import AuthNavigation from '../AuthNavigation/AuthNavigation';
+import { useAuthStore } from '@/lib/store/authStore';
 
 type NavProps = {
   variant?: 'header' | 'header-main-page' | 'footer' | 'mobile-menu';
@@ -16,6 +17,8 @@ const navItems = [
 ];
 
 export default function Navigation({ variant, handleClick }: NavProps) {
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+
   function getNavClass() {
     switch (variant) {
       case 'footer':
@@ -54,6 +57,18 @@ export default function Navigation({ variant, handleClick }: NavProps) {
             </Link>
           </li>
         ))}
+
+        {variant === 'mobile-menu' && isAuthenticated && (
+          <li className={`${css.navItem} ${getNavItemClass()}`}>
+            <Link
+              href="/profile"
+              className={`${css.navLink} ${getNavLinkClass()}`}
+              onClick={handleClick}
+            >
+              Моя сторінка
+            </Link>
+          </li>
+        )}
 
         {variant === 'header-main-page' && handleClick && (
           <AuthNavigation
