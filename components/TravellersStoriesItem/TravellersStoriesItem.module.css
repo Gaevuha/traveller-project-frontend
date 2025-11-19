@@ -194,7 +194,7 @@
   .story__btn {
     font-size: 18px;
   }
-}
+
 
 .story__btn:hover,
 .story__btn:focus {
@@ -209,6 +209,7 @@
   transform: translateY(0);
   color: var(--color-text-inverse);
   background-color: var(--color-primary-active-second);
+}
 }
 
 .story__save {
@@ -234,6 +235,24 @@
   height: 24px;
 }
 
+.story__save.saved {
+ background-color: #1a2a5a;;
+ 
+}
+
+.story__save.saved .icon__saved {
+ 
+  fill: #fff;
+  stroke: none;
+  width: 30px;
+    height: 30px;
+
+}
+
+
+
+@media screen and (min-width: 1440px){
+
 .story__save:hover .icon__bookmark,
 .story__save:focus .icon__bookmark,
 .story__save:hover .iconEdit,
@@ -250,6 +269,7 @@
   box-shadow: 0 6px 12px var(--box-shadow);
   border: none;
 }
+
 
 .story__save.saved {
   background: var(--color-primary-active-second);
