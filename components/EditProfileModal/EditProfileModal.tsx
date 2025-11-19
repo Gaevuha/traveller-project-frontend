@@ -37,6 +37,13 @@ interface ApiErrorWithResponse {
   message?: string;
 }
 
+const EDIT_PROFILE_DRAFT_KEY = 'edit-profile-draft';
+
+interface ProfileDraft {
+  name?: string;
+  description?: string;
+}
+
 export default function EditProfileModal({
   user,
   isOpen,
@@ -58,23 +65,50 @@ export default function EditProfileModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
+  // Завантаження збережених значень з localStorage при відкритті модалки
   useEffect(() => {
-    if (!isOpen) {
-      document.body.style.overflow = '';
+    if (!isOpen || typeof window === 'undefined') {
+      isInitializedRef.current = false;
       return;
     }
 
     // Скидаємо форму до початкових значень при відкритті
-    setName(user.name);
-    setDescription(user.description || '');
+    const savedDraft = window.localStorage.getItem(EDIT_PROFILE_DRAFT_KEY);
+    
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft) as ProfileDraft;
+        // Використовуємо збережені значення, якщо вони є
+        if (parsed.name !== undefined) {
+          setName(parsed.name);
+        } else {
+          setName(user.name);
+        }
+        if (parsed.description !== undefined) {
+          setDescription(parsed.description);
+        } else {
+          setDescription(user.description || '');
+        }
+      } catch (error) {
+        console.error('Cannot parse stored profile draft:', error);
+        setName(user.name);
+        setDescription(user.description || '');
+      }
+    } else {
+      setName(user.name);
+      setDescription(user.description || '');
+    }
+
     setAvatar(null);
     setAvatarPreview(user.avatarUrl || null);
     setErrors({});
+    isInitializedRef.current = true;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -90,6 +124,30 @@ export default function EditProfileModal({
       document.body.style.overflow = '';
     };
   }, [isOpen, user]);
+
+  // Збереження значень в localStorage при зміні полів (з debounce)
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined' || !isInitializedRef.current) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const draft: ProfileDraft = {
+        name,
+        description,
+      };
+
+      try {
+        window.localStorage.setItem(EDIT_PROFILE_DRAFT_KEY, JSON.stringify(draft));
+      } catch (error) {
+        console.error('Cannot save profile draft:', error);
+      }
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, name, description]);
 
   if (!isOpen) return null;
 
@@ -196,6 +254,11 @@ export default function EditProfileModal({
       }
 
       const updatedUser = await updateUserProfile(updateData);
+
+      // Очищаємо збережені дані після успішного збереження
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(EDIT_PROFILE_DRAFT_KEY);
+      }
 
       onUpdate(updatedUser);
       toast.success('Профіль успішно оновлено!');
