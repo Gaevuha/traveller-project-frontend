@@ -103,7 +103,6 @@ export default function EditStoryForm({ story }: Props) {
       }
 
       router.push(`/stories/${story._id}`);
-      console.log('Successfully update the story: ', values);
     } catch {
       toast.error(
         `Помилка оновлення. Спробуйте зберегти вашу історію пізніше.`,
@@ -111,7 +110,6 @@ export default function EditStoryForm({ story }: Props) {
       );
     }
   }
-  // console.log('Formik initial values:', EditStoryInitial);
   return (
     <>
       <Formik<StoryEdit>

@@ -109,7 +109,6 @@ export default function AddStoryForm() {
       }
 
       router.push(`/stories/${response.data._id}`);
-      console.log('Successfully sent the story: ', storyToSend);
     } catch {
       toast.error(
         `Помилка збереження. Спробуйте зберегти вашу історію пізніше.`,

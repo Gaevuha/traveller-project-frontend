@@ -5,13 +5,12 @@ import css from './EditStoryPage.module.css';
 import EditStoryForm from '@/components/EditStoryForm/EditStoryForm';
 import { fetchStoryByIdServer } from '@/lib/api/serverApi';
 
-type AddStoryPageProps = {
-
+type Props = {
   params: Promise<{ storyId: string }>;
 };
 
-export default async function AddStoryPage({ params }: AddStoryPageProps) {
-  const { storyId } = await params; 
+export default async function AddStoryPage({ params }: Props) {
+  const { storyId } = await params;
   const story = await fetchStoryByIdServer(storyId);
 
   return (
