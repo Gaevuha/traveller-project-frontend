@@ -3,20 +3,16 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 export type ApiError = AxiosError<{ error: string }>;
 
 // Строим базовый URL из переменной окружения
-const API_ROOT = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
-if (!API_ROOT) {
-  throw new Error('NEXT_PUBLIC_API_URL is not defined');
-}
-const BASE_URL = `${API_ROOT}/api`;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') + '/api';
+if (!BASE_URL) throw new Error('NEXT_PUBLIC_API_URL is not defined');
 
 /**
  * Client-side API instance
  */
 export const api = axios.create({
-  baseURL: BASE_URL,         // теперь /api запрашивается на правильный домен и порт
+  baseURL: '/api', // Next.js API routes
   withCredentials: true,
-  // Не встановлюємо Content-Type за замовчуванням - axios автоматично встановить для JSON,
-  // а для FormData встановить multipart/form-data з boundary
+  headers: { 'Content-Type': 'application/json' },
 });
 
 
