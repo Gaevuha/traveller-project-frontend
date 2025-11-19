@@ -11,7 +11,7 @@
   right: 0; */
   /* z-index: 20; */
 
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--color-bg-popular-light);
   transition:
     border 250ms ease,
     background-color 250ms ease;
@@ -19,7 +19,7 @@
 
 .button:hover,
 .button:focus {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--color-bg-popular-light);
 }
 
 .button:active {
@@ -32,11 +32,10 @@
   position: relative;
   cursor: pointer;
   display: inline-block;
-  /* background-color: brown; */
 }
 
 .navIcon span {
-  background-color: #000;
+  background-color: var(--color-text-primary);
   position: absolute;
   transition: 0.3s cubic-bezier(0.8, 0.5, 0.2, 1.4);
   width: 100%;

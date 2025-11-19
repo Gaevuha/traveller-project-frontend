@@ -11,13 +11,10 @@ type StoryRouteParams = {
 /**
  * GET /api/stories/[id]
  */
-export async function GET(
-  request: NextRequest,
-  { params }: StoryRouteParams
-) {
+export async function GET(request: NextRequest, { params }: StoryRouteParams) {
   try {
     const cookieStore = cookies();
-    const { id } = await params; 
+    const { id } = await params;
 
     const res = await api.get(`/stories/${id}`, {
       headers: {
@@ -51,7 +48,9 @@ export async function PATCH(
 ) {
   try {
     const cookieStore = cookies();
-    const {id} = await params;
+
+    const { id } = await params;
+
     const formData = await request.formData();
 
     const remoteFormData = new FormData();

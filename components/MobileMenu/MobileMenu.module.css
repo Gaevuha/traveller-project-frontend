@@ -22,8 +22,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  height: 100vh;
-  background-color: #fff;
+  background-color: var(--color-bg-primary);
   transition: transform 500ms ease;
   transform: translateX(100%);
   z-index: 9;

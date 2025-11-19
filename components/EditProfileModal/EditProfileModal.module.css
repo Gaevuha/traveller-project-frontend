@@ -26,11 +26,11 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   background-color: var(--color-bg-secondary);
   border-radius: 24px;
-  padding: 64px 24px;
+  padding: 30px 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: slideUp 0.2s ease-out;
   transition: background-color 0.3s ease;
@@ -49,8 +49,8 @@
 
 .closeButton {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 20px;
+  right: 20px;
   background: none;
   border: none;
   padding: 8px;
@@ -78,9 +78,9 @@
 .closeIcon {
   width: 24px;
   height: 24px;
-  fill: var(--color-white, var(--color-text-inverse));
+  fill: var(--color-text-primary);
   stroke-width: 1px;
-  stroke: var(--color-scheme-1-text, var(--color-text-primary));
+  stroke: var(--color-text-primary);
 }
 
 .title {
@@ -90,7 +90,7 @@
   line-height: 120%;
   letter-spacing: -0.01em;
   text-align: center;
-  color: var(--color-scheme-1-text, var(--color-text-primary));
+  color: var(--color-text-primary);
   margin: 0 0 32px 0;
   padding-right: 40px;
   transition: color 0.3s ease;
@@ -99,13 +99,13 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .label {
@@ -130,11 +130,11 @@
 }
 
 .input {
-  height: 40px;
+  height: 38px;
 }
 
 .textarea {
-  min-height: 120px;
+  min-height: 88px;
   resize: vertical;
   font-family: var(--font-nunito-sans), sans-serif;
 }
@@ -184,12 +184,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .avatarPreviewWrapper {
-  width: 120px;
-  height: 120px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--color-border);
@@ -215,8 +215,8 @@
   font-size: 16px;
   line-height: 1.5;
   color: var(--color-text-primary);
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background-color: var(--color-bg-popular-light);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 4px 9px;
   height: 32px;
@@ -231,13 +231,18 @@
 
 .fileButton:hover,
 .fileButton:focus {
-  border: 1px solid rgba(255, 255, 255, 0);
-  color: #fff;
-  background-color: #4169e1;
+  background-color: var(--color-primary-hover-second);
+  border-color: var(--color-primary-hover-second);
+  color: var(--color-text-inverse);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--box-shadow);
 }
 
 .fileButton:active {
-  background-color: #1a2a5a;
+  transform: translateY(0);
+  background-color: var(--color-primary-active-second);
+  border-color: var(--color-primary-active-second);
+  color: var(--color-text-inverse);
 }
 
 .buttons {
@@ -245,7 +250,7 @@
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .cancelButton {
@@ -254,8 +259,8 @@
   font-size: 18px;
   line-height: 150%;
   color: var(--color-text-primary);
-  background: var(--opacity-neutral-darkest-5, var(--color-bg-secondary));
-  border: 1px solid var(--color-scheme-2-border, var(--color-border-light));
+  background-color: var(--color-bg-popular-light);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 6px 12px;
   width: 100%;
@@ -270,22 +275,23 @@
 
 .cancelButton:hover:not(:disabled),
 .cancelButton:focus:not(:disabled) {
-  background: var(--opacity-neutral-darkest-5, var(--color-bg-secondary));
-  border-color: rgba(65, 105, 225, 0.3);
+  background-color: var(--color-primary-hover-second);
+  border-color: var(--color-primary-hover-second);
+  color: var(--color-text-inverse);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--box-shadow);
 }
 
 .cancelButton:active:not(:disabled) {
   transform: translateY(0);
-  background-color: #8daefb;
-  border-color: #6a90f0;
-  color: var(--color-text-primary);
+  background-color: var(--color-primary-active-second);
+  border-color: var(--color-primary-active-second);
+  color: var(--color-text-inverse);
 }
 
 .cancelButton:disabled {
-  background-color: var(--color-bg-tertiary);
-  border-color: var(--color-border-light);
+  background-color: var(--color-bg-popular-dis);
+  border-color: var(--color-bg-popular-dis);
   color: var(--color-text-primary);
   opacity: 0.3;
   cursor: not-allowed;
@@ -298,7 +304,7 @@
   line-height: 150%;
   color: var(--color-text-inverse);
   background-color: var(--color-primary);
-  border: 1px solid var(--color-royal-blue, var(--color-primary));
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
   padding: 6px 12px;
   width: 100%;
@@ -313,17 +319,18 @@
 
 .confirmButton:hover:not(:disabled),
 .confirmButton:focus:not(:disabled) {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-hover-first);
   border-color: var(--color-primary);
+  color: var(--color-text-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3);
+  box-shadow: 0 4px 12px var(--box-shadow);
 }
 
 .confirmButton:active:not(:disabled) {
   transform: translateY(0);
-  background-color: #1a2b50;
-  border-color: #3a4b70;
-  color: var(--color-text-inverse);
+  background-color: var(--color-primary-active-first);
+  border-color: var(--color-border-active-first);
+  color: var(--color-text-primary);
   box-shadow: none;
 }
 
@@ -339,7 +346,7 @@
 @media (min-width: 768px) {
   .modal {
     width: 704px;
-    padding: 64px;
+    padding: 36px 64px;
   }
 
   .title {
@@ -350,7 +357,7 @@
     letter-spacing: -0.01em;
     text-align: center;
     color: var(--color-scheme-1-text, var(--color-text-primary));
-    margin-bottom: 32px;
+    margin-bottom: 20px;
   }
 
   .input,
@@ -379,12 +386,12 @@
 @media (min-width: 1440px) {
   .modal {
     width: 768px;
-    padding: 64px;
+    padding: 36px 64px;
   }
 
   .title {
     font-size: 48px;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
   }
 
   .label {
@@ -415,4 +422,3 @@
     font-size: 18px;
   }
 }
-

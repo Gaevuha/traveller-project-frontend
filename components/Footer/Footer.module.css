@@ -2,7 +2,7 @@
 
 .footer {
   padding: 56px 0 48px 0;
-  background-color: #e8eeff;
+  background-color: var(--color-bg-popular);
 }
 
 .footerContainer {
@@ -14,7 +14,7 @@
 }
 
 .logoFooter .logoText {
-  color: #000;
+  color: var(--color-text-inverse);
 }
 
 .copyRight {
@@ -33,14 +33,11 @@
   min-width: 280px;
   max-width: 335px;
   height: 1px;
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--color-border);
   content: '';
 }
 
 @media screen and (min-width: 768px) {
-  .footer {
-  }
-
   .footerContainer {
     display: grid;
     grid-template-columns: auto 1fr;
