@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ComponentType } from 'react';
-import { getGoogleAuthUrl } from '@/lib/api/clientApi';
+import { getGoogleOAuthUrl } from '@/lib/api/clientApi';
 import { toast } from 'react-hot-toast';
 import css from './GoogleAuthButton.module.css';
 
@@ -24,11 +24,11 @@ export default function GoogleAuthButton() {
 
   const handleGoogleLogin = async () => {
     try {
-      const url = await getGoogleAuthUrl();
+     const authUrl = await getGoogleOAuthUrl();
 
-      if (url) {
-        console.log('🌐 Redirecting to Google Auth URL:', url);
-        window.location.href = url;
+      if (authUrl) {
+        console.log('🌐 Redirecting to Google Auth URL:', authUrl);
+        window.location.href = authUrl;
       } else {
         throw new Error('URL авторизації не знайдено');
       }
