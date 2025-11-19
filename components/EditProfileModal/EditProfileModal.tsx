@@ -305,15 +305,14 @@ export default function EditProfileModal({
         <form className={css.form} onSubmit={handleSubmit}>
           {/* Аватар */}
           <div className={css.fieldGroup}>
-            <label className={css.label}>Аватар</label>
             <div className={css.avatarSection}>
               <div className={css.avatarPreviewWrapper}>
                 <Image
                   src={avatarPreview ?? '/Avatar Image.svg'}
                   alt="Avatar preview"
                   className={css.avatarPreview}
-                  width={120}
-                  height={120}
+                  width={88}
+                  height={88}
                 />
               </div>
               <input
