@@ -9,9 +9,13 @@ import Loader from '../Loader/Loader';
 import Image from 'next/image';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { FormikLocalStoragePersistor } from '../Forms/FormikLocalStoragePersistor';
-import StoryFormSchemaValidate from '@/lib/validation/StoryFormSchemaValidate';
 import { Story } from '@/types/story';
 import { useEffect, useId, useState } from 'react';
+import EditStoryFormSchemaValidate from '@/lib/validation/EditStoryFormSchemaValidate';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { useLockScroll } from '@/lib/hooks/useLockScroll';
+import { patchStoryByIdClient } from '@/lib/api/clientApi';
 
 type Category =
   | 'Європа'
@@ -50,6 +54,7 @@ export default function EditStoryForm({ story }: Props) {
   const fieldId = useId();
   const [preview, setPreview] = useState<string>(placeholderImage);
   const [storyData, setStoryData] = useState<StoryEdit>(EditStoryInitial);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!story) return;
@@ -64,16 +69,57 @@ export default function EditStoryForm({ story }: Props) {
     });
   }, [story]);
 
-  function handleSubmit() {}
+  const editStory = useMutation({
+    mutationFn: patchStoryByIdClient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myStories', 'allStories'] });
+
+      toast.success('Історію успішно оновлено!', {
+        style: { maxWidth: '500px' },
+      });
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+      }
+    },
+  });
+
+  const { isPending } = editStory;
+
+  useLockScroll(isPending);
+
+  async function handleSubmit(values: StoryEdit) {
+    try {
+      await editStory.mutateAsync({
+        storyToEdit: values,
+        id: story._id,
+      });
+
+      // actions.resetForm();
+      // setPreview(placeholderImage);
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
+      }
+
+      router.push(`/stories/${story._id}`);
+      console.log('Successfully update the story: ', values);
+    } catch {
+      toast.error(
+        `Помилка оновлення. Спробуйте зберегти вашу історію пізніше.`,
+        { style: { maxWidth: '500px' } }
+      );
+    }
+  }
   // console.log('Formik initial values:', EditStoryInitial);
   return (
     <>
       <Formik<StoryEdit>
         enableReinitialize
         initialValues={storyData}
-        validationSchema={StoryFormSchemaValidate}
+        validationSchema={EditStoryFormSchemaValidate}
         onSubmit={handleSubmit}
-        // validateOnMount
+        validateOnMount
       >
         {formik => (
           <Form className={css.form}>
@@ -106,7 +152,8 @@ export default function EditStoryForm({ story }: Props) {
                 <input
                   id={`${fieldId}-cover`}
                   type="file"
-                  accept="image/*"
+                  // accept="image/*"
+                  accept=".jpg,.jpeg,.png"
                   name="img"
                   className={css.coverInput}
                   onChange={e => {
@@ -219,7 +266,7 @@ export default function EditStoryForm({ story }: Props) {
               <button
                 type="submit"
                 className={
-                  formik.isValid
+                  formik.isValid && formik.dirty
                     ? css.saveBtn
                     : `${css.saveBtn} ${css.btnDisabled}`
                 }
@@ -239,14 +286,14 @@ export default function EditStoryForm({ story }: Props) {
         )}
       </Formik>
 
-      {/* {isPending && (
+      {isPending && (
         <>
           <BackgroundOverlay isActive={true} isOverAll={true} />
           <div className={css.loaderContainer}>
             <Loader />
           </div>
         </>
-      )} */}
+      )}
     </>
   );
 }

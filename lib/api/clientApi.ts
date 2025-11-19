@@ -19,6 +19,7 @@ import {
 import { AxiosError, isAxiosError } from 'axios';
 import { api } from '../api/api';
 import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
+import { EditStory } from '@/types/editStoryForm/editStoryForm';
 
 export type ApiError = AxiosError<{ error: string }>;
 
@@ -395,4 +396,25 @@ export async function createStory(
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data;
+}
+
+export async function patchStoryByIdClient(params: {
+  storyToEdit: EditStory;
+  id: string;
+}): Promise<Story> {
+  const formData = new FormData();
+  const { storyToEdit, id } = params;
+  if (storyToEdit.title) formData.append('title', storyToEdit.title);
+  if (storyToEdit.article) formData.append('article', storyToEdit.article);
+  if (storyToEdit.category) formData.append('category', storyToEdit.category);
+  if (storyToEdit.img) formData.append('img', storyToEdit.img);
+
+  const { data } = await api.patch<StoryByIdResponse>(
+    `/stories/${id}`,
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }
+  );
+  return data.data;
 }
