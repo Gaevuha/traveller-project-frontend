@@ -20,20 +20,19 @@ export default function GoogleCallbackPage() {
       return;
     }
 
-    const confirmGoogleLogin = async () => {
+    const confirm = async () => {
       const loadingId = toast.loading('Входимо через Google...');
 
       try {
         const user = await authConfirmGoogle(code);
 
-        if (!user) {
-          throw new Error('Користувача не знайдено');
-        }
+        if (!user) throw new Error('Користувача не знайдено');
 
+        // Получаем полные данные пользователя
         try {
-          const profileData = await getMeProfile();
-          if (profileData && profileData.user) {
-            setUser(profileData.user);
+          const profile = await getMeProfile();
+          if (profile?.user) {
+            setUser(profile.user);
           } else {
             setUser(user);
           }
@@ -45,21 +44,20 @@ export default function GoogleCallbackPage() {
         toast.success(`Вітаємо, ${user.name || 'мандрівнику'}!`);
 
         router.replace('/');
-      } catch (error) {
-        console.error('❌ Google OAuth error:', error);
+      } catch (err) {
+        console.error('❌ Google OAuth error:', err);
         toast.dismiss(loadingId);
         toast.error('Не вдалося увійти через Google');
         router.replace('/auth/login');
       }
     };
 
-    confirmGoogleLogin();
+    confirm();
   }, [searchParams, router, setUser]);
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <p>Підтвердження входу через Google.....</p>
+      <p>Підтвердження входу через Google...</p>
     </div>
   );
 }
-
