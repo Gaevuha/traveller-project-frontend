@@ -196,7 +196,7 @@ export default function AddStoryForm() {
                 <ErrorMessage
                   component="span"
                   name="title"
-                  className={css.errorMessage}
+                  className={`${css.errorMessage} ${css.errorTitle}`}
                 />
               </li>
 
@@ -236,7 +236,7 @@ export default function AddStoryForm() {
                 <ErrorMessage
                   component="span"
                   name="category"
-                  className={css.errorMessage}
+                  className={`${css.errorMessage} ${css.errorCategory}`}
                 />
               </li>
 
@@ -260,7 +260,7 @@ export default function AddStoryForm() {
                 <ErrorMessage
                   component="span"
                   name="article"
-                  className={css.errorMessage}
+                  className={`${css.errorMessage} ${css.errorText}`}
                 />
               </li>
             </ul>

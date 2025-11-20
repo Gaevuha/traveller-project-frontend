@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 40px;
 
-  margin-bottom: 42px;
+  margin-bottom: 50px;
 }
 
 .fieldItem {
@@ -46,13 +46,24 @@
 
 .errorMessage {
   position: absolute;
-  bottom: -23px;
   left: 0;
   color: red;
 }
 
 .errorMessageImage {
   bottom: -28px;
+}
+
+.errorTitle {
+  top: 80px;
+}
+
+.errorCategory {
+  top: 80px;
+}
+
+.errorText {
+  top: 220px;
 }
 
 .imageWrapper {
