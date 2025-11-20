@@ -46,12 +46,7 @@ export const login = async (data: LoginRequest) => {
  * Google OAuth — отримання URL для входу через Google
  */
 export const getGoogleOAuthUrl = async () => {
-  const res = await api.get<{
-    status: number;
-    message: string;
-    data: { url: string };
-  }>('/auth/google/get-oauth-url');
-
+  const res = await api.get('/auth/google/get-oauth-url');
   return res.data.data.url;
 };
 
@@ -59,12 +54,7 @@ export const getGoogleOAuthUrl = async () => {
  * Підтвердження входу після редіректу з Google
  */
 export const authConfirmGoogle = async (code: string) => {
-  const res = await api.post<{
-    status: number;
-    message: string;
-    data: { user: User };
-  }>('/auth/google/confirm-oauth', { code });
-
+  const res = await api.post('/auth/google/confirm-oauth', { code });
   return res.data.data.user;
 };
 
