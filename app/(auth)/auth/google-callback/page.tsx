@@ -30,26 +30,21 @@ export default function GoogleCallbackPage() {
           throw new Error('Користувача не знайдено');
         }
 
-        // Після успішного входу через Google отримуємо повні дані користувача з avatarUrl
-        // Це вирішує проблему, коли Google OAuth повертає неповні дані
         try {
           const profileData = await getMeProfile();
           if (profileData && profileData.user) {
-            // Використовуємо повні дані з avatarUrl
             setUser(profileData.user);
           } else {
-            // Якщо не вдалося отримати повні дані - використовуємо дані з Google OAuth
             setUser(user);
           }
         } catch {
-          // Якщо помилка при отриманні повних даних - використовуємо дані з Google OAuth
           setUser(user);
         }
 
         toast.dismiss(loadingId);
         toast.success(`Вітаємо, ${user.name || 'мандрівнику'}!`);
 
-        router.replace('/'); // ← тепер точно перенаправляє на головну
+        router.replace('/');
       } catch (error) {
         console.error('❌ Google OAuth error:', error);
         toast.dismiss(loadingId);
@@ -67,3 +62,4 @@ export default function GoogleCallbackPage() {
     </div>
   );
 }
+
