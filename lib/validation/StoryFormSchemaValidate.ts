@@ -34,7 +34,7 @@ const StoryFormSchemaValidate = Yup.object().shape({
       if (!value) return false;
       return value instanceof File && value.type.startsWith('image/');
     })
-    .test('fileSize', 'Максимальний розмір файлу — 2MB', value => {
+    .test('fileSize', 'Максимальний розмір файлу — 2Мб', value => {
       if (!value) return false;
       return value instanceof File && value.size <= MAX_FILE_SIZE;
     }),
@@ -46,7 +46,7 @@ const StoryFormSchemaValidate = Yup.object().shape({
 
   article: Yup.string()
     .min(300, 'Текст історії має містити щонайменше 300 символів')
-    .max(2500, 'You incresed the maximum characters for this field')
+    .max(2500, 'Ви перевищили максимальну кількість символів для цього поля')
     .required('Це поле є необхідним для заповнення'),
 
   category: Yup.string()

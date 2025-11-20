@@ -8,7 +8,6 @@ import css from './EditStoryForm.module.css';
 import Loader from '../Loader/Loader';
 import Image from 'next/image';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
-import { FormikLocalStoragePersistor } from '../Forms/FormikLocalStoragePersistor';
 import { Story } from '@/types/story';
 import { useEffect, useId, useState } from 'react';
 import EditStoryFormSchemaValidate from '@/lib/validation/EditStoryFormSchemaValidate';
@@ -35,8 +34,6 @@ interface StoryEdit {
   img: string | File;
 }
 
-const CREATE_STORY_DRAFT_KEY = 'create-story-draft';
-
 type Props = {
   story: Story;
 };
@@ -49,7 +46,7 @@ export default function EditStoryForm({ story }: Props) {
     category: 'Категорія' as Category,
     img: '',
   };
-  //   const id = '691ba2a23f6d884087fda64d';
+
   const router = useRouter();
   const fieldId = useId();
   const [preview, setPreview] = useState<string>(placeholderImage);
@@ -72,15 +69,11 @@ export default function EditStoryForm({ story }: Props) {
   const editStory = useMutation({
     mutationFn: patchStoryByIdClient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myStories'] });
+      queryClient.invalidateQueries({ queryKey: ['allStories', 'myStories'] });
 
       toast.success('Історію успішно оновлено!', {
         style: { maxWidth: '500px' },
       });
-
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
-      }
     },
   });
 
@@ -94,13 +87,6 @@ export default function EditStoryForm({ story }: Props) {
         storyToEdit: values,
         id: story._id,
       });
-
-      // actions.resetForm();
-      // setPreview(placeholderImage);
-
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(CREATE_STORY_DRAFT_KEY);
-      }
 
       router.push(`/stories/${story._id}`);
     } catch {
@@ -121,12 +107,6 @@ export default function EditStoryForm({ story }: Props) {
       >
         {formik => (
           <Form className={css.form}>
-            <FormikLocalStoragePersistor<StoryEdit>
-              formik={formik}
-              storageKey={CREATE_STORY_DRAFT_KEY}
-              excludeFields={['img']}
-            />
-
             <ul className={css.fieldsList}>
               {/* Зображення */}
               <li className={css.fieldItem}>
@@ -191,7 +171,7 @@ export default function EditStoryForm({ story }: Props) {
                 <ErrorMessage
                   component="span"
                   name="title"
-                  className={css.errorMessage}
+                  className={`${css.errorMessage} ${css.errorTitle}`}
                 />
               </li>
 
@@ -231,7 +211,7 @@ export default function EditStoryForm({ story }: Props) {
                 <ErrorMessage
                   component="span"
                   name="category"
-                  className={css.errorMessage}
+                  className={`${css.errorMessage} ${css.errorCategory}`}
                 />
               </li>
 
@@ -255,7 +235,7 @@ export default function EditStoryForm({ story }: Props) {
                 <ErrorMessage
                   component="span"
                   name="article"
-                  className={css.errorMessage}
+                  className={`${css.errorMessage} ${css.errorText}`}
                 />
               </li>
             </ul>
