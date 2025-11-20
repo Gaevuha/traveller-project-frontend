@@ -46,13 +46,22 @@ export default function Navigation({ variant, handleClick }: NavProps) {
 
   // Додаємо "Мій профіль" лише для авторизованого
   const itemsToRender = [...navItems];
-  if (isAuthenticated) {
+  if (isAuthenticated && variant !== 'footer') {
     itemsToRender.push({ href: '/profile', label: 'Мій Профіль' });
   }
 
   return (
     <nav
-      className={`${css.nav} ${getNavClass()} ${variant === 'mobile-menu' ? css.mobileMenuNav : ''}`}
+      className={[
+        css.nav,
+        variant === 'footer' ? css.navFooter : '',
+        variant === 'header' || variant === 'header-main-page'
+          ? css.navHeader
+          : '',
+        variant === 'mobile-menu' ? css.mobileMenuNav : '',
+      ]
+        .filter(Boolean) // прибирає пусті рядки
+        .join(' ')}
     >
       <ul className={`${css.navList} ${getNavListClass()}`}>
         {itemsToRender.map(({ href, label }) => (

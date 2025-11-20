@@ -16,6 +16,8 @@ import RootPageClient from './RootPage.client';
 import { getServerMe } from '@/lib/api/serverApi';
 import { User } from '@/types/user';
 
+import ScrollToTopButton from '@/components/ScrollToTopButton/ScrollToTopButton';
+
 const nunitoSans = Nunito_Sans({
   subsets: ['cyrillic'],
   weight: ['400', '500', '600', '700', '800', '900'],
@@ -92,8 +94,9 @@ export default async function RootLayout({
   return (
     <html lang="uk" data-theme={initialTheme}>
       <body className={`${nunitoSans.variable} ${sora.variable}`}>
-        <style dangerouslySetInnerHTML={{
-          __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
             @keyframes toastFadeOut {
               from {
                 opacity: 1;
@@ -125,8 +128,9 @@ export default async function RootLayout({
             .react-hot-toast > div[role="status"] {
               animation: toastFadeOut 3s ease-out 2s forwards !important;
             }
-          `
-        }} />
+          `,
+          }}
+        />
         <BreakpointInitializer />
         <ThemeProvider initialTheme={initialTheme}>
           <TanStackProvider>
@@ -168,6 +172,7 @@ export default async function RootLayout({
                 }}
               />
               <RootPageClient />
+              <ScrollToTopButton />
             </AuthProvider>
           </TanStackProvider>
         </ThemeProvider>
