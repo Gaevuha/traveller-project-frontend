@@ -28,7 +28,7 @@ export function extractUser<T>(
   if (!responseData || typeof responseData !== 'object') {
     return null;
   }
-  
+
   // Функція для нормалізації id → _id
   const normalizeUserId = (obj: unknown): unknown => {
     if (obj && typeof obj === 'object') {
@@ -41,7 +41,7 @@ export function extractUser<T>(
     }
     return obj;
   };
-  
+
   // Якщо це вже User-подібний об'єкт - нормалізуємо і повертаємо
   if (isUserLike(responseData)) {
     return normalizeUserId(responseData) as T;
@@ -138,26 +138,23 @@ export function extractErrorMessage(error: unknown): string {
   };
 
   // Try to extract message from nested response structure (Next.js API route format)
-  if (axiosError.response?.data) {
-    const errorData = axiosError.response.data;
+  if (axiosError.response?.data?.response?.data) {
+    const errorData = axiosError.response.data.response.data;
 
     // Check for nested response (from Next.js API route)
-    if (errorData.response) {
-      const nestedResponse = errorData.response;
-      if (nestedResponse.message) {
-        return nestedResponse.message;
+    if (errorData.message) {
+      const nestedResponse = errorData.message;
+      if (nestedResponse) {
+        return nestedResponse;
       }
-      if (nestedResponse.data?.message) {
-        return nestedResponse.data.message;
-      }
+      // if (nestedResponse.data?.message) {
+      //   return nestedResponse.data.message;
+      // }
     }
 
     // Check for direct message/error in response data
     if (errorData.message) {
       return errorData.message;
-    }
-    if (errorData.error) {
-      return errorData.error;
     }
   }
 
