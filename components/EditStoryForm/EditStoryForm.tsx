@@ -88,7 +88,7 @@ export default function EditStoryForm({ story }: Props) {
         id: story._id,
       });
 
-      router.push(`/stories/${story._id}`);
+      router.push(`/profile`);
     } catch {
       toast.error(
         `Помилка оновлення. Спробуйте зберегти вашу історію пізніше.`,
