@@ -6,6 +6,8 @@ import { authConfirmGoogle, getMeProfile } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
 
+
+
 export default function GoogleCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,8 +58,8 @@ export default function GoogleCallbackPage() {
   }, [searchParams, router, setUser]);
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <p>Підтвердження входу через Google...</p>
+    <div className="container">
+      <p style={{ textAlign: "center" }}>Підтвердження входу через Google...</p>
     </div>
   );
 }
