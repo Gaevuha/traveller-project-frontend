@@ -1,18 +1,33 @@
+/* БАЗА */
 .nav {
-  display: none;
   min-width: 280px;
 }
 
-.nav.mobileMenuNav {
+/* ====== HEADER NAVIGATION ====== */
+.navHeader {
+  display: none;
+}
+
+@media screen and (min-width: 1440px) {
+  .navHeader {
+    display: block;
+  }
+}
+
+/* ====== FOOTER NAVIGATION ====== */
+.navFooter {
+  display: block; /* завжди видно */
+  margin-bottom: 64px;
+}
+
+/* ====== MOBILE-MENU NAVIGATION ====== */
+.mobileMenuNav {
   display: block;
   width: 100%;
   padding: 0 20px;
 }
 
-.navHeader {
-  display: none;
-}
-
+/* ====== LIST ====== */
 .navList {
   display: flex;
   flex-direction: column;
@@ -20,35 +35,29 @@
   gap: 32px;
 }
 
-.navListFooter {
+/* .navListFooter {
   margin-bottom: 64px;
-}
+} */
 
+/* ====== ITEMS ====== */
 .navItem {
   border: 1px solid transparent;
   border-radius: 8px;
   transition:
     border 250ms ease,
     background-color 250ms ease;
-
   text-align: center;
   width: 100%;
 }
 
-.navItemHeaderMain {
-  /* margin-right: 12px; */
+.navItemFooter {
+  width: 335px;
+}
+.navItemMobileMenu {
+  width: 335px;
 }
 
-.navItem:hover,
-.navItem:focus {
-  border: 1px solid var(--color-text-primary);
-}
-
-.navItemHeaderMain:hover,
-.navItemHeaderMain:focus {
-  border: 1px solid var(--color-text-inverse-bg);
-}
-
+/* ====== LINKS ====== */
 .navLink {
   font-weight: 400;
   font-size: 16px;
@@ -65,69 +74,46 @@
   color: var(--color-text-inverse-bg);
 }
 
-.navItemFooter {
-  /* padding-left: 10px;
-    padding-right: 10px; */
-  width: 335px;
-}
-
-.navItemMobileMenu {
-  width: 335px;
-}
-
+/* ====== FOOTER ADAPTIVE ====== */
 @media screen and (min-width: 768px) {
   .navFooter {
-    grid-row: 2;
-    grid-column: span 2;
+    justify-self: center; /* центрує елемент всередині grid */
   }
-
   .navListFooter {
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
     gap: 12px;
   }
-
   .navItemFooter {
     width: auto;
   }
-
   .navLinkFooter {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 4px 10px;
   }
 }
 
+/* ====== DESKTOP ADAPTIVE ====== */
 @media screen and (min-width: 1440px) {
-  .nav {
-    display: block;
-  }
-
-  .navHeader {
-    display: block;
-  }
-
-  .navFooter {
-    grid-row: 1;
-    grid-column: 3;
-  }
-
   .navList {
     flex-direction: row;
     gap: 12px;
   }
 
-  .navListFooter {
-    gap: 12px;
-  }
-
   .navItem {
-    /* margin-right: 12px; */
     width: auto;
   }
 
   .navItem:active {
     background-color: var(--logo-bg-active);
+  }
+
+  .navItem:hover,
+  .navItem:focus {
+    border: 1px solid var(--color-text-primary);
+  }
+
+  .navItemHeaderMain:hover,
+  .navItemHeaderMain:focus {
+    border: 1px solid var(--color-text-inverse-bg);
   }
 
   .navLink {

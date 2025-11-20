@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
-  margin-bottom: 48px;
+  /* margin-bottom: 48px; */
 }
 
 .item {

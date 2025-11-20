@@ -11,10 +11,10 @@ export default function Footer() {
         <Logo variant="footer" />
         <SocialsList />
         <Navigation variant="footer" />
-        <p className={css.copyRight}>
-          &copy; 2025 Подорожники. Усі права захищені.
-        </p>
       </div>
+      <p className={css.copyRight}>
+        &copy; 2025 Подорожники. Усі права захищені.
+      </p>
     </footer>
   );
 }
