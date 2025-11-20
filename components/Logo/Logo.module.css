@@ -11,7 +11,7 @@
 
   background-color: transparent;
 
-  position: absolute;
+  /* position: absolute; */
   top: -16px;
   left: 0;
   transform: translateX(0);
@@ -87,7 +87,7 @@
   }
 
   .logoLinkMobileMenuOpen {
-    transform: translateX(380px);
+    /* transform: translateX(380px); */
     /* background-color: red; */
   }
 }

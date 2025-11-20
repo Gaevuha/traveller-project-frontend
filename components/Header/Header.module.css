@@ -19,7 +19,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: nowrap;
 }
 
 .logoWrapper {
@@ -27,12 +26,22 @@
   flex-shrink: 0;
 }
 
+.logoAndTheme {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* відступ між логотипом та ThemeToggle */
+  flex-shrink: 0;
+}
+.themeToggleWrapper {
+  margin-left: 152px;
+}
+
 .navWrapper {
   flex: 1;
   min-width: 0;
   display: flex;
   justify-content: flex-end;
-  margin-left: auto;
+  /* margin-left: auto; */
 }
 
 .controls {
@@ -41,9 +50,28 @@
   gap: 12px;
   flex-shrink: 0;
 }
+.tabletPublishBtn {
+  display: none;
+}
+
+@media screen and (min-width: 768px) and (max-width: 1439px) {
+  .tabletPublishBtn {
+    display: block;
+    flex-shrink: 0;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .themeToggleWrapper {
+    margin-left: 186px;
+  }
+}
 
 @media screen and (min-width: 1440px) {
   .controls {
     margin-left: auto;
+  }
+  .logoAndTheme {
+    height: 42px;
   }
 }

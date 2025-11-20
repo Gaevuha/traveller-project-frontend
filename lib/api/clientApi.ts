@@ -50,7 +50,6 @@ export const getGoogleOAuthUrl = async () => {
   return res.data.data.url;
 };
 
-
 /**
  * Підтвердження входу після редіректу з Google
  */
@@ -219,15 +218,8 @@ export async function fetchStoryByIdClient(storyId: string): Promise<Story> {
 export async function fetchSavedStoriesByUserId(
   userId: string
 ): Promise<SavedStory[]> {
-  console.log('fetchSavedStoriesByUserId CALL with userId:', userId);
-
   const res = await api.get<UserSavedArticlesResponse>(
     `/users/${userId}/saved-articles`
-  );
-
-  console.log(
-    'fetchSavedStoriesByUserId RESPONSE:',
-    res.data.data.savedStories
   );
 
   return res.data.data.savedStories;

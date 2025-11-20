@@ -1,14 +1,14 @@
 .publichStoryLink {
   font-weight: 500;
   font-size: 16px;
-  line-height: 1.5;
-
+  line-height: 1.375; /*1.5*/
+  letter-spacing: -0.00507em;
   display: block;
   text-align: center;
 
   /* padding: 4px 85.5px; */
-  padding-top: 4px;
-  padding-bottom: 4px;
+  padding: 4px 10px;
+  /* padding-bottom: 4px; */
   /* min-width: 320px; */
   /* width: 100%;
   max-width: 335px; */
@@ -58,8 +58,10 @@
 @media screen and (min-width: 1440px) {
   .publichStoryLink {
     font-size: 18px;
-    margin-left: 10px;
+    /* margin-left: 10px; */
     margin-right: 4px;
     padding: 4px 10px;
+    line-height: 1.389;
+    width: 202px;
   }
 }
