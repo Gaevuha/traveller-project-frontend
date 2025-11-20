@@ -75,6 +75,8 @@
   --thumb: #a4b4e6;
 
   --color-toast: #4169e1;
+  /* Scroll Up */
+  --color-scroll-btn: #1a2a5a;
 }
 
 [data-theme='dark'] {
@@ -149,6 +151,9 @@
   --toggle-bg: #1a1a1a;
 
   --color-toast: #4169e1;
+
+  /* Scroll Up */
+  --color-scroll-btn: #b7caf9;
 }
 
 /* RESET */
