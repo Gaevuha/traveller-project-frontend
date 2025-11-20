@@ -146,7 +146,7 @@
 
 @media screen and (min-width: 1440px) {
   .loginItem {
-    margin-left: 10px;
+    /* margin-left: 10px; */
   }
 
   .loginItemRegister {
