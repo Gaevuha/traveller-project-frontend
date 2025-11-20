@@ -6,14 +6,18 @@ import Navigation from '../Navigation/Navigation';
 import css from './Header.module.css';
 import MobileMenuBtn from '../MobileMenuBtn/MobileMenuBtn';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import PublishStoryLink from '../Navigation/PublishStoryLink/PublishStoryLink';
 
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import { useLockScroll } from '@/lib/hooks/useLockScroll';
 import { useBreakpointStore } from '@/lib/store/breakpointStore';
+import { useAuthStore } from '@/lib/store/authStore';
 
 export default function Header() {
   const pathname = usePathname();
   const isMainPage = pathname === '/';
+
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   const isMobileMenuOpen = useMobileMenuOpen(state => state.isMobileMenuOpen);
   const setIsMobileMenuOpen = useMobileMenuOpen(
@@ -23,6 +27,7 @@ export default function Header() {
 
   const device = useBreakpointStore(state => state.screenSize);
   const isDesktop = device === 'desktop';
+  const isTablet = device === 'tablet'; // ← ДОДАЄМО
 
   useLockScroll(isMobileMenuOpen);
 
@@ -38,7 +43,7 @@ export default function Header() {
           <ThemeToggle variant={isMainPage ? 'header-main-page' : 'header'} />
         </div>
 
-        {/* Навігація рендериться лише на десктопі */}
+        {/* НАВІГАЦІЯ ДЛЯ ДЕСКТОПУ */}
         {isDesktop && (
           <div className={css.navWrapper}>
             <Navigation
@@ -48,13 +53,22 @@ export default function Header() {
           </div>
         )}
 
-        {/* Мобільна кнопка меню */}
         {!isDesktop && (
-          <MobileMenuBtn
-            variant={isMainPage ? 'header-main-page' : undefined}
-            handleClick={setIsMobileMenuOpen}
-            isOpen={isMobileMenuOpen}
-          />
+          <div className={css.controls}>
+            {/* Tablet Publish Button */}
+            {isTablet && isAuthenticated && (
+              <div className={css.tabletPublishBtn}>
+                <PublishStoryLink />
+              </div>
+            )}
+
+            {/* Mobile Burger */}
+            <MobileMenuBtn
+              variant={isMainPage ? 'header-main-page' : undefined}
+              handleClick={setIsMobileMenuOpen}
+              isOpen={isMobileMenuOpen}
+            />
+          </div>
         )}
       </div>
     </header>

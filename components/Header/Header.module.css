@@ -50,6 +50,16 @@
   gap: 12px;
   flex-shrink: 0;
 }
+.tabletPublishBtn {
+  display: none;
+}
+
+@media screen and (min-width: 768px) and (max-width: 1439px) {
+  .tabletPublishBtn {
+    display: block;
+    flex-shrink: 0;
+  }
+}
 
 @media screen and (min-width: 768px) {
   .themeToggleWrapper {
@@ -60,5 +70,8 @@
 @media screen and (min-width: 1440px) {
   .controls {
     margin-left: auto;
+  }
+  .logoAndTheme {
+    height: 42px;
   }
 }
