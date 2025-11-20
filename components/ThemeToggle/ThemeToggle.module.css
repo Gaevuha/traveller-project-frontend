@@ -2,10 +2,9 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   width: 58px;
-  height: 24px;
-  padding: 6px 8px;
+  height: 26px;
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background-color: var(--toggle-bg);
@@ -43,8 +42,8 @@
 }
 
 .icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: var(--color-text-secondary);
   opacity: 0.6;
   transition:
@@ -60,9 +59,9 @@
 .thumb {
   position: absolute;
   top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background-color: var(--thumb);
   transition:
@@ -100,6 +99,7 @@
   .toggle {
     width: 64px;
     height: 32px;
+    padding: 6px 8px;
   }
 
   .thumb {
