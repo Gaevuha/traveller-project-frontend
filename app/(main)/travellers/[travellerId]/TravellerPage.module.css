@@ -74,22 +74,18 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.5;
-  color: #fff;
+  color: var(--color-text-inverse);
   margin: 0 auto;
 }
 
-/* ======== BUTTON HOVER / FOCUS ======== */
 .myCustomBtnLoadMore {
   transition: all 0.3s ease;
 }
 
-.myCustomBtnLoadMore:hover,
-.myCustomBtnLoadMore:focus {
-  background: #e8eeff;
-  color: #0a0a0a;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.08);
-  border: 1 solid #4169e1;
+.myCustomBtnLoadMore:active {
+  transform: translateY(0);
+  color: var(--color-text-primary);
+  background-color: var(--color-primary-active-first);
 }
 .loadMoreWrapper {
   display: flex;
@@ -150,5 +146,14 @@
   }
   .wrapperMessage {
     height: 232px;
+  }
+
+  /* ======== BUTTON HOVER / FOCUS ======== */
+  .myCustomBtnLoadMore:hover,
+  .myCustomBtnLoadMore:focus {
+    background-color: var(--color-primary-hover-first);
+    transform: translateY(-1px);
+    color: var(--color-text-primary);
+    box-shadow: 0 4px 12px var(--box-shadow);
   }
 }

@@ -110,14 +110,6 @@
   opacity: 0.3;
 }
 
-.traveller__btn__more:hover,
-.traveller__btn__more:focus {
-  background-color: var(--color-primary-hover-first);
-  transform: translateY(-1px);
-  color: var(--color-text-primary);
-  box-shadow: 0 4px 12px var(--box-shadow);
-}
-
 .traveller__btn__more:active {
   transform: translateY(0);
   color: var(--color-text-primary);
@@ -184,6 +176,13 @@
     -webkit-line-clamp: 3;
     line-clamp: 3;
     text-overflow: ellipsis;
+  }
+  .traveller__btn__more:hover,
+  .traveller__btn__more:focus {
+    background-color: var(--color-primary-hover-first);
+    transform: translateY(-1px);
+    color: var(--color-text-primary);
+    box-shadow: 0 4px 12px var(--box-shadow);
   }
 
   .traveller__btn__more {
