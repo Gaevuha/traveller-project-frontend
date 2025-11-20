@@ -154,12 +154,9 @@
 
 .saveBtn.btnDisabled:hover,
 .saveBtn.btnDisabled:focus {
-  color: #fff;
-  background-color: #4169e1;
-}
-
-.saveBtn.btnDisabled:active {
-  background-color: #4169e1;
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary-hover-second);
+  transform: none;
 }
 
 .rejectBtn {

@@ -44,7 +44,7 @@ export const useAuth = () => {
       if (!user) {
         throw new Error('Користувач не знайдений');
       }
-      
+
       // Після успішного входу отримуємо повні дані користувача з avatarUrl
       // Це вирішує проблему, коли /auth/login повертає неповні дані
       // Використовуємо getMeProfile() для отримання повного профілю з avatarUrl
@@ -66,6 +66,7 @@ export const useAuth = () => {
       router.push('/');
     } catch (error) {
       const message = extractErrorMessage(error);
+
       toast.error(message);
       throw new Error(message);
     } finally {
