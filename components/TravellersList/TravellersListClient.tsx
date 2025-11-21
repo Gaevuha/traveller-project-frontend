@@ -18,41 +18,45 @@ interface TravellersListClientProps {
 
 export default function TravellersListClient({
   loadMorePerPage,
-  showLoadMoreOnMobile = false,
   customStyles,
   initialUsers,
 }: TravellersListClientProps) {
   const styles = customStyles || defaultStyles;
 
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [perPage, setPerPage] = useState<number>(12); // ⭐ реальна кількість карток
+  const [visibleCount, setVisibleCount] = useState<number>(12);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const isFetchingRef = useRef(false);
 
-  // Визначаємо мобільний розмір
+  // ⭐ Responsive логіка: змінюємо perPage при зміні ширини екрана
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const updatePerPage = () => {
+      if (window.innerWidth >= 1440) {
+        setPerPage(12);
+      } else {
+        setPerPage(8);
+      }
+    };
+
+    updatePerPage();
+    window.addEventListener('resize', updatePerPage);
+
+    return () => window.removeEventListener('resize', updatePerPage);
   }, []);
 
-  // Адаптивне обрізання початкових користувачів
+  // Оновлюємо кількість видимих карток при зміні perPage
   useEffect(() => {
-    if (isMobile === null) return;
+    setVisibleCount(perPage);
+  }, [perPage]);
 
-    let count = initialUsers.length;
-    if (window.innerWidth >= 1440) count = Math.min(initialUsers.length, 12);
-    else if (window.innerWidth >= 768) count = Math.min(initialUsers.length, 8);
-    else count = Math.min(initialUsers.length, 8);
+  // Масив користувачів, який реально рендериться
+  const visibleUsers = users.slice(0, visibleCount);
 
-    setUsers(initialUsers.slice(0, count));
-  }, [initialUsers, isMobile]);
-
-  if (isMobile === null) return null;
-
-  // Load More
+  // -------------------------------------------------------
+  // LOAD MORE
+  // -------------------------------------------------------
   const handleLoadMore = async () => {
     if (isFetchingRef.current || !hasMore) return;
 
@@ -62,7 +66,12 @@ export default function TravellersListClient({
     try {
       const offset = users.length;
       const page = Math.floor(offset / loadMorePerPage) + 1;
-      const res = await getUsersClient({ page, perPage: loadMorePerPage });
+
+      const res = await getUsersClient({
+        page,
+        perPage: loadMorePerPage,
+      });
+
       const newUsers = res.data.users ?? [];
 
       setUsers(prev => {
@@ -71,6 +80,9 @@ export default function TravellersListClient({
       });
 
       setHasMore(newUsers.length === loadMorePerPage);
+
+      // ⭐ Після "Load More" — збільшуємо visibleCount
+      setVisibleCount(prev => prev + loadMorePerPage);
     } catch (err) {
       console.error('Помилка підвантаження користувачів:', err);
     } finally {
@@ -82,7 +94,7 @@ export default function TravellersListClient({
   return (
     <>
       <ul className={styles.travellers__list}>
-        {users.map(user => (
+        {visibleUsers.map(user => (
           <li key={user._id} className={styles.travellers__item}>
             <TravellerInfo user={user} useDefaultStyles />
             <Link
@@ -95,7 +107,7 @@ export default function TravellersListClient({
         ))}
       </ul>
 
-      {hasMore && (!isMobile || showLoadMoreOnMobile) && (
+      {hasMore && (
         <div className={styles.loadMoreWrapper}>
           {loading ? (
             <Loader className={styles.loader} />
