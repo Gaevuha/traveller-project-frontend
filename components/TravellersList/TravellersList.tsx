@@ -1,7 +1,9 @@
 // app/components/TravellersList/TravellersList.tsx
+
 import TravellersListClient from './TravellersListClient';
 import { getUsersServer } from '@/lib/api/serverApi';
 import defaultStyles from './TravellersList.module.css';
+
 import {
   HydrationBoundary,
   QueryClient,
@@ -23,7 +25,6 @@ export default async function TravellersList({
 }: Props) {
   const queryClient = new QueryClient();
 
-  // RSC: запит на сервері
   const res = await getUsersServer(1, initialPerPage);
 
   await queryClient.prefetchQuery({
@@ -41,7 +42,7 @@ export default async function TravellersList({
         loadMorePerPage={loadMorePerPage}
         showLoadMoreOnMobile={showLoadMoreOnMobile}
         customStyles={customStyles}
-        initialUsers={res.data.users ?? []} // передаємо дані на клієнт
+        initialUsers={res.data.users ?? []}
       />
     </HydrationBoundary>
   );
