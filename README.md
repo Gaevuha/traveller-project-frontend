@@ -1,51 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with
-[`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Подорожники — платформа мандрівників
 
-## Getting Started
+## Про проєкт
 
-First, run the development server:
+Подорожники — це веб‑платформа, яка об’єднує спільноту мандрівників. Користувачі можуть:
+- ділитися власними історіями та враженнями;
+- зберігати вподобані дописи до особистої колекції;
+- підтримувати профіль із біографією та аватаром;
+- переглядати тематичні добірки та топ авторів;
+- перемикати світлу/темну тему для комфортного читання.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Рішення складається з **Next.js фронтенду** (цей репозиторій) та **Node.js/Nest.js бекенду** з REST API і Swagger‑документацією. Код серверної частини: [travel-fs116-teamproject-backend](https://github.com/Sergii-Sotnikov/travel-fs116-teamproject-backend).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the
-result.
+## Основні можливості
 
-You can start editing the page by modifying `app/page.tsx`. The page
-auto-updates as you edit the file.
+- 🔐 Реєстрація, логін, відновлення сесії та автоматичне оновлення токенів.
+- 👤 Профіль з редагуванням опису, аватару та статистики історій.
+- 📚 Дві вкладки на сторінці профілю: «Мої історії» та «Збережені».
+- 💾 Збереження/видалення історій одним кліком з будь‑якої картки.
+- 🌓 Глобальне перемикання теми (light/dark) з пам’яттю вибору через LocalStorage + cookies.
+- 🌀 Адаптивний інтерфейс (mobile‑first) з окремими серверними/клієнтськими компонентами для продуктивності.
+- 🎯 SEO-метадані та Open Graph теги, що генеруються на сервері для кожного користувача.
 
-This project uses
-[`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts)
-to automatically optimize and load [Geist](https://vercel.com/font), a new font
-family for Vercel.
+## Використані технології
 
-## Learn More
+| Шар | Технології |
+| --- | --- |
+| Фронтенд | Next.js 14 (App Router), React 18, TypeScript, CSS Modules, Formik + Yup, Axios, TanStack Query, Zustand, React Hook Form utils, Vercel deployment |
+| Бекенд | Node.js, Nest.js, MongoDB, Mongoose, JWT, Cloudinary, Swagger/OpenAPI (див. [репозиторій](https://github.com/Sergii-Sotnikov/travel-fs116-teamproject-backend)) |
+| Інше | ESLint, Prettier, Husky (git hooks), responsive images (Next/Image), власний ThemeProvider |
 
-To learn more about Next.js, take a look at the following resources:
+## Налаштування оточення
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Вимоги**
+   - Node.js ≥ 18.18
+   - npm ≥ 9 (або pnpm/yarn/bun за бажанням)
 
-You can check out
-[the Next.js GitHub repository](https://github.com/vercel/next.js) - your
-feedback and contributions are welcome!
+2. **Клонування репозиторію**
+   ```bash
+   git clone https://github.com/TEAM_P/travel-fs116-teamproject-frontend.git
+   cd travel-fs116-teamproject-frontend
+   ```
 
-## Deploy on Vercel
+3. **Змінні середовища**
+Створіть файл `.env.local` і додайте (для продакшн backend на Render):
+   ```
+NEXT_PUBLIC_API_URL=https://travel-fs116-teamproject-backend.onrender.com
+   ```
+> За потреби можна підставити інший домен (наприклад, локальний `http://localhost:4000`). Головне — щоб URL вказував на бекенд API (див. [backend repo](https://github.com/Sergii-Sotnikov/travel-fs116-teamproject-backend)).
 
-The easiest way to deploy your Next.js app is to use the
-[Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
-from the creators of Next.js.
+4. **Встановлення залежностей**
+   ```bash
+   npm install
+   ```
 
-Check out our
-[Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying)
-for more details.
+5. **Скрипти**
+   - `npm run dev` — запуск dev-сервера на `http://localhost:3000`
+   - `npm run lint` — перевірка ESLint
+   - `npm run build` — продакшн білд
+   - `npm run start` — запуск зібраної програми
 
-Documentation to backend: https://notehub-api.goit.study/docs/
+## Розгортання
+
+- **Vercel** — рекомендований спосіб (повна сумісність з Next.js App Router).
+- **Docker / власний сервер** — зберіть застосунок (`npm run build`), потім запустіть у Node середовищі (`npm run start`) за зворотним проксі, який прокидає cookies (SameSite=Lax).
+- Для SSR потрібен доступ до бекенду через `NEXT_PUBLIC_API_URL`, JWT cookies (`accessToken`, `refreshToken`) та HTTPS у продакшні.
+
+## API та бекенд
+
+- Репозиторій: [travel-fs116-teamproject-backend](https://github.com/Sergii-Sotnikov/travel-fs116-teamproject-backend)
+- Swagger/OpenAPI: `https://<backend-domain>/docs` (див. інструкції в backend README)
+- Основні приватні ендпоїнти:
+  - `POST /auth/login`, `POST /auth/register`, `POST /auth/refresh`
+  - `GET /users/me/profile`, `PATCH /users/me`, `PATCH /users/me/avatar`
+  - `GET /users/{id}/saved-articles`, `POST/DELETE /users/me/saved/{storyId}`
+  - `GET/POST/PATCH /stories`, `GET /stories/{storyId}`
+
+## Супутня інформація
+
+- **UI/UX** — компонентна система з модульними стилями, адаптивними грідами та кастомним `TravellerInfo` для профілю.
+- **Стейт** — глобальний `authStore` (Zustand) + React Query для даних історій, локальні `useState` для UI.
+- **Безпека** — middleware перевіряє доступ до `/profile`, на клієнті axios interceptors автоматично додають токени й оновлюють їх при 401.
+- **Тестування** — ручні e2e сценарії (логін, перемикання табів, збереження історій, зміна теми) + статичний аналіз ESLint/TypeScript.
+- **Локалізація** — основна мова інтерфейсу: українська.
+
+---
+
+Якщо маєте запитання або хочете долучитися до розробки (frontend чи backend) — відкрийте issue або створіть pull request у відповідному репозиторії. Гарних подорожей! ✈️🌍
+
+

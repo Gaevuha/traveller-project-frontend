@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Loader from '@/components/Loader/Loader';
 import { useAuthStore } from '@/lib/store/authStore';
 
 type ProtectedRouteProps = {
@@ -34,10 +35,12 @@ export default function ProtectedRoute({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          minHeight: '50vh',
+          minHeight: '100vh',
+          width: '100%',
+          backgroundColor: 'var(--color-bg-primary, #fdfdfd)',
         }}
       >
-        <p>Завантаження...</p>
+        <Loader />
       </div>
     );
   }
