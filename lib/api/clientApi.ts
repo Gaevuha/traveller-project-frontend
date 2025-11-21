@@ -389,7 +389,10 @@ export async function createStory(
   formData.append('img', newStory.img);
 
   const { data } = await api.post<StoryResponse>('/stories', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: {
+      // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
+      'Content-Type': undefined,
+    },
   });
   return data;
 }
@@ -460,7 +463,10 @@ export async function patchStoryByIdClient(params: {
     `/stories/${id}`,
     formData,
     {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: {
+        // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
+        'Content-Type': undefined,
+      },
     }
   );
   return data.data;
