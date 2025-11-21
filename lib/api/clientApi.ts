@@ -388,10 +388,10 @@ export async function createStory(
   formData.append('category', newStory.category);
   formData.append('img', newStory.img);
 
+  // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
   const { data } = await api.post<StoryResponse>('/stories', formData, {
     headers: {
-      // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
-      'Content-Type': undefined,
+      'Content-Type': undefined, // Явно видаляємо Content-Type, щоб axios міг встановити multipart/form-data
     },
   });
   return data;
@@ -459,13 +459,13 @@ export async function patchStoryByIdClient(params: {
   if (storyToEdit.category) formData.append('category', storyToEdit.category);
   if (storyToEdit.img) formData.append('img', storyToEdit.img);
 
+  // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
   const { data } = await api.patch<StoryByIdResponse>(
     `/stories/${id}`,
     formData,
     {
       headers: {
-        // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
-        'Content-Type': undefined,
+        'Content-Type': undefined, // Явно видаляємо Content-Type, щоб axios міг встановити multipart/form-data
       },
     }
   );

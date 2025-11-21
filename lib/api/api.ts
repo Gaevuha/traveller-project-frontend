@@ -40,6 +40,14 @@ const processQueue = (error: unknown, token: string | null = null) => {
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Cookies are sent automatically with withCredentials: true
+    
+    // Для FormData видаляємо дефолтний Content-Type, щоб axios автоматично встановив multipart/form-data з boundary
+    if (config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers['Content-Type'];
+      }
+    }
+    
     return config;
   },
   error => {
