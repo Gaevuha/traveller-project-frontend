@@ -397,6 +397,25 @@ export async function createStory(
   return data;
 }
 
+export async function deleteStoryByIdClient(storyId: string): Promise<void> {
+  console.log('🚀 deleteStoryByIdClient API call for story:', storyId);
+  try {
+    // Використовуйте цей шлях для повного видалення історії
+    const response = await api.delete(`/stories/${storyId}`);
+    console.log('✅ deleteStoryByIdClient success:', response.status);
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    console.error('❌ deleteStoryByIdClient error:', {
+      error: axiosError.message,
+      storyId,
+      status: axiosError.response?.status,
+      data: axiosError.response?.data,
+      code: axiosError.code,
+    });
+    throw error;
+  }
+}
+
 /**
  * Update user profile
  * Оновлює профіль користувача (ім'я, опис, аватар)

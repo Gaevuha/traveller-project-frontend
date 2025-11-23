@@ -9,7 +9,11 @@ import Loader from '@/components/Loader/Loader';
 import EditProfileModal from '@/components/EditProfileModal/EditProfileModal';
 import { User } from '@/types/user';
 import { Story } from '@/types/story';
-import { getMeProfile, getUserSavedArticles } from '@/lib/api/clientApi';
+import {
+  getMeProfile,
+  getUserSavedArticles,
+  deleteStoryByIdClient,
+} from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
 import css from './ProfilePage.module.css';
@@ -51,7 +55,35 @@ export default function ProfilePageClient({
   const handleRemoveSavedStory = (storyId: string) => {
     setStories(prev => prev.filter(story => story._id !== storyId));
   };
+  const handleDeleteMyStory = async (storyId: string) => {
+    console.log('🔄 handleDeleteMyStory called with storyId:', storyId);
 
+    try {
+      console.log('📤 Calling deleteStoryByIdClient API for story:', storyId);
+      await deleteStoryByIdClient(storyId);
+      console.log('✅ Successfully deleted story from DB:', storyId);
+
+      console.log('🔄 Removing story from UI state:', storyId);
+      setStories(prev => {
+        const newStories = prev.filter(story => story._id !== storyId);
+        console.log(
+          '✅ UI state updated. Remaining stories:',
+          newStories.length
+        );
+        return newStories;
+      });
+
+      toast.success('Історію успішно видалено');
+    } catch (error) {
+      console.error('❌ Error in handleDeleteMyStory:', {
+        error,
+        storyId,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorStack: error instanceof Error ? error.stack : 'No stack trace',
+      });
+      toast.error('Не вдалося видалити історію');
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       if (authIsLoading) return;
@@ -245,12 +277,28 @@ export default function ProfilePageClient({
               {stories.length === 0 ? (
                 <MessageNoStories {...getMessageNoStoriesProps()} />
               ) : (
-                <TravellersStories
-                  stories={stories}
-                  isAuthenticated={isAuthenticated}
-                  onRemoveSavedStory={handleRemoveSavedStory}
-                  isMyStory={activeTab === 'my'}
-                />
+                <>
+                  {console.log('🔍 Rendering TravellersStories with props:', {
+                    storiesCount: stories.length,
+                    isAuthenticated,
+                    hasOnRemoveSavedStory: !!handleRemoveSavedStory,
+                    hasOnDeleteStory: !!handleDeleteMyStory,
+                    activeTab,
+                    isMyStory: activeTab === 'my',
+                    variant:
+                      activeTab === 'my' ? 'profileMyStories' : undefined,
+                  })}
+                  <TravellersStories
+                    stories={stories}
+                    isAuthenticated={isAuthenticated}
+                    onRemoveSavedStory={handleRemoveSavedStory}
+                    onDeleteStory={handleDeleteMyStory}
+                    isMyStory={activeTab === 'my'}
+                    variant={
+                      activeTab === 'my' ? 'profileMyStories' : undefined
+                    }
+                  />
+                </>
               )}
             </div>
           </>

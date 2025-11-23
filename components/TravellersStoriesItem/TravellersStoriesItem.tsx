@@ -19,28 +19,77 @@ interface TravellersStoriesItemProps {
   story: Story;
   isAuthenticated: boolean;
   isMyStory?: boolean;
-  onRemoveSavedStory?: (id: string) => void; // ⬅ додаємо!
+  onRemoveSavedStory?: (id: string) => void;
+  onDeleteStory?: (id: string) => void;
+  variant?: 'profileMyStories';
 }
 
 export default function TravellersStoriesItem({
   story,
   isAuthenticated,
   onRemoveSavedStory,
+  onDeleteStory,
+  variant,
   isMyStory,
 }: TravellersStoriesItemProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isSaved, setIsSaved] = useState<boolean>(story.isFavorite ?? false);
-  // const [isSaving, setIsSaving] = useState(false);
   const [favoriteCount, setFavoriteCount] = useState<number>(
     story.favoriteCount
   );
   const [loading, setLoading] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     setIsSaved(story.isFavorite ?? false);
   }, [story.isFavorite]);
+
+  // ✅ Функція для видалення МОЄЇ історії
+  const handleDeleteMyStory = async () => {
+    console.log('🔍 TravellersStoriesItem delete props:', {
+      storyId: story._id,
+      storyTitle: story.title,
+      isMyStory,
+      hasOnDeleteStory: !!onDeleteStory,
+      hasOnRemoveSavedStory: !!onRemoveSavedStory,
+    });
+
+    if (!onDeleteStory) {
+      console.error('❌ onDeleteStory is not defined!', {
+        storyId: story._id,
+        isMyStory,
+        hasOnDeleteStory: !!onDeleteStory,
+      });
+      return;
+    }
+
+    console.log('🔄 Starting delete process for story:', {
+      storyId: story._id,
+      storyTitle: story.title,
+      isMyStory,
+    });
+
+    if (confirm('Ви впевнені, що хочете видалити цю історію?')) {
+      setIsDeleting(true);
+      try {
+        console.log('📤 Calling onDeleteStory with storyId:', story._id);
+        await onDeleteStory(story._id);
+        console.log('✅ Successfully called onDeleteStory for:', story._id);
+      } catch (error) {
+        console.error('❌ Error in handleDeleteMyStory:', {
+          error,
+          storyId: story._id,
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+        });
+        toast.error('Не вдалося видалити історію');
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) {
@@ -54,11 +103,9 @@ export default function TravellersStoriesItem({
     const prevCount = favoriteCount;
     const nextSaved = !prevSaved;
 
-    // оптимістичне оновлення UI в самій картці
     setIsSaved(nextSaved);
     setFavoriteCount(prevCount + (nextSaved ? 1 : -1));
 
-    // видалення картки зі сторінки, якщо "unfavorite"
     if (!nextSaved && onRemoveSavedStory) {
       onRemoveSavedStory(story._id);
     }
@@ -68,7 +115,6 @@ export default function TravellersStoriesItem({
 
     try {
       if (nextSaved) {
-        // пушимо цю історію в кеш savedStoriesMe
         queryClient.setQueryData<Story[] | undefined>(
           ['savedStoriesMe'],
           prev => {
@@ -80,7 +126,6 @@ export default function TravellersStoriesItem({
 
         await addStoryToFavorites(story._id);
       } else {
-        // прибираємо історію з кешу savedStoriesMe
         queryClient.setQueryData<Story[] | undefined>(
           ['savedStoriesMe'],
           prev =>
@@ -88,7 +133,6 @@ export default function TravellersStoriesItem({
         );
 
         await removeStoryFromFavorites(story._id);
-      // видалити картку зі сторінки
         if (onRemoveSavedStory) {
           onRemoveSavedStory(story._id);
         }
@@ -97,14 +141,9 @@ export default function TravellersStoriesItem({
       queryClient.invalidateQueries({ queryKey: ['savedStoriesMe'] });
     } catch (error) {
       console.error(error);
-
-      // відкат UI якщо зламаэться
       setIsSaved(prevSaved);
       setFavoriteCount(prevCount);
-
-      // відкат кешу savedStoriesMe якщо зламаэться
       queryClient.setQueryData(['savedStoriesMe'], prevSavedMe);
-
       toast.error('Не вдалося оновити збережені історії');
     } finally {
       setLoading(false);
@@ -118,7 +157,9 @@ export default function TravellersStoriesItem({
     const year = d.getFullYear();
     return `${day}.${month}.${year}`;
   }
-const categoryName = story.category?.name ?? 'Без категорії';
+
+  const categoryName = story.category?.name ?? 'Без категорії';
+
   return (
     <>
       <li className={css.story}>
@@ -155,19 +196,36 @@ const categoryName = story.category?.name ?? 'Без категорії';
             </div>
           </div>
           <div className={css.story__actions}>
-            <Link href={`/stories/${story._id}`} className={css.story__btn}>
+            <Link
+              href={`/stories/${story._id}`}
+              className={`${css.story__btn} ${variant === 'profileMyStories' ? css.story__btn_profile : ''}`}
+            >
               Переглянути статтю
             </Link>
 
-            {/* Якщо моя історія → EDIT */}
+            {/* ✅ Для МОЇХ історій - кнопки редагування та видалення */}
             {isMyStory ? (
-              <button
-                onClick={() => router.push(`/stories/${story._id}/edit`)}
-                className={css.story__save}
-              >
-                <Icon name="icon-edit" className={css.iconEdit} />
-              </button>
+              <>
+                <button
+                  onClick={() => router.push(`/stories/${story._id}/edit`)}
+                  className={css.story__save}
+                  title="Редагувати історію"
+                  disabled={isDeleting}
+                >
+                  <Icon name="icon-edit" className={css.iconEdit} />
+                </button>
+
+                <button
+                  onClick={handleDeleteMyStory} // ✅ ВИКОРИСТОВУЄМО ПРАВИЛЬНУ ФУНКЦІЮ
+                  className={css.story__delete}
+                  title="Видалити історію"
+                  disabled={isDeleting}
+                >
+                  <Icon name="icon-trash" className={css.iconDelete} />
+                </button>
+              </>
             ) : (
+              // ✅ Для ЗБЕРЕЖЕНИХ історій - тільки кнопка збереження
               <button
                 onClick={handleToggleFavorite}
                 disabled={loading}
