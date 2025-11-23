@@ -398,11 +398,8 @@ export async function createStory(
 }
 
 export async function deleteStoryByIdClient(storyId: string): Promise<void> {
-  console.log('🚀 deleteStoryByIdClient API call for story:', storyId);
   try {
-    // Використовуйте цей шлях для повного видалення історії
-    const response = await api.delete(`/stories/${storyId}`);
-    console.log('✅ deleteStoryByIdClient success:', response.status);
+    await api.delete(`/stories/${storyId}`);
   } catch (error) {
     const axiosError = error as AxiosError;
     console.error('❌ deleteStoryByIdClient error:', {

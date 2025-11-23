@@ -56,26 +56,16 @@ export default function ProfilePageClient({
     setStories(prev => prev.filter(story => story._id !== storyId));
   };
   const handleDeleteMyStory = async (storyId: string) => {
-    console.log('🔄 handleDeleteMyStory called with storyId:', storyId);
-
     try {
-      console.log('📤 Calling deleteStoryByIdClient API for story:', storyId);
       await deleteStoryByIdClient(storyId);
-      console.log('✅ Successfully deleted story from DB:', storyId);
-
-      console.log('🔄 Removing story from UI state:', storyId);
       setStories(prev => {
         const newStories = prev.filter(story => story._id !== storyId);
-        console.log(
-          '✅ UI state updated. Remaining stories:',
-          newStories.length
-        );
         return newStories;
       });
 
       toast.success('Історію успішно видалено');
     } catch (error) {
-      console.error('❌ Error in handleDeleteMyStory:', {
+      console.error('Error in handleDeleteMyStory:', {
         error,
         storyId,
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
@@ -277,28 +267,14 @@ export default function ProfilePageClient({
               {stories.length === 0 ? (
                 <MessageNoStories {...getMessageNoStoriesProps()} />
               ) : (
-                <>
-                  {console.log('🔍 Rendering TravellersStories with props:', {
-                    storiesCount: stories.length,
-                    isAuthenticated,
-                    hasOnRemoveSavedStory: !!handleRemoveSavedStory,
-                    hasOnDeleteStory: !!handleDeleteMyStory,
-                    activeTab,
-                    isMyStory: activeTab === 'my',
-                    variant:
-                      activeTab === 'my' ? 'profileMyStories' : undefined,
-                  })}
-                  <TravellersStories
-                    stories={stories}
-                    isAuthenticated={isAuthenticated}
-                    onRemoveSavedStory={handleRemoveSavedStory}
-                    onDeleteStory={handleDeleteMyStory}
-                    isMyStory={activeTab === 'my'}
-                    variant={
-                      activeTab === 'my' ? 'profileMyStories' : undefined
-                    }
-                  />
-                </>
+                <TravellersStories
+                  stories={stories}
+                  isAuthenticated={isAuthenticated}
+                  onRemoveSavedStory={handleRemoveSavedStory}
+                  onDeleteStory={handleDeleteMyStory}
+                  isMyStory={activeTab === 'my'}
+                  variant={activeTab === 'my' ? 'profileMyStories' : undefined}
+                />
               )}
             </div>
           </>

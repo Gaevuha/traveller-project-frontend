@@ -48,14 +48,6 @@ export default function TravellersStoriesItem({
 
   // ✅ Функція для видалення МОЄЇ історії
   const handleDeleteMyStory = async () => {
-    console.log('🔍 TravellersStoriesItem delete props:', {
-      storyId: story._id,
-      storyTitle: story.title,
-      isMyStory,
-      hasOnDeleteStory: !!onDeleteStory,
-      hasOnRemoveSavedStory: !!onRemoveSavedStory,
-    });
-
     if (!onDeleteStory) {
       console.error('❌ onDeleteStory is not defined!', {
         storyId: story._id,
@@ -65,25 +57,11 @@ export default function TravellersStoriesItem({
       return;
     }
 
-    console.log('🔄 Starting delete process for story:', {
-      storyId: story._id,
-      storyTitle: story.title,
-      isMyStory,
-    });
-
     if (confirm('Ви впевнені, що хочете видалити цю історію?')) {
       setIsDeleting(true);
       try {
-        console.log('📤 Calling onDeleteStory with storyId:', story._id);
         await onDeleteStory(story._id);
-        console.log('✅ Successfully called onDeleteStory for:', story._id);
       } catch (error) {
-        console.error('❌ Error in handleDeleteMyStory:', {
-          error,
-          storyId: story._id,
-          errorMessage:
-            error instanceof Error ? error.message : 'Unknown error',
-        });
         toast.error('Не вдалося видалити історію');
       } finally {
         setIsDeleting(false);
