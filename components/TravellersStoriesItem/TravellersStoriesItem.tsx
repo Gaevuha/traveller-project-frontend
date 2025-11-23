@@ -49,7 +49,7 @@ export default function TravellersStoriesItem({
   // ✅ Функція для видалення МОЄЇ історії
   const handleDeleteMyStory = async () => {
     if (!onDeleteStory) {
-      console.error('❌ onDeleteStory is not defined!', {
+      console.error('onDeleteStory is not defined!', {
         storyId: story._id,
         isMyStory,
         hasOnDeleteStory: !!onDeleteStory,

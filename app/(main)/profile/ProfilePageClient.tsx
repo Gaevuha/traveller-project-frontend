@@ -53,13 +53,20 @@ export default function ProfilePageClient({
 
   // Видалення картки зі сторінки після "unfavorite"
   const handleRemoveSavedStory = (storyId: string) => {
-    setStories(prev => prev.filter(story => story._id !== storyId));
+    setStories(prev => {
+      const newStories = prev.filter(story => story._id !== storyId);
+
+      initialSavedStoriesRef.current = newStories;
+
+      return newStories;
+    });
   };
   const handleDeleteMyStory = async (storyId: string) => {
     try {
       await deleteStoryByIdClient(storyId);
       setStories(prev => {
         const newStories = prev.filter(story => story._id !== storyId);
+        initialMyStoriesRef.current = newStories;
         return newStories;
       });
 
