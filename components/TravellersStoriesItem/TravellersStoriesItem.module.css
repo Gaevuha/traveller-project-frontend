@@ -189,30 +189,33 @@
   line-height: 1.5;
   color: var(--color-text-primary);
 }
+.story__btn_profile {
+  font-size: 14px;
+}
 
 @media screen and (min-width: 1440px) {
   .story__btn {
     font-size: 18px;
   }
 
+  .story__btn:hover,
+  .story__btn:focus {
+    background-color: var(--color-primary-hover-second);
+    border: none;
+    color: var(--color-text-inverse);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px var(--box-shadow);
+  }
 
-.story__btn:hover,
-.story__btn:focus {
-  background-color: var(--color-primary-hover-second);
-  border: none;
-  color: var(--color-text-inverse);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 12px var(--box-shadow);
+  .story__btn:active {
+    transform: translateY(0);
+    color: var(--color-text-inverse);
+    background-color: var(--color-primary-active-second);
+  }
 }
 
-.story__btn:active {
-  transform: translateY(0);
-  color: var(--color-text-inverse);
-  background-color: var(--color-primary-active-second);
-}
-}
-
-.story__save {
+.story__save,
+.story__delete {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -228,7 +231,8 @@
 }
 
 .story__save .icon__bookmark,
-.story__save .iconEdit {
+.story__save .iconEdit,
+.story__delete .iconDelete {
   color: var(--color-text-primary);
   fill: var(--color-text-primary);
   width: 24px;
@@ -236,63 +240,59 @@
 }
 
 .story__save.saved {
- background-color: #1a2a5a;;
- 
+  background-color: #1a2a5a;
 }
 
 .story__save.saved .icon__saved {
- 
   fill: #fff;
   stroke: none;
   width: 30px;
-    height: 30px;
-
+  height: 30px;
 }
 
+@media screen and (min-width: 1440px) {
+  .story__save:hover .icon__bookmark,
+  .story__save:focus .icon__bookmark,
+  .story__save:hover .iconEdit,
+  .story__save:focus .iconEdit,
+  .story__delete:hover .iconDelete,
+  .story__delete:focus .iconDelete {
+    color: var(--color-text-inverse);
+    fill: var(--color-text-inverse);
+    fill: currentColor;
+  }
 
+  .story__save:hover,
+  .story__save:focus,
+  .story__delete:hover,
+  .story__delete:focus {
+    background-color: var(--color-primary-hover-second);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--box-shadow);
+    border: none;
+  }
 
-@media screen and (min-width: 1440px){
+  .story__save.saved {
+    background: var(--color-primary-active-second);
+    border-color: var(--color-primary-active-second);
+    fill: var(--color-text-inverse);
+  }
 
-.story__save:hover .icon__bookmark,
-.story__save:focus .icon__bookmark,
-.story__save:hover .iconEdit,
-.story__save:focus .iconEdit {
-  color: var(--color-text-inverse);
-  fill: var(--color-text-inverse);
-  fill: currentColor;
-}
+  .story__save.saved .icon__bookmark,
+  .story__save.saved .iconEdit {
+    color: var(--color-text-inverse);
+    fill: var(--color-text-inverse);
+    stroke: none;
+  }
 
-.story__save:hover,
-.story__save:focus {
-  background-color: var(--color-primary-hover-second);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px var(--box-shadow);
-  border: none;
-}
+  .story__save:focus {
+    outline: 3px solid rgba(59, 130, 246, 0.12);
+    outline-offset: 2px;
+  }
 
-
-.story__save.saved {
-  background: var(--color-primary-active-second);
-  border-color: var(--color-primary-active-second);
-  fill: var(--color-text-inverse);
-}
-
-.story__save.saved .icon__bookmark,
-.story__save.saved .iconEdit {
-  color: var(--color-text-inverse);
-  fill: var(--color-text-inverse);
-  stroke: none;
-}
-
-.story__save:focus {
-  outline: 3px solid rgba(59, 130, 246, 0.12);
-  outline-offset: 2px;
-}
-
-.story__save:active {
-  transform: translateY(0);
-  color: var(--color-text-inverse);
-  background-color: var(--color-primary-active-second);
-}
-
+  .story__save:active {
+    transform: translateY(0);
+    color: var(--color-text-inverse);
+    background-color: var(--color-primary-active-second);
+  }
 }

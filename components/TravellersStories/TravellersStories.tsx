@@ -7,7 +7,9 @@ interface TravellersStoriesProps {
   isAuthenticated: boolean;
   className?: string; // додатковий проп для кастомного стилю
   onRemoveSavedStory?: (id: string) => void; // ⬅ додаємо!
+  onDeleteStory?: (id: string) => void;
   isMyStory?: boolean;
+  variant?: 'profileMyStories';
 }
 
 export default function TravellersStories({
@@ -15,7 +17,9 @@ export default function TravellersStories({
   isAuthenticated,
   className,
   isMyStory,
+  onDeleteStory,
   onRemoveSavedStory,
+  variant,
 }: TravellersStoriesProps) {
   return (
     <ul className={`${css.stories__list} ${className || ''}`}>
@@ -25,7 +29,9 @@ export default function TravellersStories({
           story={story}
           isAuthenticated={isAuthenticated}
           onRemoveSavedStory={onRemoveSavedStory}
+          onDeleteStory={onDeleteStory}
           isMyStory={isMyStory}
+          variant={variant}
         />
       ))}
     </ul>
