@@ -51,7 +51,10 @@ export const getGoogleOAuthUrl = async () => {
     message: string;
     data: { url: string };
   }>('/auth/google/get-oauth-url');
-
+  console.log(
+    '🌐 [Frontend] Google OAuth URL from backend:',
+    res.data.data.url
+  );
   return res.data.data.url;
 };
 
