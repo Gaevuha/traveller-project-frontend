@@ -25,8 +25,6 @@ export default function GoogleAuthButton() {
   const handleGoogleLogin = async () => {
     try {
       const authUrl = await getGoogleOAuthUrl();
-      console.log('✅ OAuth URL fetched:', authUrl);
-
       if (authUrl) {
         console.log('🌐 Redirecting to Google Auth URL:', authUrl);
         window.location.href = authUrl;
