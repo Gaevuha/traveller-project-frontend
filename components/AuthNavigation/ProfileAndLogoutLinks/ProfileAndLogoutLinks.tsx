@@ -5,10 +5,11 @@ import css from './ProfileAndLogoutLinks.module.css';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useAuthStore } from '@/lib/store/authStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import Image from 'next/image';
 import Modal from '@/components/Modal/Modal';
+import { getMe } from '@/lib/api/clientApi';
 
 type ProfileAndLogoutLinksProps = {
   variant?: 'header-main-page' | 'mobile-menu';
@@ -19,10 +20,39 @@ export default function ProfileAndLogoutLinks({
 }: ProfileAndLogoutLinksProps) {
   const { logout } = useAuth();
   const user = useAuthStore(state => state.user);
+  const setUser = useAuthStore(state => state.setUser);
   const closeMobileMenu = useMobileMenuOpen(state => state.closeMobileMenu);
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Завантажуємо повний профіль при зміні user
+  useEffect(() => {
+    const loadAvatarIfMissing = async () => {
+      if (user && !user.avatarUrl) {
+        try {
+          // Чекаємо 1 секунду, щоб сесія точно встановилася
+          const timeoutId = setTimeout(async () => {
+            try {
+              const fullUser = await getMe(true);
+              if (fullUser?.avatarUrl) {
+                // Оновлюємо користувача з аватаркою
+                setUser({ ...user, avatarUrl: fullUser.avatarUrl });
+              }
+            } catch {
+              // Ігноруємо помилку
+            }
+          }, 1000);
+
+          return () => clearTimeout(timeoutId);
+        } catch {
+          // Ігноруємо помилку
+        }
+      }
+    };
+
+    loadAvatarIfMissing();
+  }, [user, setUser]);
 
   const handleLogoutClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -31,7 +61,7 @@ export default function ProfileAndLogoutLinks({
   };
 
   const handleConfirmLogout = async () => {
-    if (isLoggingOut) return; // Запобігаємо подвійному кліку
+    if (isLoggingOut) return;
 
     try {
       setIsLoggingOut(true);
@@ -48,31 +78,9 @@ export default function ProfileAndLogoutLinks({
     setIsModalOpen(false);
   };
 
-  // Отримуємо ім'я користувача або дефолтне значення
-  let userName = 'Користувач';
-  if (user) {
-    if (
-      'data' in user &&
-      typeof user.data === 'object' &&
-      user.data !== null &&
-      'name' in user.data
-    ) {
-      userName = (user.data as { name: string }).name;
-    } else if ('name' in user && typeof user.name === 'string') {
-      // Якщо це валідний User об'єкт
-      userName = user.name;
-    }
-  }
-  const userAvatar =
-    user && 'avatarUrl' in user
-      ? user.avatarUrl
-      : user &&
-          'data' in user &&
-          typeof user.data === 'object' &&
-          user.data !== null &&
-          'avatarUrl' in user.data
-        ? (user.data as { avatarUrl?: string }).avatarUrl
-        : undefined;
+  // Отримуємо ім'я та аватарку
+  const userName = user?.name || 'Користувач';
+  const userAvatar = user?.avatarUrl;
 
   return (
     <div className={css.container}>
