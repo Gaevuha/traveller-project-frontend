@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 export type ApiError = AxiosError<{ error: string }>;
 const baseURL =
   (process.env.NEXT_PUBLIC_API_URL ||
-    'https://travel-fs116-teamproject-backend.onrender.com') + '/api';
+    'https://traveller-project-backend.onrender.com') + '/api';
 
 if (process.env.NODE_ENV === 'development') {
   console.log('API Base URL:', baseURL);

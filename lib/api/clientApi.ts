@@ -47,33 +47,17 @@ export const login = async (data: LoginRequest) => {
  */
 export const getGoogleOAuthUrl = async (): Promise<string> => {
   try {
-    console.log('🔍 === GETTING GOOGLE OAUTH URL ===');
-    console.log('📍 Базовий URL API:', api.defaults.baseURL);
+    const { data } = await api.get<{ url: string }>(
+      '/auth/google/get-oauth-url'
+    );
 
-    const res = await api.get<{ url: string }>('/auth/google/get-oauth-url');
-
-    console.log('✅ Google OAuth URL response:', res.data);
-    console.log('✅ Повний URL:', res.data.url);
-
-    // Парсимо URL для перевірки параметрів
-    const url = new URL(res.data.url);
-    console.log('🔍 Аналіз OAuth URL:');
-    console.log('  - Хост:', url.host);
-    console.log('  - Шлях:', url.pathname);
-    console.log('  - Redirect URI:', url.searchParams.get('redirect_uri'));
-    console.log('  - Client ID:', url.searchParams.get('client_id'));
-    console.log('  - Scope:', url.searchParams.get('scope'));
-
-    const oauthUrl = res.data.url;
-    if (!oauthUrl) {
-      console.error('❌ OAuth URL missing in response', res.data);
-      throw new Error('OAuth URL missing in response');
+    if (!data.url) {
+      throw new Error();
     }
 
-    return oauthUrl;
-  } catch (err) {
-    console.error('❌ getGoogleOAuthUrl failed', err);
-    throw err;
+    return data.url;
+  } catch {
+    throw new Error('Failed to get Google OAuth URL');
   }
 };
 
