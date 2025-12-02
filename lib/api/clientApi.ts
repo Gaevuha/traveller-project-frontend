@@ -26,20 +26,53 @@ export type ApiError = AxiosError<{ error: string }>;
 
 export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
   try {
-    await api.post('/theme', { theme });
+    // Перевіряємо чи користувач авторизований
+    const user = await getMe(true);
+    if (user) {
+      await api.post('/theme', { theme });
+    }
   } catch (_error) {}
 };
 
 export const getThemeFromBackend = async (): Promise<Theme | null> => {
   try {
-    const response = await api.get('/theme');
-    return response.data.data?.theme || null;
-  } catch (_error) {
-    console.error('Error getting theme from backend:', _error);
+    const response = await api.get<{
+      status: number;
+      message: string;
+      data: {
+        theme: Theme;
+        source: string;
+        userId: string | null;
+      };
+    }>('/theme');
+
+    if (response.data.data?.theme) {
+      const theme = response.data.data.theme;
+      return theme;
+    }
+
+    return null;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error('getThemeFromBackend error:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+
+      // Якщо 401 - користувач не авторизований
+      if (error.response?.status === 401) {
+        console.log('User not authenticated, using localStorage theme');
+        return null;
+      }
+    } else {
+      // Обробка інших помилок
+      console.error('Unknown error in getThemeFromBackend:', error);
+    }
+
     return null;
   }
 };
-
 /**
  * Register user
  */

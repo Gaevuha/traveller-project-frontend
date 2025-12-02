@@ -1,3 +1,4 @@
+// useAuth.ts
 'use client';
 
 import { useState } from 'react';
@@ -26,6 +27,7 @@ export const useAuth = () => {
         throw new Error('Користувач не створений');
       }
       setUser(user);
+
       toast.success('Реєстрація успішна!');
       setTimeout(() => router.push('/'), 200);
     } catch (error) {
@@ -45,20 +47,15 @@ export const useAuth = () => {
         throw new Error('Користувач не знайдений');
       }
 
-      // Після успішного входу отримуємо повні дані користувача з avatarUrl
-      // Це вирішує проблему, коли /auth/login повертає неповні дані
-      // Використовуємо getMeProfile() для отримання повного профілю з avatarUrl
+      // Отримуємо повний профіль користувача
       try {
         const profileData = await getMeProfile();
         if (profileData && profileData.user) {
-          // Використовуємо повні дані з avatarUrl
           setUser(profileData.user);
         } else {
-          // Якщо не вдалося отримати повні дані - використовуємо дані з login
           setUser(user);
         }
       } catch {
-        // Якщо помилка при отриманні повних даних - використовуємо дані з login
         setUser(user);
       }
 
@@ -66,7 +63,6 @@ export const useAuth = () => {
       router.push('/');
     } catch (error) {
       const message = extractErrorMessage(error);
-
       toast.error(message);
       throw new Error(message);
     } finally {
@@ -79,17 +75,14 @@ export const useAuth = () => {
       logoutStore();
 
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth-storage');
       }
 
       await logoutApi();
+
       toast.success('Ви вийшли з облікового запису');
       router.push('/');
     } catch {
       logoutStore();
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth-storage');
-      }
       toast.success('Ви вийшли з облікового запису');
       router.push('/');
     }

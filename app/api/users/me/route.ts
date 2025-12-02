@@ -4,10 +4,6 @@ import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
 import { logErrorResponse } from '../../_utils/utils';
 
-/**
- * GET /api/users/me
- * Отримати дані поточного користувача
- */
 export async function GET() {
   try {
     const cookieStore = await cookies();
@@ -46,9 +42,6 @@ export async function PATCH(request: Request) {
   try {
     const cookieStore = await cookies();
     const formData = await request.formData();
-
-    // Логування для діагностики
-    console.log('Received formData fields:', Array.from(formData.keys()));
 
     // Використовуємо form-data пакет для Node.js середовища
     const FormDataClass = (await import('form-data')).default;
@@ -106,7 +99,8 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('Non-axios error:', errorMessage);
     if (error instanceof Error) {
       console.error('Error stack:', error.stack);
