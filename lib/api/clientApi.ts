@@ -68,12 +68,25 @@ export const authConfirmGoogle = async (code: string) => {
   const res = await api.post<{
     status: number;
     message: string;
-    data: { user: User };
+    data: {
+      user: User;
+      googlePicture?: string; // Додайте це поле на бекенді
+    };
   }>('/auth/google/confirm-oauth', { code });
 
-  return res.data.data.user;
-};
+  const user = res.data.data.user;
+  const googlePicture = res.data.data.googlePicture;
 
+  // Додаємо аватар з Google, якщо є
+  if (googlePicture && !user.avatarUrl) {
+    return {
+      ...user,
+      avatarUrl: googlePicture,
+    };
+  }
+
+  return user;
+};
 /**
  * Get current user
  */
