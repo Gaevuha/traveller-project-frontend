@@ -8,7 +8,9 @@ import {
   useMemo,
   useState,
   type ReactNode,
+  useRef,
 } from 'react';
+import { saveThemeToBackend } from '@/lib/api/clientApi';
 
 type Theme = 'light' | 'dark';
 
@@ -26,14 +28,20 @@ type ThemeProviderProps = {
   initialTheme?: Theme;
 };
 
-function persistTheme(value: Theme) {
+// Функція для локального збереження теми
+function persistThemeLocally(value: Theme) {
   if (typeof document !== 'undefined') {
     document.documentElement.setAttribute('data-theme', value);
   }
   if (typeof window !== 'undefined') {
     window.localStorage.setItem('theme', value);
-    const maxAge = 60 * 60 * 24 * 365; // 1 year
+    const maxAge = 60 * 60 * 24 * 365;
     document.cookie = `theme=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+
+    // Зберігаємо тему на бекенді (без await для уникнення проблем)
+    saveThemeToBackend(value).catch(() => {
+      // Тиха обробка помилки
+    });
   }
 }
 
@@ -42,6 +50,8 @@ export default function ThemeProvider({
   initialTheme = 'light',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(initialTheme);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const initializingRef = useRef(false);
 
   const setTheme = useCallback((value: Theme) => {
     setThemeState(value);
@@ -51,22 +61,47 @@ export default function ThemeProvider({
     setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'));
   }, []);
 
+  // Ініціалізація теми при завантаженні
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || initializingRef.current) return;
 
-    const storedTheme = window.localStorage.getItem('theme');
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      setThemeState(storedTheme);
-      return;
-    }
+    initializingRef.current = true;
 
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setThemeState(prefersDark ? 'dark' : initialTheme);
+    const initializeTheme = () => {
+      try {
+        // Спершу перевіряємо локальне сховище
+        const storedTheme = window.localStorage.getItem('theme');
+        if (storedTheme === 'light' || storedTheme === 'dark') {
+          setThemeState(storedTheme);
+          setIsInitialized(true);
+          return;
+        }
+
+        // Перевірка системних налаштувань
+        const prefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches;
+        setThemeState(prefersDark ? 'dark' : initialTheme);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error initializing theme:', error);
+        setIsInitialized(true);
+      }
+    };
+
+    initializeTheme();
+
+    return () => {
+      initializingRef.current = false;
+    };
   }, [initialTheme]);
 
+  // Ефект для збереження теми при зміні
   useEffect(() => {
-    persistTheme(theme);
-  }, [theme]);
+    if (!isInitialized) return;
+
+    persistThemeLocally(theme);
+  }, [theme, isInitialized]);
 
   const value = useMemo(
     () => ({
@@ -78,7 +113,9 @@ export default function ThemeProvider({
     [theme, toggleTheme, setTheme]
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {
@@ -88,4 +125,3 @@ export function useTheme() {
   }
   return ctx;
 }
-

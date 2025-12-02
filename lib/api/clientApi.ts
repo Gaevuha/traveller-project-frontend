@@ -20,8 +20,25 @@ import { AxiosError, isAxiosError } from 'axios';
 import { api } from '../api/api';
 import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
 import { EditStory } from '@/types/editStoryForm/editStoryForm';
+import { Theme } from '@/types/theme';
 
 export type ApiError = AxiosError<{ error: string }>;
+
+export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
+  try {
+    await api.post('/theme', { theme });
+  } catch (_error) {}
+};
+
+export const getThemeFromBackend = async (): Promise<Theme | null> => {
+  try {
+    const response = await api.get('/theme');
+    return response.data.data?.theme || null;
+  } catch (_error) {
+    console.error('Error getting theme from backend:', _error);
+    return null;
+  }
+};
 
 /**
  * Register user
@@ -64,19 +81,35 @@ export const getGoogleOAuthUrl = async (): Promise<string> => {
 /**
  * Підтвердження входу після редіректу з Google
  */
-export const authConfirmGoogle = async (code: string) => {
-  const res = await api.post<{
-    status: number;
-    message: string;
-    data: {
-      user: User; // Тепер тут буде avatarUrl
-      accessToken: string;
-      accessTokenValidUntil: string;
-      sessionId: string;
-    };
-  }>('/auth/google/confirm-oauth', { code });
+export const authConfirmGoogle = async (code: string): Promise<User> => {
+  try {
+    const res = await api.post<{
+      status: number;
+      message: string;
+      data: {
+        user: User;
+        accessToken: string;
+        accessTokenValidUntil: string;
+        sessionId: string;
+      };
+    }>('/auth/google/confirm-oauth', { code });
+    return res.data.data.user;
+  } catch (error: unknown) {
+    console.error('Error in authConfirmGoogle:');
 
-  return res.data.data.user; // Повертає повний об'єкт з avatarUrl
+    if (error instanceof AxiosError) {
+      throw new Error(
+        error.response?.data?.message ||
+          `Google authentication failed: ${error.response?.status || 'Unknown status'}`
+      );
+    }
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error('Unknown error during Google authentication');
+  }
 };
 /**
  * Get current user
