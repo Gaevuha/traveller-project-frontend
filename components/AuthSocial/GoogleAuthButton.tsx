@@ -21,19 +21,30 @@ export default function GoogleAuthButton() {
         console.warn('Failed to load FaGoogle icon:', error);
       });
   }, []);
-
   const handleGoogleLogin = async () => {
     try {
-      const authUrl = await getGoogleOAuthUrl();
-      if (authUrl) {
-        console.log('🌐 Redirecting to Google Auth URL:', authUrl);
-        window.location.href = authUrl;
-      } else {
-        throw new Error('URL авторизації не знайдено');
-      }
-    } catch (error: unknown) {
+      console.log('🔍 === STARTING GOOGLE OAUTH ===');
+      console.log('📍 Поточний URL:', window.location.href);
+
+      const url = await getGoogleOAuthUrl();
+      console.log('✅ Отримали OAuth URL, редіректимо...');
+      console.log('📍 Повний URL для редіректу:', url);
+
+      // Розбираємо URL для перевірки
+      const urlObj = new URL(url);
+      console.log('🔍 Деталі редірект URL:');
+      console.log(
+        '  - Куди Google відправить користувача:',
+        urlObj.searchParams.get('redirect_uri')
+      );
+      console.log('  - Повний шлях:', urlObj.toString());
+
+      // Тимчасово збережемо URL для налагодження
+      localStorage.setItem('last_oauth_url', url);
+
+      window.location.href = url;
+    } catch (error) {
       console.error('❌ Google auth init failed:', error);
-      toast.error('Не вдалося отримати посилання для входу через Google');
     }
   };
 
