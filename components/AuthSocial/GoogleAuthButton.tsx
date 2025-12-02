@@ -13,18 +13,19 @@ export default function GoogleAuthButton() {
 
   useEffect(() => {
     import('react-icons/fa')
-      .then((module) => {
+      .then(module => {
         // Беремо FaGoogle з модуля і кладемо як компонент
         setFaGoogle(() => module.FaGoogle);
       })
-      .catch((error) => {
+      .catch(error => {
         console.warn('Failed to load FaGoogle icon:', error);
       });
   }, []);
 
   const handleGoogleLogin = async () => {
     try {
-     const authUrl = await getGoogleOAuthUrl();
+      const authUrl = await getGoogleOAuthUrl();
+      console.log('✅ OAuth URL fetched:', authUrl);
 
       if (authUrl) {
         console.log('🌐 Redirecting to Google Auth URL:', authUrl);

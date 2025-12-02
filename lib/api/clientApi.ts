@@ -45,17 +45,22 @@ export const login = async (data: LoginRequest) => {
 /**
  * Google OAuth — отримання URL для входу через Google
  */
-export const getGoogleOAuthUrl = async () => {
-  const res = await api.get<{
-    status: number;
-    message: string;
-    data: { url: string };
-  }>('/auth/google/get-oauth-url');
-  console.log(
-    '🌐 [Frontend] Google OAuth URL from backend:',
-    res.data.data.url
-  );
-  return res.data.data.url;
+export const getGoogleOAuthUrl = async (): Promise<string> => {
+  try {
+    const res = await api.get<{ url: string }>('/auth/google/get-oauth-url');
+    // Звертаємося безпосередньо до res.data.url
+    const oauthUrl = res.data.url;
+
+    if (!oauthUrl) {
+      console.error('❌ OAuth URL missing in response', res.data);
+      throw new Error('OAuth URL missing in response');
+    }
+
+    return oauthUrl;
+  } catch (err) {
+    console.error('❌ getGoogleOAuthUrl failed', err);
+    throw err;
+  }
 };
 
 /**
