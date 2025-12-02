@@ -7,7 +7,7 @@ import { authConfirmGoogle } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
-import styles from './GoogleCallback.module.css';
+import styles from './GoogleCallbackPage.module.css';
 
 export default function GoogleCallbackPage() {
   const router = useRouter();
