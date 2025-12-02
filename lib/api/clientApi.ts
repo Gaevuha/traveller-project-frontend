@@ -65,13 +65,35 @@ export const getGoogleOAuthUrl = async (): Promise<string> => {
  * Підтвердження входу після редіректу з Google
  */
 export const authConfirmGoogle = async (code: string) => {
-  const res = await api.post<{
-    status: number;
-    message: string;
-    data: { user: User };
-  }>('/auth/google/confirm-oauth', { code });
+  try {
+    // 1. Авторизуємо через Google
+    const res = await api.post<{
+      status: number;
+      message: string;
+      data: { user: User };
+    }>('/auth/google/confirm-oauth', { code });
 
-  return res.data.data.user;
+    const basicUser = res.data.data.user;
+
+    // 2. Отримуємо повний профіль користувача
+    const profileResponse = await api.get('/users/me');
+
+    if (profileResponse.data?.data) {
+      const fullUser = profileResponse.data.data;
+      return {
+        ...basicUser,
+        avatarUrl: fullUser.avatarUrl || '',
+        articlesAmount: fullUser.articlesAmount,
+        createdAt: fullUser.createdAt,
+        updatedAt: fullUser.updatedAt,
+        description: fullUser.description,
+      } as User;
+    }
+
+    return basicUser;
+  } catch (error) {
+    throw error;
+  }
 };
 
 /**
