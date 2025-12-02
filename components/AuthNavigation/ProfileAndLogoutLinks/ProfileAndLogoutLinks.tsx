@@ -5,11 +5,10 @@ import css from './ProfileAndLogoutLinks.module.css';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useAuthStore } from '@/lib/store/authStore';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMobileMenuOpen } from '@/lib/store/MobileMenuStore';
 import Image from 'next/image';
 import Modal from '@/components/Modal/Modal';
-import { getMe } from '@/lib/api/clientApi';
 
 type ProfileAndLogoutLinksProps = {
   variant?: 'header-main-page' | 'mobile-menu';
@@ -20,39 +19,10 @@ export default function ProfileAndLogoutLinks({
 }: ProfileAndLogoutLinksProps) {
   const { logout } = useAuth();
   const user = useAuthStore(state => state.user);
-  const setUser = useAuthStore(state => state.setUser);
   const closeMobileMenu = useMobileMenuOpen(state => state.closeMobileMenu);
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Завантажуємо повний профіль при зміні user
-  useEffect(() => {
-    const loadAvatarIfMissing = async () => {
-      if (user && !user.avatarUrl) {
-        try {
-          // Чекаємо 1 секунду, щоб сесія точно встановилася
-          const timeoutId = setTimeout(async () => {
-            try {
-              const fullUser = await getMe(true);
-              if (fullUser?.avatarUrl) {
-                // Оновлюємо користувача з аватаркою
-                setUser({ ...user, avatarUrl: fullUser.avatarUrl });
-              }
-            } catch {
-              // Ігноруємо помилку
-            }
-          }, 1000);
-
-          return () => clearTimeout(timeoutId);
-        } catch {
-          // Ігноруємо помилку
-        }
-      }
-    };
-
-    loadAvatarIfMissing();
-  }, [user, setUser]);
 
   const handleLogoutClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -67,8 +37,8 @@ export default function ProfileAndLogoutLinks({
       setIsLoggingOut(true);
       setIsModalOpen(false);
       await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch {
+      // Ігноруємо помилку
     } finally {
       setIsLoggingOut(false);
     }
@@ -78,9 +48,9 @@ export default function ProfileAndLogoutLinks({
     setIsModalOpen(false);
   };
 
-  // Отримуємо ім'я та аватарку
+  // Простий доступ до полів
   const userName = user?.name || 'Користувач';
-  const userAvatar = user?.avatarUrl;
+  const userAvatar = user?.avatarUrl; // ✅ Тепер тут буде аватарка
 
   return (
     <div className={css.container}>
@@ -96,6 +66,7 @@ export default function ProfileAndLogoutLinks({
             className={css.avatar}
             width={32}
             height={32}
+            priority
           />
         ) : (
           <Icon name="avatar" className={css.avatar} />

@@ -69,23 +69,14 @@ export const authConfirmGoogle = async (code: string) => {
     status: number;
     message: string;
     data: {
-      user: User;
-      googlePicture?: string; // Додайте це поле на бекенді
+      user: User; // Тепер тут буде avatarUrl
+      accessToken: string;
+      accessTokenValidUntil: string;
+      sessionId: string;
     };
   }>('/auth/google/confirm-oauth', { code });
 
-  const user = res.data.data.user;
-  const googlePicture = res.data.data.googlePicture;
-
-  // Додаємо аватар з Google, якщо є
-  if (googlePicture && !user.avatarUrl) {
-    return {
-      ...user,
-      avatarUrl: googlePicture,
-    };
-  }
-
-  return user;
+  return res.data.data.user; // Повертає повний об'єкт з avatarUrl
 };
 /**
  * Get current user
