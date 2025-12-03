@@ -26,12 +26,30 @@ export type ApiError = AxiosError<{ error: string }>;
 
 export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
   try {
-    // Перевіряємо чи користувач авторизований
-    const user = await getMe(true);
-    if (user) {
-      await api.post('/theme', { theme });
+    console.log('Saving theme to backend:', theme);
+
+    // Використовуємо /theme - він сам визначить, чи користувач авторизований
+    const response = await api.post<{
+      status: number;
+      message: string;
+      data: {
+        theme: Theme;
+        savedToDatabase: boolean;
+        userId: string | null;
+      };
+    }>('/theme', { theme });
+
+    console.log('Theme saved to backend:', response.data);
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error('saveThemeToBackend error:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
     }
-  } catch (_error) {}
+    console.error('Failed to save theme to backend:', error);
+  }
 };
 
 export const getThemeFromBackend = async (): Promise<Theme | null> => {
@@ -44,13 +62,15 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
         source: string;
         userId: string | null;
       };
-    }>('/theme');
+    }>('/theme'); // Це приватний GET /theme (з authenticate middleware)
 
     if (response.data.data?.theme) {
       const theme = response.data.data.theme;
+      console.log('Got theme from backend:', theme);
       return theme;
     }
 
+    console.warn('No theme in backend response:', response.data);
     return null;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -66,7 +86,6 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
         return null;
       }
     } else {
-      // Обробка інших помилок
       console.error('Unknown error in getThemeFromBackend:', error);
     }
 
