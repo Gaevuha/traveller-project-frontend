@@ -1,4 +1,4 @@
-// ThemeProvider.tsx - очищена версія
+// ThemeProvider.tsx - фінальна версія без логування
 'use client';
 
 import {
@@ -61,13 +61,11 @@ export default function ThemeProvider({
     setTheme(newTheme);
   }, [theme, setTheme]);
 
-  // ОСНОВНОЙ useEffect - чекаємо поки auth завантажиться
+  // ОСНОВНОЙ useEffect
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (!hasHydrated || isInitialized) {
-      return;
-    }
+    if (!hasHydrated || isInitialized) return;
 
     setIsThemeLoading(true);
 
@@ -75,12 +73,9 @@ export default function ThemeProvider({
       try {
         let targetTheme: Theme = initialTheme;
 
-        // 1. Якщо користувач НЕ авторизований - завжди світла тема
         if (!user) {
           targetTheme = 'light';
-        }
-        // 2. Якщо користувач авторизований - запитуємо з бекенду
-        else {
+        } else {
           try {
             const backendTheme = await getThemeFromBackend();
             if (backendTheme) {
@@ -99,13 +94,12 @@ export default function ThemeProvider({
           }
         }
 
-        // 3. Встановлюємо тему
         document.documentElement.setAttribute('data-theme', targetTheme);
         setThemeState(targetTheme);
         localStorage.setItem('theme', targetTheme);
         setIsInitialized(true);
       } catch {
-        // Ігноруємо помилки
+        // ignore
       } finally {
         setIsThemeLoading(false);
       }
@@ -118,23 +112,21 @@ export default function ThemeProvider({
     return () => clearTimeout(timer);
   }, [hasHydrated, user, initialTheme, isInitialized]);
 
-  // ДОДАТКОВИЙ useEffect для синхронізації при зміні користувача
+  // Синхронізація при зміні користувача
   useEffect(() => {
     if (!isInitialized) return;
 
     const handleUserChange = async () => {
       if (user) {
-        // Користувач увійшов - завантажуємо його тему з бекенду
         try {
           const backendTheme = await getThemeFromBackend();
           if (backendTheme) {
             setTheme(backendTheme);
           }
         } catch {
-          // Ігноруємо помилки
+          // ignore
         }
       } else {
-        // Користувач вийшов - встановлюємо світлу тему за замовчуванням
         setTheme('light');
       }
     };

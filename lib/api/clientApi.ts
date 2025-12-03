@@ -26,7 +26,6 @@ export type ApiError = AxiosError<{ error: string }>;
 
 export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
   try {
-    // Використовуємо /theme - він сам визначить, чи користувач авторизований
     const response = await api.post<{
       status: number;
       message: string;
@@ -38,13 +37,13 @@ export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
     }>('/theme', { theme });
   } catch (error) {
     if (error instanceof AxiosError) {
-      console.error('saveThemeToBackend error:', {
-        message: error.message,
+      console.error('[API] Error details:', {
         status: error.response?.status,
         data: error.response?.data,
       });
     }
-    console.error('Failed to save theme to backend:', error);
+
+    throw error; // Не ігноруємо помилку повністю
   }
 };
 
