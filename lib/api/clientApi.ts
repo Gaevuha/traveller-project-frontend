@@ -26,12 +26,26 @@ export type ApiError = AxiosError<{ error: string }>;
 
 export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
   try {
-    // Перевіряємо чи користувач авторизований
-    const user = await getMe(true);
-    if (user) {
-      await api.post('/theme', { theme });
+    // Використовуємо /theme - він сам визначить, чи користувач авторизований
+    const response = await api.post<{
+      status: number;
+      message: string;
+      data: {
+        theme: Theme;
+        savedToDatabase: boolean;
+        userId: string | null;
+      };
+    }>('/theme', { theme });
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error('saveThemeToBackend error:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
     }
-  } catch (_error) {}
+    console.error('Failed to save theme to backend:', error);
+  }
 };
 
 export const getThemeFromBackend = async (): Promise<Theme | null> => {
@@ -43,31 +57,21 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
         theme: Theme;
         source: string;
         userId: string | null;
+        usedCookie: boolean;
       };
     }>('/theme');
 
-    if (response.data.data?.theme) {
+    if (response.data?.data?.theme) {
       const theme = response.data.data.theme;
       return theme;
     }
-
     return null;
   } catch (error) {
     if (error instanceof AxiosError) {
-      console.error('getThemeFromBackend error:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-
-      // Якщо 401 - користувач не авторизований
       if (error.response?.status === 401) {
-        console.log('User not authenticated, using localStorage theme');
         return null;
       }
     } else {
-      // Обробка інших помилок
-      console.error('Unknown error in getThemeFromBackend:', error);
     }
 
     return null;

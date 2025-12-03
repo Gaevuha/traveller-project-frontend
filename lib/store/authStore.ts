@@ -1,3 +1,4 @@
+// lib/store/authStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/types/user';
@@ -10,6 +11,7 @@ type AuthStore = {
   setUser: (user: User) => void;
   clearIsAuthenticated: () => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
   logout: () => void;
 };
 
@@ -19,7 +21,7 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       user: null,
       isLoading: true,
-      hasHydrated: false, // ← ADD
+      hasHydrated: false,
 
       setUser: (user: User) => {
         set({ user, isAuthenticated: true, isLoading: false });
@@ -31,6 +33,10 @@ export const useAuthStore = create<AuthStore>()(
 
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
+      },
+
+      setHasHydrated: (hasHydrated: boolean) => {
+        set({ hasHydrated, isLoading: false });
       },
 
       logout: () => {
@@ -47,25 +53,26 @@ export const useAuthStore = create<AuthStore>()(
         isAuthenticated: state.user ? true : false,
       }),
 
-      onRehydrateStorage: () => state => {
-        if (!state) return;
-
-        state.setLoading(true);
-
-        // Коли hydration завершився → виставляємо прапор
-        setTimeout(() => {
-          state.hasHydrated = true;
-          state.setLoading(false);
-        }, 0);
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (state) {
+            setTimeout(() => {
+              state.setHasHydrated(true);
+            }, 0);
+          }
+        };
       },
     }
   )
 );
 
-// Селектори для оптимізації ре-рендерів
-export const useIsAuthenticated = () =>
-  useAuthStore(state => state.isAuthenticated);
+// Додайте також цей хук для спрощеного доступу до стану
+export const useAuthHydration = () => {
+  const hasHydrated = useAuthStore(state => state.hasHydrated);
+  const user = useAuthStore(state => state.user);
 
-export const useUser = () => useAuthStore(state => state.user);
+  // hasHydrated автоматично стає true при першому рендері з user
+  const isReady = hasHydrated || user !== undefined;
 
-export const useIsLoading = () => useAuthStore(state => state.isLoading);
+  return isReady;
+};
