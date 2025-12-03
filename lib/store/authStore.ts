@@ -13,6 +13,8 @@ type AuthStore = {
   setLoading: (loading: boolean) => void;
   setHasHydrated: (hasHydrated: boolean) => void;
   logout: () => void;
+  // ✅ ДОДАНО: Функція для оновлення теми
+  updateUserTheme: (theme: 'light' | 'dark') => void;
 };
 
 export const useAuthStore = create<AuthStore>()(
@@ -41,6 +43,19 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => {
         set({ user: null, isAuthenticated: false, isLoading: false });
+      },
+
+      // ✅ ДОДАНО: Функція для оновлення теми
+      updateUserTheme: (theme: 'light' | 'dark') => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({
+            user: {
+              ...currentUser,
+              theme, // Оновлюємо тему
+            },
+          });
+        }
       },
     }),
 

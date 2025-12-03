@@ -1,7 +1,4 @@
-
-import { SavedStory } from "./story";
-
-
+import { SavedStory } from './story';
 
 export type User = {
   _id: string;
@@ -12,6 +9,7 @@ export type User = {
   description?: string | null;
   createdAt: string;
   updatedAt?: string;
+  theme?: 'light' | 'dark';
 };
 
 // Статті, які повертає /api/users/{userId}

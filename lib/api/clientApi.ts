@@ -24,30 +24,30 @@ import { Theme } from '@/types/theme';
 
 export type ApiError = AxiosError<{ error: string }>;
 
-export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
+export const saveThemeToBackend = async (theme: 'light' | 'dark') => {
   try {
-    const response = await api.post<{
-      status: number;
-      message: string;
-      data: {
-        theme: Theme;
-        savedToDatabase: boolean;
-        userId: string | null;
-      };
-    }>('/theme', { theme });
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('[API] Error details:', {
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+    const response = await fetch('http://localhost:4000/api/theme', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ theme }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to save theme: ${response.status}`);
     }
 
-    throw error; // Не ігноруємо помилку повністю
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Помилка збереження теми:', error);
+    throw error;
   }
 };
 
-export const getThemeFromBackend = async (): Promise<Theme | null> => {
+export const getThemeFromBackend = async (
+  timestamp?: number
+): Promise<Theme | null> => {
   try {
     const response = await api.get<{
       status: number;
@@ -57,11 +57,21 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
         source: string;
         userId: string | null;
         usedCookie: boolean;
+        timestamp?: string;
       };
-    }>('/theme');
+    }>('/theme', {
+      withCredentials: true,
+      params: timestamp ? { _t: timestamp } : {}, // Додаємо timestamp для уникнення кешу
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    });
 
     if (response.data?.data?.theme) {
       const theme = response.data.data.theme;
+
       return theme;
     }
     return null;
@@ -70,9 +80,8 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
       if (error.response?.status === 401) {
         return null;
       }
-    } else {
     }
-
+    console.error('Помилка отримання теми з бекенду:', error);
     return null;
   }
 };
