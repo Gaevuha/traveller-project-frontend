@@ -132,9 +132,9 @@ export default async function RootLayout({
           }}
         />
         <BreakpointInitializer />
-        <TanStackProvider>
-          <AuthProvider initialUser={initialUser}>
-            <ThemeProvider initialTheme={initialTheme}>
+        <ThemeProvider initialTheme={initialTheme}>
+          <TanStackProvider>
+            <AuthProvider initialUser={initialUser}>
               {children}
               <Toaster
                 position="bottom-center"
@@ -173,9 +173,9 @@ export default async function RootLayout({
               />
               <RootPageClient />
               <ScrollToTopButton />
-            </ThemeProvider>
-          </AuthProvider>
-        </TanStackProvider>
+            </AuthProvider>
+          </TanStackProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
