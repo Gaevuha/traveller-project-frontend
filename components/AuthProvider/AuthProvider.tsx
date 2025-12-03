@@ -31,49 +31,56 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
 
       setLoading(true);
 
-      // Якщо є initialUser з SSR - використовуємо його
+      // 1. Якщо є initialUser з SSR - використовуємо його
       if (initialUser) {
         console.log('🔐 AuthProvider: Using SSR initialUser');
 
-        // Нормалізуємо користувача
-        let normalizedUser: User | null = null;
-        const asRecord = initialUser as unknown as Record<string, unknown>;
+        // Функція для нормалізації користувача
+        const normalizeUser = (userData: unknown): User | null => {
+          const asRecord = userData as Record<string, unknown>;
 
-        if (
-          asRecord &&
-          typeof asRecord === 'object' &&
-          'status' in asRecord &&
-          'data' in asRecord
-        ) {
-          // API відповідь { status, message, data }
-          const rawUnknown = (asRecord as { data: unknown }).data;
-          if (rawUnknown && typeof rawUnknown === 'object') {
-            const raw = rawUnknown as Record<string, unknown>;
+          if (
+            asRecord &&
+            typeof asRecord === 'object' &&
+            'status' in asRecord &&
+            'data' in asRecord
+          ) {
+            // API відповідь { status, message, data }
+            const rawUnknown = (asRecord as { data: unknown }).data;
+            if (rawUnknown && typeof rawUnknown === 'object') {
+              const raw = rawUnknown as Record<string, unknown>;
+              const idFromUnderscore =
+                '_id' in raw && typeof raw._id === 'string'
+                  ? raw._id
+                  : undefined;
+              const idFromId =
+                'id' in raw && typeof raw.id === 'string' ? raw.id : undefined;
+              const resolvedId = idFromUnderscore ?? idFromId;
+
+              return {
+                ...(raw as unknown as Omit<User, '_id'>),
+                _id: resolvedId ?? '',
+              };
+            }
+          } else {
+            // Безпосередньо User об'єкт
+            const raw = userData as Record<string, unknown>;
             const idFromUnderscore =
               '_id' in raw && typeof raw._id === 'string' ? raw._id : undefined;
             const idFromId =
               'id' in raw && typeof raw.id === 'string' ? raw.id : undefined;
             const resolvedId = idFromUnderscore ?? idFromId;
 
-            normalizedUser = {
-              ...(raw as unknown as Omit<User, '_id'>),
+            return {
+              ...(userData as unknown as Omit<User, '_id'>),
               _id: resolvedId ?? '',
             };
           }
-        } else {
-          // Безпосередньо User об'єкт
-          const raw = initialUser as unknown as Record<string, unknown>;
-          const idFromUnderscore =
-            '_id' in raw && typeof raw._id === 'string' ? raw._id : undefined;
-          const idFromId =
-            'id' in raw && typeof raw.id === 'string' ? raw.id : undefined;
-          const resolvedId = idFromUnderscore ?? idFromId;
 
-          normalizedUser = {
-            ...(initialUser as unknown as Omit<User, '_id'>),
-            _id: resolvedId ?? '',
-          };
-        }
+          return null;
+        };
+
+        const normalizedUser = normalizeUser(initialUser);
 
         if (normalizedUser && normalizedUser._id) {
           console.log(
@@ -85,33 +92,38 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
           console.log('🔐 AuthProvider: Clearing auth - invalid SSR user');
           clearIsAuthenticated();
         }
+
         setLoading(false);
         setIsInitialized(true);
         return;
       }
 
-      // Якщо немає initialUser з SSR
+      // 2. Якщо немає initialUser з SSR
       console.log(
         '🔐 AuthProvider: No SSR user, checking localStorage/session'
       );
 
       try {
-        // Пробуємо отримати поточну сесію
+        // Спершу пробуємо отримати поточну сесію
+        console.log('🔐 AuthProvider: Trying to get current session...');
         const currentUser = await getMe(true); // silent: true
 
         if (currentUser) {
-          // Сесія активна
+          // Успіх - сесія активна
           console.log('🔐 AuthProvider: Active session found', currentUser._id);
           setUser(currentUser);
         } else {
           // Спробуємо оновити сесію
-          console.log('🔐 AuthProvider: No active session, trying refresh');
+          console.log('🔐 AuthProvider: No active session, trying refresh...');
           const refreshed = await refreshSession();
 
           if (refreshed) {
             const retried = await getMe(true);
             if (retried) {
-              console.log('🔐 AuthProvider: Session refreshed', retried._id);
+              console.log(
+                '🔐 AuthProvider: Session refreshed successfully',
+                retried._id
+              );
               setUser(retried);
             } else {
               console.log('🔐 AuthProvider: No user after refresh');
@@ -124,9 +136,33 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
           }
         }
       } catch (error) {
-        // Помилка при перевірці
+        // ВАЖЛИВО: Не очищаємо авторизацію при помилках мережі!
         console.error('🔐 AuthProvider: Error checking session', error);
-        clearIsAuthenticated();
+
+        // Якщо це мережева помилка (502, таймаут тощо) - не очищаємо
+        const isNetworkError =
+          error instanceof Error &&
+          (error.message.includes('Network Error') ||
+            error.message.includes('Failed to fetch') ||
+            error.message.includes('502') ||
+            error.message.includes('503'));
+
+        if (isNetworkError) {
+          console.log(
+            '🔐 AuthProvider: Network error, preserving current auth state'
+          );
+          // Не викликаємо clearIsAuthenticated() - зберігаємо стан
+
+          // Якщо в store є користувач, залишаємо його
+          if (user) {
+            console.log(
+              '🔐 AuthProvider: Keeping existing user due to network error'
+            );
+          }
+        } else {
+          // Інші помилки - очищаємо
+          clearIsAuthenticated();
+        }
       }
 
       setLoading(false);
