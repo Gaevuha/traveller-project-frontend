@@ -23,13 +23,21 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
     const fetchSession = async () => {
       if (isInitialized) return;
 
+      console.log('🔐 AuthProvider: Starting session fetch', {
+        hasInitialUser: !!initialUser,
+        hasUserInStore: !!user,
+        isInitialized,
+      });
+
       setLoading(true);
 
       // Якщо є initialUser з SSR - використовуємо його
       if (initialUser) {
-        // Нормалізуємо можливу відповідь API { status, message, data }
-        const asRecord = initialUser as unknown as Record<string, unknown>;
+        console.log('🔐 AuthProvider: Using SSR initialUser');
+
+        // Нормалізуємо користувача
         let normalizedUser: User | null = null;
+        const asRecord = initialUser as unknown as Record<string, unknown>;
 
         if (
           asRecord &&
@@ -37,35 +45,30 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
           'status' in asRecord &&
           'data' in asRecord
         ) {
+          // API відповідь { status, message, data }
           const rawUnknown = (asRecord as { data: unknown }).data;
           if (rawUnknown && typeof rawUnknown === 'object') {
             const raw = rawUnknown as Record<string, unknown>;
             const idFromUnderscore =
-              '_id' in raw && typeof raw._id === 'string'
-                ? (raw._id as string)
-                : undefined;
+              '_id' in raw && typeof raw._id === 'string' ? raw._id : undefined;
             const idFromId =
-              'id' in raw && typeof (raw.id as unknown) === 'string'
-                ? (raw.id as string)
-                : undefined;
+              'id' in raw && typeof raw.id === 'string' ? raw.id : undefined;
             const resolvedId = idFromUnderscore ?? idFromId;
+
             normalizedUser = {
               ...(raw as unknown as Omit<User, '_id'>),
               _id: resolvedId ?? '',
             };
           }
         } else {
-          // В іншому випадку це вже User — але гарантуємо наявність _id
+          // Безпосередньо User об'єкт
           const raw = initialUser as unknown as Record<string, unknown>;
           const idFromUnderscore =
-            '_id' in raw && typeof raw._id === 'string'
-              ? (raw._id as string)
-              : undefined;
+            '_id' in raw && typeof raw._id === 'string' ? raw._id : undefined;
           const idFromId =
-            'id' in raw && typeof (raw.id as unknown) === 'string'
-              ? (raw.id as string)
-              : undefined;
+            'id' in raw && typeof raw.id === 'string' ? raw.id : undefined;
           const resolvedId = idFromUnderscore ?? idFromId;
+
           normalizedUser = {
             ...(initialUser as unknown as Omit<User, '_id'>),
             _id: resolvedId ?? '',
@@ -73,8 +76,13 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
         }
 
         if (normalizedUser && normalizedUser._id) {
+          console.log(
+            '🔐 AuthProvider: Setting user from SSR',
+            normalizedUser._id
+          );
           setUser(normalizedUser);
         } else {
+          console.log('🔐 AuthProvider: Clearing auth - invalid SSR user');
           clearIsAuthenticated();
         }
         setLoading(false);
@@ -82,35 +90,42 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
         return;
       }
 
-      // Якщо initialUser є null, але є user в store (з localStorage) - перевіряємо сесію
-      if (user) {
-        try {
-          // Перевіряємо, чи сесія все ще активна
-          const currentUser = await getMe(true); // silent: true - не логуємо помилки
-          if (currentUser) {
-            // Сесія активна - оновлюємо дані
-            setUser(currentUser);
-          } else {
-            // Спробуємо оновити сесію і повторити запит
-            const refreshed = await refreshSession();
-            if (refreshed) {
-              const retried = await getMe(true);
-              if (retried) {
-                setUser(retried);
-              } else {
-                clearIsAuthenticated();
-              }
-          } else {
-            // Сесія неактивна - очищаємо
-            clearIsAuthenticated();
+      // Якщо немає initialUser з SSR
+      console.log(
+        '🔐 AuthProvider: No SSR user, checking localStorage/session'
+      );
+
+      try {
+        // Пробуємо отримати поточну сесію
+        const currentUser = await getMe(true); // silent: true
+
+        if (currentUser) {
+          // Сесія активна
+          console.log('🔐 AuthProvider: Active session found', currentUser._id);
+          setUser(currentUser);
+        } else {
+          // Спробуємо оновити сесію
+          console.log('🔐 AuthProvider: No active session, trying refresh');
+          const refreshed = await refreshSession();
+
+          if (refreshed) {
+            const retried = await getMe(true);
+            if (retried) {
+              console.log('🔐 AuthProvider: Session refreshed', retried._id);
+              setUser(retried);
+            } else {
+              console.log('🔐 AuthProvider: No user after refresh');
+              clearIsAuthenticated();
             }
+          } else {
+            // Немає сесії - очищаємо
+            console.log('🔐 AuthProvider: No session, clearing auth');
+            clearIsAuthenticated();
           }
-        } catch {
-          // Помилка при перевірці - очищаємо
-          clearIsAuthenticated();
         }
-      } else {
-        // Немає ні initialUser, ні user в store - очищаємо
+      } catch (error) {
+        // Помилка при перевірці
+        console.error('🔐 AuthProvider: Error checking session', error);
         clearIsAuthenticated();
       }
 
@@ -127,6 +142,15 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
     isInitialized,
     user,
   ]);
+
+  // Логування змін стану
+  useEffect(() => {
+    console.log('🔐 AuthProvider state:', {
+      user: user?._id,
+      isInitialized,
+      initialUser: initialUser?._id,
+    });
+  }, [user, isInitialized, initialUser]);
 
   return <>{children}</>;
 };
