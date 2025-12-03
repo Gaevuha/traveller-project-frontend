@@ -22,6 +22,8 @@ import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
 import { EditStory } from '@/types/editStoryForm/editStoryForm';
 import { Theme } from '@/types/theme';
 
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 export type ApiError = AxiosError<{ error: string }>;
 
 export const saveThemeToBackend = async (theme: 'light' | 'dark') => {
