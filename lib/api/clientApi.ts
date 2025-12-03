@@ -26,7 +26,7 @@ export type ApiError = AxiosError<{ error: string }>;
 
 export const saveThemeToBackend = async (theme: 'light' | 'dark') => {
   try {
-    const response = await fetch('http://localhost:4000/api/theme', {
+    const response = await fetch(`${baseUrl}/api/theme`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
