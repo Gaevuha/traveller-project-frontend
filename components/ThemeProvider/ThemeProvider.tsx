@@ -29,30 +29,6 @@ type ThemeProviderProps = {
   initialTheme?: Theme;
 };
 
-// Допоміжна функція для отримання теми з cookies
-const getCookieTheme = (): Theme | null => {
-  if (typeof document === 'undefined') return null;
-
-  const cookies = document.cookie.split(';');
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'theme' && (value === 'light' || value === 'dark')) {
-      return value;
-    }
-  }
-  return null;
-};
-
-// Допоміжна функція для збереження теми в cookies
-const setCookieTheme = (theme: Theme) => {
-  if (typeof document === 'undefined') return;
-
-  const maxAge = 30 * 24 * 60 * 60; // 30 днів
-  document.cookie = `theme=${theme}; max-age=${maxAge}; path=/; samesite=lax${
-    process.env.NODE_ENV === 'production' ? '; secure' : ''
-  }`;
-};
-
 export default function ThemeProvider({
   children,
   initialTheme = 'light',
@@ -61,41 +37,27 @@ export default function ThemeProvider({
   const initializingRef = useRef(false);
   const { user, hasHydrated } = useAuthStore();
 
-  // Для відстеження змін користувача
-  const previousUserRef = useRef(user);
-
   // Синхронізована функція встановлення теми
   const setTheme = useCallback(
     (newTheme: Theme) => {
-      console.log(`🎨 [${Date.now()}] setTheme called:`, {
-        current: theme,
-        new: newTheme,
-        user: user?._id,
-      });
+      console.log('🎨 setTheme called:', { current: theme, new: newTheme });
 
-      // Оновлюємо локальний стан
       setThemeState(newTheme);
 
       // Застосовуємо тему в DOM
       document.documentElement.setAttribute('data-theme', newTheme);
 
-      // Зберігаємо в localStorage (для швидкого доступу)
+      // Зберігаємо в localStorage
       localStorage.setItem('theme', newTheme);
 
-      // Зберігаємо в cookies (для синхронізації між пристроями)
-      setCookieTheme(newTheme);
-
-      // Зберігаємо на бекенді (основне джерело істини)
+      // Зберігаємо на бекенді (якщо авторизований)
       if (user) {
-        console.log(
-          `🎨 [${Date.now()}] Saving theme to backend for user:`,
-          user._id
-        );
-        saveThemeToBackend(newTheme).catch(error => {
-          console.warn('Failed to save theme to backend:', error);
+        console.log('🎨 Saving theme to backend for user:', user._id);
+        saveThemeToBackend(newTheme).catch(() => {
+          console.warn('Failed to save theme to backend');
         });
       } else {
-        console.log('🎨 User not authenticated, theme saved to cookies only');
+        console.log('🎨 User not authenticated, theme saved only locally');
       }
     },
     [user, theme]
@@ -106,204 +68,144 @@ export default function ThemeProvider({
     setTheme(newTheme);
   }, [theme, setTheme]);
 
-  // Головна ініціалізація теми
+  // Ініціалізація теми при першому завантаженні
   useEffect(() => {
-    if (!hasHydrated || typeof window === 'undefined') {
-      console.log(`🎨 [${Date.now()}] Skipping init - waiting for hydration`);
+    if (
+      !hasHydrated ||
+      typeof window === 'undefined' ||
+      initializingRef.current
+    )
       return;
-    }
-
-    if (initializingRef.current) {
-      console.log(`🎨 [${Date.now()}] Skipping init - already initializing`);
-      return;
-    }
 
     const initializeTheme = async () => {
       initializingRef.current = true;
-
-      console.log(`=== 🎨 [${Date.now()}] THEME INITIALIZATION START ===`);
-      console.log(`🎨 Current state:`, {
+      console.log('=== 🎨 THEME INITIALIZATION START ===');
+      console.log('Current state:', {
         user: user?._id,
-        userExists: !!user,
         hasHydrated,
         localStorageTheme: localStorage.getItem('theme'),
-        cookieTheme: getCookieTheme(),
         htmlTheme: document.documentElement.getAttribute('data-theme'),
-        currentStateTheme: theme,
       });
 
       let finalTheme: Theme = initialTheme;
+      let themeApplied = false;
       let source = 'default';
 
-      const storedLocalTheme = localStorage.getItem('theme') as Theme;
-      const cookieTheme = getCookieTheme();
-
-      // СТРАТЕГІЯ ПРІОРИТЕТІВ:
-
-      // 1. Авторизований користувач - ОБОВ'ЯЗКОВО з бекенду
+      // 1. Перевіряємо авторизацію та бекенд
       if (user) {
         try {
-          console.log(`🎨 Fetching theme from backend for user:`, user._id);
+          console.log('🎨 Fetching theme from backend for user:', user._id);
           const backendTheme = await getThemeFromBackend();
-          console.log(`🎨 Backend theme response:`, backendTheme);
+          console.log('🎨 Backend theme response:', backendTheme);
 
           if (backendTheme) {
             finalTheme = backendTheme;
+            themeApplied = true;
             source = 'backend';
-            console.log(`🎨 Using backend theme: ${finalTheme}`);
-
-            // СИНХРОНІЗАЦІЯ: Приводимо всі джерела до одного стану
-            if (storedLocalTheme !== backendTheme) {
-              localStorage.setItem('theme', backendTheme);
-              console.log(`🎨 Synced localStorage with backend`);
-            }
-            if (cookieTheme !== backendTheme) {
-              setCookieTheme(backendTheme);
-              console.log(`🎨 Synced cookies with backend`);
-            }
+            console.log(`🎨 Using theme from ${source}: ${finalTheme}`);
           } else {
-            console.log(
-              `🎨 No theme from backend, falling back to other sources`
-            );
+            console.log('🎨 No theme from backend, falling back');
           }
         } catch (error) {
-          console.warn(`🎨 Failed to load theme from backend:`, error);
+          console.warn('🎨 Failed to load theme from backend:', error);
         }
       }
 
-      // 2. Якщо не отримали з бекенду, перевіряємо cookies
-      if (source === 'default' && cookieTheme) {
-        finalTheme = cookieTheme;
-        source = 'cookies';
-        console.log(`🎨 Using cookies theme: ${finalTheme}`);
+      // 2. localStorage
+      if (!themeApplied) {
+        const storedTheme = localStorage.getItem('theme');
+        console.log('🎨 LocalStorage theme:', storedTheme);
 
-        // Синхронізуємо localStorage з cookies
-        if (storedLocalTheme !== cookieTheme) {
-          localStorage.setItem('theme', cookieTheme);
+        if (storedTheme === 'light' || storedTheme === 'dark') {
+          finalTheme = storedTheme;
+          themeApplied = true;
+          source = 'localStorage';
+          console.log(`🎨 Using theme from ${source}: ${finalTheme}`);
         }
       }
 
-      // 3. Якщо немає cookies, перевіряємо localStorage
-      else if (
-        source === 'default' &&
-        (storedLocalTheme === 'light' || storedLocalTheme === 'dark')
-      ) {
-        finalTheme = storedLocalTheme;
-        source = 'localStorage';
-        console.log(`🎨 Using localStorage theme: ${finalTheme}`);
-
-        // Синхронізуємо cookies з localStorage
-        setCookieTheme(storedLocalTheme);
-      }
-
-      // 4. Системна тема
-      else if (source === 'default') {
+      // 3. Системна тема
+      if (!themeApplied) {
         const prefersDark = window.matchMedia(
           '(prefers-color-scheme: dark)'
         ).matches;
         finalTheme = prefersDark ? 'dark' : initialTheme;
         source = 'system';
-        console.log(`🎨 Using system theme: ${finalTheme}`);
+        console.log(`🎨 Using theme from ${source}: ${finalTheme}`);
       }
 
-      // Застосовуємо тему тільки якщо потрібно
-      const currentHtmlTheme =
-        document.documentElement.getAttribute('data-theme');
-      if (finalTheme !== currentHtmlTheme || finalTheme !== theme) {
-        console.log(`🎨 Applying theme ${finalTheme} (source: ${source})`, {
-          wasHtml: currentHtmlTheme,
-          wasState: theme,
-          willBe: finalTheme,
-        });
-
+      // Встановлюємо тему тільки якщо вона відрізняється від поточної
+      if (finalTheme !== theme) {
+        console.log(`🎨 Setting theme to: ${finalTheme} (source: ${source})`);
         setThemeState(finalTheme);
         document.documentElement.setAttribute('data-theme', finalTheme);
 
-        // Додатково зберігаємо в джерелах, якщо ще не збережено
-        if (source !== 'localStorage') {
+        // Зберігаємо в localStorage тільки якщо це не default
+        if (source !== 'default') {
           localStorage.setItem('theme', finalTheme);
-        }
-        if (source !== 'cookies' && source !== 'backend') {
-          setCookieTheme(finalTheme);
+          console.log('🎨 Saved to localStorage:', finalTheme);
         }
       } else {
-        console.log(`🎨 Theme already correct (${finalTheme}), skipping`);
+        console.log(`🎨 Theme already set to ${finalTheme}, skipping`);
       }
 
-      console.log(`=== 🎨 [${Date.now()}] THEME INITIALIZATION END ===`);
+      console.log('=== 🎨 THEME INITIALIZATION END ===');
       initializingRef.current = false;
     };
 
     initializeTheme();
   }, [hasHydrated, user, initialTheme, theme]);
 
-  // Відстеження змін авторизації (спеціально для нового пристрою)
+  // Примусова синхронізація після входу користувача
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!hasHydrated || !user || initializingRef.current) return;
 
-    console.log('🎨 Auth state tracking:', {
-      previousUser: previousUserRef.current?._id,
-      currentUser: user?._id,
-      change:
-        !previousUserRef.current && user
-          ? 'LOGIN'
-          : previousUserRef.current && !user
-            ? 'LOGOUT'
-            : 'NO_CHANGE',
-    });
+    const forceSyncTheme = async () => {
+      console.log('🎨 Force syncing theme for logged in user:', user._id);
 
-    // Користувач увійшов на новому пристрої
-    if (!previousUserRef.current && user) {
-      console.log(
-        `🎨 User logged in on potentially new device, forcing backend sync`
-      );
+      try {
+        const backendTheme = await getThemeFromBackend();
+        console.log('🎨 Force sync - backend theme:', backendTheme);
 
-      const forceBackendSync = async () => {
-        try {
-          // Даємо час для стабілізації
-          await new Promise(resolve => setTimeout(resolve, 800));
+        if (backendTheme && backendTheme !== theme) {
+          console.log(
+            `🎨 Force sync: changing theme from ${theme} to ${backendTheme}`
+          );
 
-          const backendTheme = await getThemeFromBackend();
-          const currentLocalTheme = localStorage.getItem('theme') as Theme;
-          const currentCookieTheme = getCookieTheme();
-
-          console.log('🎨 New device sync check:', {
-            backendTheme,
-            currentLocalTheme,
-            currentCookieTheme,
-            user: user._id,
-          });
-
-          if (backendTheme) {
-            // Якщо локальні джерела відрізняються від бекенду
-            if (
-              backendTheme !== currentLocalTheme ||
-              backendTheme !== currentCookieTheme
-            ) {
-              console.log(
-                `🎨 New device: overriding local state with backend theme ${backendTheme}`
-              );
-              setTheme(backendTheme);
-            } else {
-              console.log(`🎨 New device: already in sync with backend`);
-            }
-          }
-        } catch (error) {
-          console.warn('🎨 New device sync failed:', error);
+          // Використовуємо setTheme для повної синхронізації
+          setTheme(backendTheme);
+        } else if (!backendTheme) {
+          console.log(
+            '🎨 Force sync: no backend theme, keeping current:',
+            theme
+          );
+        } else {
+          console.log('🎨 Force sync: theme already synchronized');
         }
-      };
+      } catch (error) {
+        console.warn('🎨 Force sync failed:', error);
+      }
+    };
 
-      forceBackendSync();
-    }
+    // Затримка для уникнення гонок з ініціалізацією
+    const timeoutId = setTimeout(forceSyncTheme, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [user, hasHydrated, theme, setTheme]);
 
-    // Користувач вийшов - зберігаємо тему в cookies для неавторизованого стану
-    if (previousUserRef.current && !user) {
-      console.log(`🎨 User logged out, preserving theme in cookies`);
-      // Тема вже збережена в cookies, нічого робити не потрібно
-    }
-
-    previousUserRef.current = user;
-  }, [user, hasHydrated, setTheme]);
+  // Логування змін стану для дебагу
+  useEffect(() => {
+    console.log('🎨 ThemeProvider state changed:', {
+      theme,
+      user: user?._id,
+      hasHydrated,
+      localStorageTheme:
+        typeof window !== 'undefined' ? localStorage.getItem('theme') : 'n/a',
+      htmlTheme:
+        typeof document !== 'undefined'
+          ? document.documentElement.getAttribute('data-theme')
+          : 'n/a',
+    });
+  }, [theme, user, hasHydrated]);
 
   const value = useMemo(
     () => ({

@@ -54,8 +54,6 @@ export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
 
 export const getThemeFromBackend = async (): Promise<Theme | null> => {
   try {
-    console.log('🔍 Fetching theme from backend...');
-
     const response = await api.get<{
       status: number;
       message: string;
@@ -63,39 +61,20 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
         theme: Theme;
         source: string;
         userId: string | null;
-        usedCookie: boolean;
-        debug?: {
-          hadCookie: boolean;
-          cookieValue: string;
-          finalTheme: string;
-        };
       };
-    }>('/theme');
+    }>('/theme'); // Це приватний GET /theme (з authenticate middleware)
 
-    console.log('🔍 Backend response:', {
-      status: response.status,
-      theme: response.data.data?.theme,
-      source: response.data.data?.source,
-      debug: response.data.data?.debug,
-    });
-
-    const theme = response.data.data?.theme;
-
-    if (theme === 'light' || theme === 'dark') {
-      console.log(
-        '🔍 Valid theme received:',
-        theme,
-        'from',
-        response.data.data?.source
-      );
+    if (response.data.data?.theme) {
+      const theme = response.data.data.theme;
+      console.log('Got theme from backend:', theme);
       return theme;
     }
 
-    console.warn('🔍 Invalid or missing theme in response:', response.data);
+    console.warn('No theme in backend response:', response.data);
     return null;
   } catch (error) {
     if (error instanceof AxiosError) {
-      console.error('🔍 getThemeFromBackend error:', {
+      console.error('getThemeFromBackend error:', {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
@@ -103,13 +82,11 @@ export const getThemeFromBackend = async (): Promise<Theme | null> => {
 
       // Якщо 401 - користувач не авторизований
       if (error.response?.status === 401) {
-        console.log(
-          '🔍 User not authenticated, using localStorage/cookies theme'
-        );
+        console.log('User not authenticated, using localStorage theme');
         return null;
       }
     } else {
-      console.error('🔍 Unknown error in getThemeFromBackend:', error);
+      console.error('Unknown error in getThemeFromBackend:', error);
     }
 
     return null;
