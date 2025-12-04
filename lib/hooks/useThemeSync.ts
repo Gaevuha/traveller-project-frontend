@@ -1,29 +1,64 @@
 // hooks/useThemeSync.ts
 import { useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { useTheme } from '@/components/ThemeProvider/ThemeProvider';
+import { getThemeFromBackend } from '@/lib/api/clientApi';
+import type { Theme } from '@/components/ThemeProvider/ThemeProvider';
 
 export function useThemeSync() {
-  const { user } = useAuthStore();
-  const { syncWithBackend } = useTheme();
+  const { user, updateUserTheme, hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (!user) return;
+    if (!hasHydrated) return;
 
-    // Синхронізувати при завантаженні
-    syncWithBackend();
+    // Синхронізація при зміні стану авторизації
+    const syncTheme = async () => {
+      if (user) {
+        try {
+          // Отримуємо тему з бекенду
+          const backendTheme = await getThemeFromBackend();
 
-    // Синхронізувати кожні 30 секунд
-    const interval = setInterval(syncWithBackend, 30000);
+          if (backendTheme && backendTheme !== user.theme) {
+            console.log('🔄 Синхронізація теми з бекенду:', backendTheme);
 
-    return () => clearInterval(interval);
-  }, [user, syncWithBackend]);
+            // Оновлюємо в Zustand
+            if (updateUserTheme) {
+              updateUserTheme(backendTheme);
+            }
+
+            // Оновлюємо localStorage
+            localStorage.setItem('theme', backendTheme);
+          }
+        } catch (error) {
+          console.log('ℹ️ Не вдалося синхронізувати тему з бекенду');
+        }
+      } else {
+        // Для гостей: перевіряємо localStorage
+        const storedTheme = localStorage.getItem('theme') as Theme | null;
+        if (storedTheme && ['light', 'dark'].includes(storedTheme)) {
+          console.log('👤 Гостьова тема з localStorage:', storedTheme);
+        }
+      }
+    };
+
+    syncTheme();
+  }, [user, hasHydrated, updateUserTheme]);
+
+  // Функція для примусової синхронізації
+  const forceSync = async () => {
+    if (user) {
+      try {
+        const backendTheme = await getThemeFromBackend();
+        if (backendTheme && updateUserTheme) {
+          updateUserTheme(backendTheme);
+          localStorage.setItem('theme', backendTheme);
+          return backendTheme;
+        }
+      } catch (error) {
+        console.error('Помилка примусової синхронізації:', error);
+      }
+    }
+    return null;
+  };
+
+  return { forceSync };
 }
-
-// Використовуйте в layout.tsx:
-/*
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useThemeSync();
-  return <>{children}</>;
-}
-*/

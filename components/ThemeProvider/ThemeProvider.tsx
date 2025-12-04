@@ -1,4 +1,3 @@
-// ThemeProvider.tsx - очищена версія
 'use client';
 
 import {
@@ -8,13 +7,12 @@ import {
   useEffect,
   useMemo,
   useState,
-  useRef,
   type ReactNode,
 } from 'react';
 import { saveThemeToBackend, getThemeFromBackend } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark';
 
 type ThemeContextValue = {
   theme: Theme;
@@ -22,7 +20,6 @@ type ThemeContextValue = {
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
   isLoading: boolean;
-  syncWithBackend: () => Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -32,16 +29,19 @@ type ThemeProviderProps = {
   initialTheme?: Theme;
 };
 
+// Функція для оновлення cookie
+const updateThemeCookie = (theme: Theme) => {
+  if (typeof window === 'undefined') return;
+
+  document.cookie = `theme=${theme}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+};
+
 export default function ThemeProvider({
   children,
   initialTheme = 'light',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(initialTheme);
   const [isThemeLoading, setIsThemeLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  const isSyncingRef = useRef(false);
-  const isSettingRef = useRef(false);
 
   const {
     user,
@@ -50,59 +50,38 @@ export default function ThemeProvider({
     updateUserTheme,
   } = useAuthStore();
 
-  const syncWithBackend = useCallback(async () => {
-    if (!user || isSyncingRef.current) return;
+  const saveThemeLocally = useCallback((value: Theme) => {
+    if (typeof window === 'undefined') return;
 
-    isSyncingRef.current = true;
-    try {
-      const backendTheme = await getThemeFromBackend();
-
-      if (backendTheme && backendTheme !== theme && !isSettingRef.current) {
-        setThemeState(backendTheme);
-        document.documentElement.setAttribute('data-theme', backendTheme);
-        localStorage.setItem('theme', backendTheme);
-
-        if (updateUserTheme) {
-          updateUserTheme(backendTheme);
-        }
-      }
-    } catch (error) {
-      console.error('Помилка синхронізації теми з бекендом:', error);
-    } finally {
-      isSyncingRef.current = false;
-    }
-  }, [user, theme, updateUserTheme]);
+    localStorage.setItem('theme', value);
+    document.documentElement.setAttribute('data-theme', value);
+    updateThemeCookie(value);
+  }, []);
 
   const setTheme = useCallback(
     async (value: Theme) => {
-      if (isSettingRef.current) return;
-
-      isSettingRef.current = true;
-
       try {
-        setThemeState(value);
-        document.documentElement.setAttribute('data-theme', value);
-        localStorage.setItem('theme', value);
+        // 1. Зберігаємо локально (тільки на клієнті)
+        if (typeof window !== 'undefined') {
+          saveThemeLocally(value);
+          setThemeState(value);
 
-        if (user && updateUserTheme) {
-          updateUserTheme(value);
-        }
+          // 2. Оновлюємо в Zustand
+          if (user && updateUserTheme) {
+            updateUserTheme(value);
+          }
 
-        if (user) {
+          // 3. Відправляємо на сервер
           await saveThemeToBackend(value);
-          setTimeout(() => {
-            syncWithBackend();
-          }, 500);
+        } else {
+          // На сервері тільки оновлюємо стан
+          setThemeState(value);
         }
       } catch (error) {
-        console.error('Помилка збереження теми на бекенді:', error);
-      } finally {
-        setTimeout(() => {
-          isSettingRef.current = false;
-        }, 1000);
+        console.error('Помилка зміни теми:', error);
       }
     },
-    [user, updateUserTheme, syncWithBackend]
+    [user, updateUserTheme, saveThemeLocally]
   );
 
   const toggleTheme = useCallback(() => {
@@ -110,10 +89,10 @@ export default function ThemeProvider({
     setTheme(newTheme);
   }, [theme, setTheme]);
 
+  // Ініціалізація теми при завантаженні - тільки на клієнті
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!hasHydrated) return;
-    if (isInitialized) return;
 
     setIsThemeLoading(true);
 
@@ -121,46 +100,40 @@ export default function ThemeProvider({
       try {
         let targetTheme: Theme = initialTheme;
 
-        if (user) {
+        // Пріоритет 1: cookie
+        const cookieTheme = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('theme='))
+          ?.split('=')[1] as Theme | null;
+
+        if (
+          cookieTheme &&
+          (cookieTheme === 'light' || cookieTheme === 'dark')
+        ) {
+          targetTheme = cookieTheme;
+        }
+
+        // Пріоритет 2: localStorage
+        const storedTheme = localStorage.getItem('theme') as Theme | null;
+        if (storedTheme && (!cookieTheme || storedTheme !== cookieTheme)) {
+          targetTheme = storedTheme;
+        }
+
+        // Пріоритет 3: БД (тільки для авторизованих)
+        if (user && !cookieTheme && !storedTheme) {
           try {
             const backendTheme = await getThemeFromBackend();
-            if (backendTheme) {
+            if (backendTheme && backendTheme !== 'light') {
               targetTheme = backendTheme;
-            } else {
-              const storedTheme = localStorage.getItem('theme') as Theme | null;
-              if (
-                storedTheme &&
-                (storedTheme === 'light' || storedTheme === 'dark')
-              ) {
-                targetTheme = storedTheme;
-              } else if (user.theme) {
-                targetTheme = user.theme;
-              }
             }
-          } catch (error) {
-            const storedTheme = localStorage.getItem('theme') as Theme | null;
-            if (
-              storedTheme &&
-              (storedTheme === 'light' || storedTheme === 'dark')
-            ) {
-              targetTheme = storedTheme;
-            } else if (user.theme) {
-              targetTheme = user.theme;
-            }
+          } catch (error: unknown) {
+            // Мовчазно ігноруємо помилки отримання теми
           }
-        } else {
-          targetTheme = 'light';
         }
 
-        document.documentElement.setAttribute('data-theme', targetTheme);
+        // Застосовуємо тему
+        saveThemeLocally(targetTheme);
         setThemeState(targetTheme);
-        localStorage.setItem('theme', targetTheme);
-
-        if (user && user.theme !== targetTheme && updateUserTheme) {
-          updateUserTheme(targetTheme);
-        }
-
-        setIsInitialized(true);
       } catch (error) {
         console.error('Помилка ініціалізації теми:', error);
       } finally {
@@ -169,47 +142,7 @@ export default function ThemeProvider({
     };
 
     initializeTheme();
-  }, [hasHydrated, user, initialTheme, isInitialized, updateUserTheme]);
-
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const handleUserChange = async () => {
-      if (user) {
-        isSettingRef.current = false;
-        isSyncingRef.current = false;
-        await syncWithBackend();
-      } else {
-        setTheme('light');
-      }
-    };
-
-    handleUserChange();
-  }, [user, isInitialized, syncWithBackend, setTheme]);
-
-  useEffect(() => {
-    if (!isInitialized || !user) return;
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        syncWithBackend();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () =>
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isInitialized, user, syncWithBackend]);
-
-  useEffect(() => {
-    if (!isInitialized || !user) return;
-
-    const interval = setInterval(() => {
-      syncWithBackend();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [isInitialized, user, syncWithBackend]);
+  }, [hasHydrated, user, initialTheme, saveThemeLocally]);
 
   const value = useMemo(
     () => ({
@@ -218,17 +151,8 @@ export default function ThemeProvider({
       toggleTheme,
       setTheme,
       isLoading: isThemeLoading || !hasHydrated || authLoading,
-      syncWithBackend,
     }),
-    [
-      theme,
-      toggleTheme,
-      setTheme,
-      isThemeLoading,
-      hasHydrated,
-      authLoading,
-      syncWithBackend,
-    ]
+    [theme, toggleTheme, setTheme, isThemeLoading, hasHydrated, authLoading]
   );
 
   return (
