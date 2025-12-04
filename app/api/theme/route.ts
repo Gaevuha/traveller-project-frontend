@@ -7,72 +7,50 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Отримуємо всі cookies з запиту
+    const cookieHeader = request.headers.get('cookie') || '';
+
     // Проксі запит до бекенду
     const response = await fetch(`${BACKEND_URL}/api/theme`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Cookie: cookieHeader, // Передаємо всі cookies
       },
       body: JSON.stringify(body),
-      credentials: 'include',
     });
 
     const data = await response.json();
 
-    // Копіюємо кукі з бекенду
-    const cookies = response.headers.getSetCookie();
-    if (cookies) {
-      const nextResponse = NextResponse.json(data);
-      cookies.forEach(cookie => {
-        nextResponse.headers.append('Set-Cookie', cookie);
+    // Копіюємо всі cookies з відповіді бекенду
+    const nextResponse = NextResponse.json(data);
+    const setCookieHeaders = response.headers.getSetCookie();
+
+    if (setCookieHeaders && setCookieHeaders.length > 0) {
+      setCookieHeaders.forEach(cookie => {
+        // Обробка cookie для Next.js
+        const [cookiePart] = cookie.split(';');
+        const [name, value] = cookiePart.split('=');
+
+        nextResponse.cookies.set({
+          name,
+          value,
+          httpOnly: cookie.includes('HttpOnly'),
+          secure: cookie.includes('Secure'),
+          sameSite: cookie.includes('SameSite=None') ? 'none' : 'lax',
+          maxAge: 30 * 24 * 60 * 60, // 30 днів
+          path: '/',
+        });
       });
-      return nextResponse;
     }
 
-    return NextResponse.json(data);
+    return nextResponse;
   } catch (error) {
-    console.error('Error proxying theme request:', error);
+    console.error('Помилка проксі теми:', error);
     return NextResponse.json(
       {
-        status: 500,
+        status: 'error',
         message: 'Failed to save theme',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request: NextRequest) {
-  try {
-    // Проксі GET запит до бекенду
-    const response = await fetch(`${BACKEND_URL}/api/theme`, {
-      method: 'GET',
-      headers: {
-        Cookie: request.headers.get('Cookie') || '',
-      },
-      credentials: 'include',
-    });
-
-    const data = await response.json();
-
-    // Копіюємо кукі
-    const cookies = response.headers.getSetCookie();
-    if (cookies) {
-      const nextResponse = NextResponse.json(data);
-      cookies.forEach(cookie => {
-        nextResponse.headers.append('Set-Cookie', cookie);
-      });
-      return nextResponse;
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Error proxying theme GET request:', error);
-    return NextResponse.json(
-      {
-        status: 500,
-        message: 'Failed to get theme',
         error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

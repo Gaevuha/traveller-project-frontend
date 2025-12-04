@@ -16,77 +16,84 @@ import {
   StoryByIdResponse,
   UserSavedArticlesResponse,
 } from '@/types/story';
-import { AxiosError, isAxiosError } from 'axios';
+import axios, { AxiosError, isAxiosError } from 'axios';
 import { api } from '../api/api';
 import { CreateStory, StoryResponse } from '@/types/addStoryForm/story';
 import { EditStory } from '@/types/editStoryForm/editStoryForm';
 import { Theme } from '@/types/theme';
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
 export type ApiError = AxiosError<{ error: string }>;
 
-export const saveThemeToBackend = async (theme: 'light' | 'dark') => {
-  try {
-    const response = await fetch(`${baseUrl}/api/theme`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ theme }),
-    });
+// Додаємо interceptor для debug
+api.interceptors.request.use(
+  config => {
+    return config;
+  },
+  error => {
+    console.error('Axios помилка запиту:', error);
+    return Promise.reject(error);
+  }
+);
 
-    if (!response.ok) {
-      throw new Error(`Failed to save theme: ${response.status}`);
+// Додаємо interceptor для відповіді
+api.interceptors.response.use(
+  response => {
+    return response;
+  },
+  error => {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios помилка відповіді:', {
+        status: error.response?.status,
+        url: error.config?.url,
+        data: error.response?.data,
+        message: error.message,
+      });
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const saveThemeToBackend = async (theme: Theme): Promise<boolean> => {
+  try {
+    const response = await api.post(
+      '/theme',
+      { theme },
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.data.status === 'success') {
+      return true;
     }
 
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Помилка збереження теми:', error);
-    throw error;
+    return false;
+  } catch (error: unknown) {
+    console.error('Помилка від сервера:', error);
+    return false;
   }
 };
 
-export const getThemeFromBackend = async (
-  timestamp?: number
-): Promise<Theme | null> => {
+export const getThemeFromBackend = async (): Promise<Theme | null> => {
   try {
-    const response = await api.get<{
-      status: number;
-      message: string;
-      data: {
-        theme: Theme;
-        source: string;
-        userId: string | null;
-        usedCookie: boolean;
-        timestamp?: string;
-      };
-    }>('/theme', {
+    const response = await api.get('/theme', {
       withCredentials: true,
-      params: timestamp ? { _t: timestamp } : {}, // Додаємо timestamp для уникнення кешу
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
     });
 
     if (response.data?.data?.theme) {
-      const theme = response.data.data.theme;
+      return response.data.data.theme;
+    }
 
-      return theme;
-    }
-    return null;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      if (error.response?.status === 401) {
-        return null;
-      }
-    }
-    console.error('Помилка отримання теми з бекенду:', error);
-    return null;
+    return 'light';
+  } catch (error: unknown) {
+    console.error('Помилка отримання теми:', error);
+    return 'light';
   }
 };
+
 /**
  * Register user
  */
