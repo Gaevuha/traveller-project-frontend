@@ -193,7 +193,6 @@ export const getMe = async (silent: boolean = false) => {
 
     return null;
   } catch (error) {
-    // ❌ НІКОЛИ НЕ КИДАЄМО ПОМИЛКУ
     if (!silent) {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status !== 401) {
