@@ -6,16 +6,11 @@ export type ApiError = AxiosError<{ error: string }>;
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') + '/api';
 if (!BASE_URL) throw new Error('NEXT_PUBLIC_API_URL is not defined');
 
-/**
- * Client-side API instance
- */
 export const api = axios.create({
   baseURL: '/api', // Next.js API routes
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
-
-
 
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;
@@ -40,14 +35,14 @@ const processQueue = (error: unknown, token: string | null = null) => {
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Cookies are sent automatically with withCredentials: true
-    
+
     // Для FormData видаляємо дефолтний Content-Type, щоб axios автоматично встановив multipart/form-data з boundary
     if (config.data instanceof FormData) {
       if (config.headers) {
         delete config.headers['Content-Type'];
       }
     }
-    
+
     return config;
   },
   error => {
