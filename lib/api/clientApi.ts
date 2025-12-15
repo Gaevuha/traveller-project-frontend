@@ -193,20 +193,14 @@ export const getMe = async (silent: boolean = false) => {
 
     return null;
   } catch (error) {
-    if (silent) {
-      // Тиха обробка - не логуємо помилку
-      return null;
+    // ❌ НІКОЛИ НЕ КИДАЄМО ПОМИЛКУ
+    if (!silent) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status !== 401) {
+        console.warn('getMe failed (non-critical):', error);
+      }
     }
-    const axiosError = error as AxiosError;
-    if (axiosError.response?.status === 401) {
-      // 401 - це очікувано, якщо користувач не залогінений
-      // Не логуємо як помилку
-      return null;
-    }
-
-    // ✅ Логуємо інші помилки
-    console.error('❌ Error in getMe:', error);
-    throw error;
+    return null;
   }
 };
 
