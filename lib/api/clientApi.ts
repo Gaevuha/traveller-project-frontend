@@ -24,34 +24,34 @@ import { Theme } from '@/types/theme';
 
 export type ApiError = AxiosError<{ error: string }>;
 
-// Додаємо interceptor для debug
-api.interceptors.request.use(
-  config => {
-    return config;
-  },
-  error => {
-    console.error('Axios помилка запиту:', error);
-    return Promise.reject(error);
-  }
-);
+// // Додаємо interceptor для debug
+// api.interceptors.request.use(
+//   config => {
+//     return config;
+//   },
+//   error => {
+//     console.error('Axios помилка запиту:', error);
+//     return Promise.reject(error);
+//   }
+// );
 
-// Додаємо interceptor для відповіді
-api.interceptors.response.use(
-  response => {
-    return response;
-  },
-  error => {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios помилка відповіді:', {
-        status: error.response?.status,
-        url: error.config?.url,
-        data: error.response?.data,
-        message: error.message,
-      });
-    }
-    return Promise.reject(error);
-  }
-);
+// // Додаємо interceptor для відповіді
+// api.interceptors.response.use(
+//   response => {
+//     return response;
+//   },
+//   error => {
+//     if (axios.isAxiosError(error)) {
+//       console.error('Axios помилка відповіді:', {
+//         status: error.response?.status,
+//         url: error.config?.url,
+//         data: error.response?.data,
+//         message: error.message,
+//       });
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export const warmUpBackend = async () => {
   try {
@@ -64,47 +64,64 @@ export const warmUpBackend = async () => {
   }
 };
 
-export const saveThemeToBackend = async (theme: Theme): Promise<boolean> => {
-  try {
-    const response = await api.post(
-      '/theme',
-      { theme },
-      {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+// export const saveThemeToBackend = async (theme: Theme): Promise<boolean> => {
+//   try {
+//     const response = await api.post(
+//       '/theme',
+//       { theme },
+//       {
+//         withCredentials: true,
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     );
 
-    if (response.data.status === 'success') {
-      return true;
-    }
+//     if (response.data.status === 'success') {
+//       return true;
+//     }
 
-    return false;
-  } catch (error: unknown) {
-    console.error('Помилка від сервера:', error);
-    return false;
-  }
-};
+//     return false;
+//   } catch (error: unknown) {
+//     console.error('Помилка від сервера:', error);
+//     return false;
+//   }
+// };
 
-export const getThemeFromBackend = async (): Promise<Theme | null> => {
-  try {
-    const response = await api.get('/theme', {
+// export const getThemeFromBackend = async (): Promise<Theme | null> => {
+//   try {
+//     const response = await api.get('/theme', {
+//       withCredentials: true,
+//     });
+
+//     if (response.data?.data?.theme) {
+//       return response.data.data.theme;
+//     }
+
+//     return 'light';
+//   } catch (error: unknown) {
+//     console.error('Помилка отримання теми:', error);
+//     return 'light';
+//   }
+// };
+
+export const saveThemeToBackend = async (theme: Theme): Promise<void> => {
+  await api.post(
+    '/theme',
+    { theme },
+    {
       withCredentials: true,
-    });
-
-    if (response.data?.data?.theme) {
-      return response.data.data.theme;
     }
-
-    return 'light';
-  } catch (error: unknown) {
-    console.error('Помилка отримання теми:', error);
-    return 'light';
-  }
+  );
 };
 
+export const getThemeFromBackend = async (): Promise<Theme> => {
+  const res = await api.get('/theme', {
+    withCredentials: true,
+  });
+
+  return res.data?.data?.theme ?? 'light';
+};
 /**
  * Register user
  */
