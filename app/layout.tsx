@@ -18,6 +18,8 @@ import { User } from '@/types/user';
 
 import ScrollToTopButton from '@/components/ScrollToTopButton/ScrollToTopButton';
 
+import { warmUpBackend } from '@/lib/api/serverApi';
+
 const nunitoSans = Nunito_Sans({
   subsets: ['cyrillic'],
   weight: ['400', '500', '600', '700', '800', '900'],
@@ -81,6 +83,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let initialUser: User | null = null;
+  await warmUpBackend();
   try {
     initialUser = await getServerMe();
   } catch {
