@@ -24,22 +24,30 @@ import { Theme } from '@/types/theme';
 
 export type ApiError = AxiosError<{ error: string }>;
 
+/**
+ * Зберегти тему (backend для авторизованого користувача, cookie для гостей)
+ */
 export async function saveTheme(theme: Theme): Promise<boolean> {
   try {
     const res = await api.post('/theme', { theme });
-    return res.data?.status === 'success';
+    return res.status === 200;
   } catch (e) {
-    console.error('❌ saveTheme error:', e);
+    const error = e as AxiosError;
+    console.error('❌ saveTheme error:', error.message, error.response?.data);
     return false;
   }
 }
 
+/**
+ * Отримати тему (backend для авторизованого користувача або cookie для гостя)
+ */
 export async function getTheme(): Promise<Theme> {
   try {
-    const res = await api.get('/theme');
-    return res.data?.data?.theme ?? 'light';
+    const res = await api.get<{ theme: Theme }>('/theme');
+    return res.data?.theme ?? 'light';
   } catch (e) {
-    console.error('❌ getTheme error:', e);
+    const error = e as AxiosError;
+    console.error('❌ getTheme error:', error.message, error.response?.data);
     return 'light';
   }
 }

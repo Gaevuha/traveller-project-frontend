@@ -1,11 +1,10 @@
+// app/api/theme/route.ts (Next.js 13+)
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
-/**
- * GET /api/theme
- */
+// GET /api/theme
 export async function GET(req: NextRequest) {
   try {
     const cookie = req.headers.get('cookie') ?? '';
@@ -15,17 +14,7 @@ export async function GET(req: NextRequest) {
       withCredentials: true,
     });
 
-    const response = NextResponse.json(res.data);
-
-    // проксі cookies назад у браузер
-    const setCookie = res.headers['set-cookie'];
-    if (setCookie) {
-      setCookie.forEach((c: string) =>
-        response.headers.append('Set-Cookie', c)
-      );
-    }
-
-    return response;
+    return NextResponse.json(res.data);
   } catch (e) {
     console.error('❌ GET /api/theme error:', e);
     return NextResponse.json(
@@ -35,9 +24,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/**
- * POST /api/theme
- */
+// POST /api/theme
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -48,16 +35,7 @@ export async function POST(req: NextRequest) {
       withCredentials: true,
     });
 
-    const response = NextResponse.json(res.data);
-
-    const setCookie = res.headers['set-cookie'];
-    if (setCookie) {
-      setCookie.forEach((c: string) =>
-        response.headers.append('Set-Cookie', c)
-      );
-    }
-
-    return response;
+    return NextResponse.json(res.data);
   } catch (e) {
     console.error('❌ POST /api/theme error:', e);
     return NextResponse.json(

@@ -9,7 +9,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { saveTheme, getTheme } from '@/lib/api/clientApi';
+import {
+  saveTheme as saveThemeAPI,
+  getTheme as getThemeAPI,
+} from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 
 export type Theme = 'light' | 'dark';
@@ -43,9 +46,6 @@ export default function ThemeProvider({
     updateUserTheme,
   } = useAuthStore();
 
-  /**
-   * Локальне застосування теми (тільки UI)
-   */
   const applyTheme = useCallback((value: Theme) => {
     if (typeof window === 'undefined') return;
     localStorage.setItem('theme', value);
@@ -53,22 +53,19 @@ export default function ThemeProvider({
     setThemeState(value);
   }, []);
 
-  /**
-   * Публічний setter
-   */
   const setTheme = useCallback(
     async (value: Theme) => {
       applyTheme(value);
 
-      // Zustand (UI sync)
+      // Update Zustand
       if (user && updateUserTheme) {
         updateUserTheme(value);
       }
 
-      // backend ТІЛЬКИ якщо залогінений
+      // Only send to backend if logged in
       if (user) {
         try {
-          await saveTheme(value);
+          await saveThemeAPI(value);
         } catch (e) {
           console.error('❌ Failed to save theme to backend:', e);
         }
@@ -81,32 +78,24 @@ export default function ThemeProvider({
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
 
-  /**
-   * ІНІЦІАЛІЗАЦІЯ
-   */
   useEffect(() => {
     if (!hasHydrated) return;
 
     const init = async () => {
       setIsThemeLoading(true);
 
-      // 1️⃣ дефолт
       let resolvedTheme: Theme = 'light';
 
-      // 2️⃣ локальна тема (для гостей)
+      // Local theme
       const localTheme = localStorage.getItem('theme') as Theme | null;
-      if (localTheme) {
-        resolvedTheme = localTheme;
-      }
+      if (localTheme) resolvedTheme = localTheme;
 
-      // 3️⃣ авторизований → бекенд головний
+      // Backend theme for logged-in user
       if (user) {
         try {
-          const backendTheme = await getTheme();
-          if (backendTheme) {
-            resolvedTheme = backendTheme;
-          }
-        } catch (e) {
+          const backendTheme = await getThemeAPI();
+          if (backendTheme) resolvedTheme = backendTheme;
+        } catch {
           console.warn('⚠️ Backend theme not available');
         }
       }
@@ -136,8 +125,6 @@ export default function ThemeProvider({
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
   return ctx;
 }
