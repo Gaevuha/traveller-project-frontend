@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { api } from '../api';
 import { cookies } from 'next/headers';
@@ -51,7 +52,16 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies();
+    // 🔹 АВЕРТ cookies()
+    const cookieStore = await cookies();
+
+    // 🔹 Якщо тобі потрібен заголовок Cookie для axios
+    const cookieHeader = cookieStore
+      .getAll()
+      .map(c => `${c.name}=${c.value}`)
+      .join('; ');
+
+    console.log('🍪 Cookies header:', cookieHeader || 'NO COOKIES');
 
     const formData = await request.formData();
 
@@ -62,20 +72,22 @@ export async function POST(request: NextRequest) {
 
     const res = await api.post('/stories', remoteFormData, {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: cookieHeader,
       },
     });
+
+    console.log('✅ Story created:', res.data);
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {
-      console.error(error.response?.data);
+      console.error('🟡 Axios Error:', error.response?.data);
       return NextResponse.json(
         { error: error.message, response: error.response?.data },
         { status: error.response?.status || 500 }
       );
     }
-    console.error({ message: (error as Error).message });
+    console.error('❌ Unknown Error:', (error as Error).message);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
