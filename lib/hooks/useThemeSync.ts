@@ -1,7 +1,7 @@
 // hooks/useThemeSync.ts
 import { useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { getThemeFromBackend } from '@/lib/api/clientApi';
+import { getTheme } from '@/lib/api/clientApi';
 import type { Theme } from '@/components/ThemeProvider/ThemeProvider';
 
 export function useThemeSync() {
@@ -15,7 +15,7 @@ export function useThemeSync() {
       if (user) {
         try {
           // Отримуємо тему з бекенду
-          const backendTheme = await getThemeFromBackend();
+          const backendTheme = await getTheme();
 
           if (backendTheme && backendTheme !== user.theme) {
             console.log('🔄 Синхронізація теми з бекенду:', backendTheme);
@@ -47,7 +47,7 @@ export function useThemeSync() {
   const forceSync = async () => {
     if (user) {
       try {
-        const backendTheme = await getThemeFromBackend();
+        const backendTheme = await getTheme();
         if (backendTheme && updateUserTheme) {
           updateUserTheme(backendTheme);
           localStorage.setItem('theme', backendTheme);
