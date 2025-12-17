@@ -3,8 +3,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 export type ApiError = AxiosError<{ error: string }>;
 
 // Строим базовый URL из переменной окружения
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') + '/api';
-if (!BASE_URL) throw new Error('NEXT_PUBLIC_API_URL is not defined');
+// const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') + '/api';
+// if (!BASE_URL) throw new Error('NEXT_PUBLIC_API_URL is not defined');
 
 export const api = axios.create({
   baseURL: '/api', // Next.js API routes

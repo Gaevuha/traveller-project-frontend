@@ -1,44 +1,35 @@
-// app/api/theme/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
 /**
  * GET /api/theme
- * Отримати тему користувача з бекенду
  */
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
+    const cookie = req.headers.get('cookie') ?? '';
 
-    const response = await axios.get(`${BACKEND_URL}/api/theme`, {
-      headers: {
-        Cookie: cookieHeader, // передаємо cookies для авторизації
-      },
+    const res = await axios.get(`${BACKEND_URL}/api/theme`, {
+      headers: { Cookie: cookie },
       withCredentials: true,
     });
 
-    const nextResponse = NextResponse.json(response.data);
+    const response = NextResponse.json(res.data);
 
-    // Проксі всі Set-Cookie з бекенду назад у браузер
-    const setCookie = response.headers['set-cookie'];
+    // проксі cookies назад у браузер
+    const setCookie = res.headers['set-cookie'];
     if (setCookie) {
-      setCookie.forEach((cookie: string) => {
-        nextResponse.headers.append('Set-Cookie', cookie);
-      });
+      setCookie.forEach((c: string) =>
+        response.headers.append('Set-Cookie', c)
+      );
     }
 
-    return nextResponse;
-  } catch (error: unknown) {
-    console.error('GET /api/theme proxy error:', error);
-
+    return response;
+  } catch (e) {
+    console.error('❌ GET /api/theme error:', e);
     return NextResponse.json(
-      {
-        status: 'error',
-        message: 'Failed to get theme',
-      },
+      { message: 'Failed to get theme' },
       { status: 500 }
     );
   }
@@ -46,39 +37,31 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/theme
- * Зберегти тему користувача
  */
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const cookieHeader = request.headers.get('cookie') || '';
+    const body = await req.json();
+    const cookie = req.headers.get('cookie') ?? '';
 
-    const response = await axios.post(`${BACKEND_URL}/api/theme`, body, {
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: cookieHeader,
-      },
+    const res = await axios.post(`${BACKEND_URL}/api/theme`, body, {
+      headers: { Cookie: cookie },
       withCredentials: true,
     });
 
-    const nextResponse = NextResponse.json(response.data);
+    const response = NextResponse.json(res.data);
 
-    const setCookie = response.headers['set-cookie'];
+    const setCookie = res.headers['set-cookie'];
     if (setCookie) {
-      setCookie.forEach((cookie: string) => {
-        nextResponse.headers.append('Set-Cookie', cookie);
-      });
+      setCookie.forEach((c: string) =>
+        response.headers.append('Set-Cookie', c)
+      );
     }
 
-    return nextResponse;
-  } catch (error: unknown) {
-    console.error('POST /api/theme proxy error:', error);
-
+    return response;
+  } catch (e) {
+    console.error('❌ POST /api/theme error:', e);
     return NextResponse.json(
-      {
-        status: 'error',
-        message: 'Failed to save theme',
-      },
+      { message: 'Failed to save theme' },
       { status: 500 }
     );
   }

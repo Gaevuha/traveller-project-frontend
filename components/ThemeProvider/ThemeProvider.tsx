@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { saveThemeToBackend, getThemeFromBackend } from '@/lib/api/clientApi';
+import { saveTheme, getTheme } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 
 export type Theme = 'light' | 'dark';
@@ -29,19 +29,12 @@ type ThemeProviderProps = {
   initialTheme?: Theme;
 };
 
-// Функція для оновлення cookie
-const updateThemeCookie = (theme: Theme) => {
-  if (typeof window === 'undefined') return;
-
-  document.cookie = `theme=${theme}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
-};
-
 export default function ThemeProvider({
   children,
   initialTheme = 'light',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(initialTheme);
-  const [isThemeLoading, setIsThemeLoading] = useState(false);
+  const [isThemeLoading, setIsThemeLoading] = useState(true);
 
   const {
     user,
@@ -50,80 +43,80 @@ export default function ThemeProvider({
     updateUserTheme,
   } = useAuthStore();
 
-  const saveThemeLocally = useCallback((value: Theme) => {
+  /**
+   * Локальне застосування теми (тільки UI)
+   */
+  const applyTheme = useCallback((value: Theme) => {
     if (typeof window === 'undefined') return;
-
     localStorage.setItem('theme', value);
     document.documentElement.setAttribute('data-theme', value);
-    updateThemeCookie(value);
+    setThemeState(value);
   }, []);
 
+  /**
+   * Публічний setter
+   */
   const setTheme = useCallback(
     async (value: Theme) => {
-      try {
-        // 1. Зберігаємо локально (тільки на клієнті)
-        if (typeof window !== 'undefined') {
-          saveThemeLocally(value);
-          setThemeState(value);
+      applyTheme(value);
 
-          // 2. Оновлюємо в Zustand
-          if (user && updateUserTheme) {
-            updateUserTheme(value);
-          }
+      // Zustand (UI sync)
+      if (user && updateUserTheme) {
+        updateUserTheme(value);
+      }
 
-          // 3. Відправляємо на сервер
-          await saveThemeToBackend(value);
-        } else {
-          // На сервері тільки оновлюємо стан
-          setThemeState(value);
+      // backend ТІЛЬКИ якщо залогінений
+      if (user) {
+        try {
+          await saveTheme(value);
+        } catch (e) {
+          console.error('❌ Failed to save theme to backend:', e);
         }
-      } catch (error) {
-        console.error('Помилка зміни теми:', error);
       }
     },
-    [user, updateUserTheme, saveThemeLocally]
+    [user, updateUserTheme, applyTheme]
   );
 
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
 
-  // useEffect для ініціалізації
+  /**
+   * ІНІЦІАЛІЗАЦІЯ
+   */
   useEffect(() => {
     if (!hasHydrated) return;
 
-    const initializeTheme = async () => {
-      // 1. Дефолтна тема для всіх
-      let targetTheme: Theme = 'light';
+    const init = async () => {
+      setIsThemeLoading(true);
 
-      // 2. Якщо cookie або localStorage є — беремо їх
-      const cookieTheme = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('theme='))
-        ?.split('=')[1] as Theme | null;
-      const storedTheme = localStorage.getItem('theme') as Theme | null;
+      // 1️⃣ дефолт
+      let resolvedTheme: Theme = 'light';
 
-      if (cookieTheme) targetTheme = cookieTheme;
-      else if (storedTheme) targetTheme = storedTheme;
+      // 2️⃣ локальна тема (для гостей)
+      const localTheme = localStorage.getItem('theme') as Theme | null;
+      if (localTheme) {
+        resolvedTheme = localTheme;
+      }
 
-      // 3. Якщо користувач авторизований — підтягуємо тему з БД і перезаписуємо
+      // 3️⃣ авторизований → бекенд головний
       if (user) {
         try {
-          const backendTheme = await getThemeFromBackend();
-          if (backendTheme) targetTheme = backendTheme;
-        } catch (error) {
-          console.error('Помилка отримання теми з бекенду:', error);
+          const backendTheme = await getTheme();
+          if (backendTheme) {
+            resolvedTheme = backendTheme;
+          }
+        } catch (e) {
+          console.warn('⚠️ Backend theme not available');
         }
       }
 
-      saveThemeLocally(targetTheme);
-      setThemeState(targetTheme);
+      applyTheme(resolvedTheme);
       setIsThemeLoading(false);
     };
 
-    initializeTheme();
-  }, [hasHydrated, user, saveThemeLocally]);
+    init();
+  }, [hasHydrated, user, applyTheme]);
 
   const value = useMemo(
     () => ({
@@ -131,9 +124,9 @@ export default function ThemeProvider({
       isDark: theme === 'dark',
       toggleTheme,
       setTheme,
-      isLoading: isThemeLoading || !hasHydrated || authLoading,
+      isLoading: isThemeLoading || authLoading || !hasHydrated,
     }),
-    [theme, toggleTheme, setTheme, isThemeLoading, hasHydrated, authLoading]
+    [theme, toggleTheme, setTheme, isThemeLoading, authLoading, hasHydrated]
   );
 
   return (
