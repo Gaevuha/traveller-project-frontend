@@ -89,60 +89,41 @@ export default function ThemeProvider({
     setTheme(newTheme);
   }, [theme, setTheme]);
 
-  // Ініціалізація теми при завантаженні - тільки на клієнті
+  // useEffect для ініціалізації
   useEffect(() => {
-    if (typeof window === 'undefined') return;
     if (!hasHydrated) return;
 
-    setIsThemeLoading(true);
-
     const initializeTheme = async () => {
-      try {
-        let targetTheme: Theme = initialTheme;
+      // 1. Дефолтна тема для всіх
+      let targetTheme: Theme = 'light';
 
-        // Пріоритет 1: cookie
-        const cookieTheme = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('theme='))
-          ?.split('=')[1] as Theme | null;
+      // 2. Якщо cookie або localStorage є — беремо їх
+      const cookieTheme = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('theme='))
+        ?.split('=')[1] as Theme | null;
+      const storedTheme = localStorage.getItem('theme') as Theme | null;
 
-        if (
-          cookieTheme &&
-          (cookieTheme === 'light' || cookieTheme === 'dark')
-        ) {
-          targetTheme = cookieTheme;
+      if (cookieTheme) targetTheme = cookieTheme;
+      else if (storedTheme) targetTheme = storedTheme;
+
+      // 3. Якщо користувач авторизований — підтягуємо тему з БД і перезаписуємо
+      if (user) {
+        try {
+          const backendTheme = await getThemeFromBackend();
+          if (backendTheme) targetTheme = backendTheme;
+        } catch (error) {
+          console.error('Помилка отримання теми з бекенду:', error);
         }
-
-        // Пріоритет 2: localStorage
-        const storedTheme = localStorage.getItem('theme') as Theme | null;
-        if (storedTheme && (!cookieTheme || storedTheme !== cookieTheme)) {
-          targetTheme = storedTheme;
-        }
-
-        // Пріоритет 3: БД (тільки для авторизованих)
-        if (user && !cookieTheme && !storedTheme) {
-          try {
-            const backendTheme = await getThemeFromBackend();
-            if (backendTheme && backendTheme !== 'light') {
-              targetTheme = backendTheme;
-            }
-          } catch (error: unknown) {
-            // Мовчазно ігноруємо помилки отримання теми
-          }
-        }
-
-        // Застосовуємо тему
-        saveThemeLocally(targetTheme);
-        setThemeState(targetTheme);
-      } catch (error) {
-        console.error('Помилка ініціалізації теми:', error);
-      } finally {
-        setIsThemeLoading(false);
       }
+
+      saveThemeLocally(targetTheme);
+      setThemeState(targetTheme);
+      setIsThemeLoading(false);
     };
 
     initializeTheme();
-  }, [hasHydrated, user, initialTheme, saveThemeLocally]);
+  }, [hasHydrated, user, saveThemeLocally]);
 
   const value = useMemo(
     () => ({
