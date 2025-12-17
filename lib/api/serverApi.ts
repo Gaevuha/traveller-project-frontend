@@ -18,19 +18,6 @@ import {
   StoryByIdResponse,
 } from '@/types/story';
 
-let warmed = false;
-
-export async function warmUpBackend() {
-  if (warmed) return;
-
-  try {
-    await api.get(`${process.env.NEXT_PUBLIC_API_URL}/api/health`, {
-      timeout: 20_000,
-    });
-    warmed = true;
-  } catch {}
-}
-
 // Normalize backend user payload to always contain `_id`
 function normalizeUserId(
   obj: Record<string, unknown> | null | undefined
@@ -260,40 +247,38 @@ export async function getMeProfileServer(): Promise<{
 
     // Завантажуємо повну інформацію про кожну історію (включаючи article)
     const articles = await Promise.allSettled(
-      (profileData.articles || []).map(
-        async (article: {
-          _id: string;
-          title: string;
-          img: string;
-          date: string;
-          favoriteCount: number;
-          createdAt: string;
-          category: { _id: string; name: string };
-        }) => {
-          try {
-            const fullStory = await fetchStoryByIdServer(article._id);
-            return fullStory;
-          } catch {
-            // Fallback до базової інформації без article
-            return {
-              _id: article._id,
-              img: article.img,
-              title: article.title,
-              article: '',
-              category: article.category,
-              ownerId: {
-                _id: user._id,
-                name: user.name,
-                avatarUrl: user.avatarUrl || '',
-                articlesAmount: user.articlesAmount,
-                description: user.description ?? undefined,
-              },
-              date: article.date,
-              favoriteCount: article.favoriteCount,
-            } as Story;
-          }
+      (profileData.articles || []).map(async (article: {
+        _id: string;
+        title: string;
+        img: string;
+        date: string;
+        favoriteCount: number;
+        createdAt: string;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          const fullStory = await fetchStoryByIdServer(article._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації без article
+          return {
+            _id: article._id,
+            img: article.img,
+            title: article.title,
+            article: '',
+            category: article.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: article.date,
+            favoriteCount: article.favoriteCount,
+          } as Story;
         }
-      )
+      })
     );
 
     const stories = articles
@@ -309,7 +294,9 @@ export async function getMeProfileServer(): Promise<{
 /**
  * Get user saved articles (server-side)
  */
-export async function getUserSavedArticlesServer(userId: string): Promise<{
+export async function getUserSavedArticlesServer(
+  userId: string
+): Promise<{
   user: User;
   savedStories: Story[];
 } | null> {
@@ -334,40 +321,38 @@ export async function getUserSavedArticlesServer(userId: string): Promise<{
 
     // Завантажуємо повну інформацію про кожну збережену історію (включаючи ownerId)
     const savedStories = await Promise.allSettled(
-      (data.savedStories || []).map(
-        async (savedStory: {
-          _id: string;
-          img: string;
-          title: string;
-          article: string;
-          date: string;
-          favoriteCount: number;
-          category: { _id: string; name: string };
-        }) => {
-          try {
-            const fullStory = await fetchStoryByIdServer(savedStory._id);
-            return fullStory;
-          } catch {
-            // Fallback до базової інформації
-            return {
-              _id: savedStory._id,
-              img: savedStory.img,
-              title: savedStory.title,
-              article: savedStory.article || '',
-              category: savedStory.category,
-              ownerId: {
-                _id: user._id,
-                name: user.name,
-                avatarUrl: user.avatarUrl || '',
-                articlesAmount: user.articlesAmount,
-                description: user.description ?? undefined,
-              },
-              date: savedStory.date,
-              favoriteCount: savedStory.favoriteCount,
-            } as Story;
-          }
+      (data.savedStories || []).map(async (savedStory: {
+        _id: string;
+        img: string;
+        title: string;
+        article: string;
+        date: string;
+        favoriteCount: number;
+        category: { _id: string; name: string };
+      }) => {
+        try {
+          const fullStory = await fetchStoryByIdServer(savedStory._id);
+          return fullStory;
+        } catch {
+          // Fallback до базової інформації
+          return {
+            _id: savedStory._id,
+            img: savedStory.img,
+            title: savedStory.title,
+            article: savedStory.article || '',
+            category: savedStory.category,
+            ownerId: {
+              _id: user._id,
+              name: user.name,
+              avatarUrl: user.avatarUrl || '',
+              articlesAmount: user.articlesAmount,
+              description: user.description ?? undefined,
+            },
+            date: savedStory.date,
+            favoriteCount: savedStory.favoriteCount,
+          } as Story;
         }
-      )
+      })
     );
 
     const stories = savedStories

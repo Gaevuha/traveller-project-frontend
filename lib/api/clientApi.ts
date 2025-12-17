@@ -53,17 +53,6 @@ api.interceptors.response.use(
   }
 );
 
-export const warmUpBackend = async () => {
-  try {
-    await api.get('/health', {
-      timeout: 20_000,
-    });
-    console.log('✅ Backend warmed up');
-  } catch {
-    console.log('⏳ Backend is waking up...');
-  }
-};
-
 export const saveThemeToBackend = async (theme: Theme): Promise<boolean> => {
   try {
     const response = await api.post(
