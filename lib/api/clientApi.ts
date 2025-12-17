@@ -516,22 +516,23 @@ export async function patchStoryByIdClient(params: {
   storyToEdit: EditStory;
   id: string;
 }): Promise<Story> {
-  const formData = new FormData();
   const { storyToEdit, id } = params;
+  const formData = new FormData();
+
   if (storyToEdit.title) formData.append('title', storyToEdit.title);
   if (storyToEdit.article) formData.append('article', storyToEdit.article);
   if (storyToEdit.category) formData.append('category', storyToEdit.category);
-  if (storyToEdit.img) formData.append('img', storyToEdit.img);
+  if (storyToEdit.img instanceof File) formData.append('img', storyToEdit.img);
 
-  // Не встановлюємо Content-Type - axios автоматично додасть boundary для FormData
   const { data } = await api.patch<StoryByIdResponse>(
     `/stories/${id}`,
     formData,
     {
       headers: {
-        'Content-Type': undefined, // Явно видаляємо Content-Type, щоб axios міг встановити multipart/form-data
+        'Content-Type': undefined, // axios сам встановить multipart/form-data з boundary
       },
     }
   );
+
   return data.data;
 }
