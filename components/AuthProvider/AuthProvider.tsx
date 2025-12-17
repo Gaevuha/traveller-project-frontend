@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-
 import { useAuthStore } from '@/lib/store/authStore';
-import { getMe, refreshSession } from '@/lib/api/clientApi';
 import { User } from '@/types/user';
+import { useEffect, useState } from 'react';
+import { getMe, refreshSession } from '@/lib/api/clientApi';
 
 type Props = {
   children: React.ReactNode;
@@ -19,63 +17,115 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
   );
   const setLoading = useAuthStore(state => state.setLoading);
   const user = useAuthStore(state => state.user);
-
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (isInitialized) return;
+    const fetchSession = async () => {
+      if (isInitialized) return;
 
-    const initAuth = async () => {
       setLoading(true);
 
-      // 🔥 1️⃣ ПРОГРІВ BACKEND (Render)
-      try {
-        await axios.get('/api/health');
-      } catch {
-        // backend може прокидатися — це ОК
-      }
+      // Якщо є initialUser з SSR - використовуємо його
+      if (initialUser) {
+        // Нормалізуємо можливу відповідь API { status, message, data }
+        const asRecord = initialUser as unknown as Record<string, unknown>;
+        let normalizedUser: User | null = null;
 
-      // 🔐 2️⃣ AUTH LOGIC
-      try {
-        if (initialUser) {
-          setUser(initialUser);
-          return;
+        if (
+          asRecord &&
+          typeof asRecord === 'object' &&
+          'status' in asRecord &&
+          'data' in asRecord
+        ) {
+          const rawUnknown = (asRecord as { data: unknown }).data;
+          if (rawUnknown && typeof rawUnknown === 'object') {
+            const raw = rawUnknown as Record<string, unknown>;
+            const idFromUnderscore =
+              '_id' in raw && typeof raw._id === 'string'
+                ? (raw._id as string)
+                : undefined;
+            const idFromId =
+              'id' in raw && typeof (raw.id as unknown) === 'string'
+                ? (raw.id as string)
+                : undefined;
+            const resolvedId = idFromUnderscore ?? idFromId;
+            normalizedUser = {
+              ...(raw as unknown as Omit<User, '_id'>),
+              _id: resolvedId ?? '',
+            };
+          }
+        } else {
+          // В іншому випадку це вже User — але гарантуємо наявність _id
+          const raw = initialUser as unknown as Record<string, unknown>;
+          const idFromUnderscore =
+            '_id' in raw && typeof raw._id === 'string'
+              ? (raw._id as string)
+              : undefined;
+          const idFromId =
+            'id' in raw && typeof (raw.id as unknown) === 'string'
+              ? (raw.id as string)
+              : undefined;
+          const resolvedId = idFromUnderscore ?? idFromId;
+          normalizedUser = {
+            ...(initialUser as unknown as Omit<User, '_id'>),
+            _id: resolvedId ?? '',
+          };
         }
 
-        if (user) {
-          const me = await getMe(true);
-          if (me) {
-            setUser(me);
-            return;
-          }
-
-          const refreshed = await refreshSession();
-          if (refreshed) {
-            const retried = await getMe(true);
-            if (retried) {
-              setUser(retried);
-              return;
-            }
-          }
+        if (normalizedUser && normalizedUser._id) {
+          setUser(normalizedUser);
+        } else {
+          clearIsAuthenticated();
         }
-
-        clearIsAuthenticated();
-      } catch {
-        clearIsAuthenticated();
-      } finally {
         setLoading(false);
         setIsInitialized(true);
+        return;
       }
+
+      // Якщо initialUser є null, але є user в store (з localStorage) - перевіряємо сесію
+      if (user) {
+        try {
+          // Перевіряємо, чи сесія все ще активна
+          const currentUser = await getMe(true); // silent: true - не логуємо помилки
+          if (currentUser) {
+            // Сесія активна - оновлюємо дані
+            setUser(currentUser);
+          } else {
+            // Спробуємо оновити сесію і повторити запит
+            const refreshed = await refreshSession();
+            if (refreshed) {
+              const retried = await getMe(true);
+              if (retried) {
+                setUser(retried);
+              } else {
+                clearIsAuthenticated();
+              }
+            } else {
+              // Сесія неактивна - очищаємо
+              clearIsAuthenticated();
+            }
+          }
+        } catch {
+          // Помилка при перевірці - очищаємо
+          clearIsAuthenticated();
+        }
+      } else {
+        // Немає ні initialUser, ні user в store - очищаємо
+        clearIsAuthenticated();
+      }
+
+      setLoading(false);
+      setIsInitialized(true);
     };
 
-    initAuth();
+    fetchSession();
   }, [
-    isInitialized,
     initialUser,
-    user,
+    clearIsAuthenticated,
     setUser,
     setLoading,
-    clearIsAuthenticated,
+    isInitialized,
+    user,
   ]);
 
   return <>{children}</>;
