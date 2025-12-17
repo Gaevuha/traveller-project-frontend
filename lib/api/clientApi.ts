@@ -24,75 +24,25 @@ import { Theme } from '@/types/theme';
 
 export type ApiError = AxiosError<{ error: string }>;
 
-// Додаємо interceptor для debug
-api.interceptors.request.use(
-  config => {
-    return config;
-  },
-  error => {
-    console.error('Axios помилка запиту:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Додаємо interceptor для відповіді
-api.interceptors.response.use(
-  response => {
-    return response;
-  },
-  error => {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios помилка відповіді:', {
-        status: error.response?.status,
-        url: error.config?.url,
-        data: error.response?.data,
-        message: error.message,
-      });
-    }
-    return Promise.reject(error);
-  }
-);
-
-export const saveThemeToBackend = async (theme: Theme): Promise<boolean> => {
+export async function saveTheme(theme: Theme): Promise<boolean> {
   try {
-    const response = await api.post(
-      '/theme',
-      { theme },
-      {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (response.data.status === 'success') {
-      return true;
-    }
-
-    return false;
-  } catch (error: unknown) {
-    console.error('Помилка від сервера:', error);
+    const res = await api.post('/theme', { theme });
+    return res.data?.status === 'success';
+  } catch (e) {
+    console.error('❌ saveTheme error:', e);
     return false;
   }
-};
+}
 
-export const getThemeFromBackend = async (): Promise<Theme | null> => {
+export async function getTheme(): Promise<Theme> {
   try {
-    const response = await api.get('/theme', {
-      withCredentials: true,
-    });
-
-    if (response.data?.data?.theme) {
-      return response.data.data.theme;
-    }
-
-    return 'light';
-  } catch (error: unknown) {
-    console.error('Помилка отримання теми:', error);
+    const res = await api.get('/theme');
+    return res.data?.data?.theme ?? 'light';
+  } catch (e) {
+    console.error('❌ getTheme error:', e);
     return 'light';
   }
-};
+}
 
 /**
  * Register user
