@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import { useAuthStore } from '@/lib/store/authStore';
@@ -20,32 +20,28 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
   const setLoading = useAuthStore(state => state.setLoading);
   const user = useAuthStore(state => state.user);
 
-  // 🔒 гарантія одноразової ініціалізації
-  const initializedRef = useRef(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
+    if (isInitialized) return;
 
     const initAuth = async () => {
       setLoading(true);
 
-      // 🔥 1️⃣ ПРОГРІВ BACKEND (НЕ КРИТИЧНИЙ)
+      // 🔥 1️⃣ ПРОГРІВ BACKEND (Render)
       try {
         await axios.get('/api/health');
       } catch {
-        // Render може прокидатися — і це ОК
+        // backend може прокидатися — це ОК
       }
 
       // 🔐 2️⃣ AUTH LOGIC
       try {
-        // SSR user має найвищий пріоритет
         if (initialUser) {
           setUser(initialUser);
           return;
         }
 
-        // Якщо є user у store — перевіряємо сесію
         if (user) {
           const me = await getMe(true);
           if (me) {
@@ -53,7 +49,6 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
             return;
           }
 
-          // Пробуємо refresh
           const refreshed = await refreshSession();
           if (refreshed) {
             const retried = await getMe(true);
@@ -64,17 +59,24 @@ const AuthProvider = ({ children, initialUser = null }: Props) => {
           }
         }
 
-        // Якщо нічого не спрацювало
         clearIsAuthenticated();
       } catch {
         clearIsAuthenticated();
       } finally {
         setLoading(false);
+        setIsInitialized(true);
       }
     };
 
     initAuth();
-  }, [initialUser, user, setUser, setLoading, clearIsAuthenticated]);
+  }, [
+    isInitialized,
+    initialUser,
+    user,
+    setUser,
+    setLoading,
+    clearIsAuthenticated,
+  ]);
 
   return <>{children}</>;
 };
