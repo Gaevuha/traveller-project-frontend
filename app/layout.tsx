@@ -49,7 +49,7 @@ export default async function RootLayout({
         <TanStackProvider>
           {/* ❗ backend тут НЕ чіпаємо */}
           <AuthProvider initialUser={null}>
-            <ThemeProvider>
+            <ThemeProvider initialTheme={initialTheme}>
               {children}
 
               <RootPageClient />
